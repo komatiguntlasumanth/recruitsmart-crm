@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["jdk24"]
+
+[phases.build]
+cmds = ["./mvnw clean package -DskipTests"]
+
+[start]
+cmd = "java -Dserver.port=$PORT -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar"
