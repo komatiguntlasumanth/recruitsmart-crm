@@ -1,6 +1,6 @@
 // API Configuration
 // Uses environment variable VITE_API_URL for production, falls back to localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = 'https://recruitsmart-crm-production.up.railway.app';
 
 // Helper function to get auth headers
 export const getAuthHeaders = () => {
