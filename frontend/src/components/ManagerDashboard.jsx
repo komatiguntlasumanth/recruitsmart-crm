@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_BASE_URL from '../config/api';
 
 const ManagerDashboard = ({ user }) => {
     const [activeTab, setActiveTab] = useState('jobs'); // jobs, training
@@ -19,7 +20,7 @@ const ManagerDashboard = ({ user }) => {
         jobType: 'JOB' // JOB or TRAINING
     });
 
-    const API_BASE = 'http://localhost:8080/api/jobs';
+    const API_BASE = `${API_BASE_URL}/api/jobs`;
 
     useEffect(() => {
         fetchJobs();

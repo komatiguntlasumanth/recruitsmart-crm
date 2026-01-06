@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_BASE_URL from '../config/api';
 
 const StudentDashboard = ({ user }) => {
     const [section, setSection] = useState('home');
@@ -40,7 +41,7 @@ const StudentDashboard = ({ user }) => {
         // Fetch All Jobs first
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:8080/api/jobs', {
+            const res = await fetch(`${API_BASE_URL}/api/jobs`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -63,7 +64,7 @@ const StudentDashboard = ({ user }) => {
     const fetchApplicationCount = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch('http://localhost:8080/api/applications/my', {
+            const res = await fetch(`${API_BASE_URL}/api/applications/my`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -78,7 +79,7 @@ const StudentDashboard = ({ user }) => {
     const fetchProfile = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch('http://localhost:8080/api/student/profile', {
+            const res = await fetch(`${API_BASE_URL}/api/student/profile`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -135,7 +136,7 @@ const StudentDashboard = ({ user }) => {
         });
 
         try {
-            const res = await fetch('http://localhost:8080/api/student/profile', {
+            const res = await fetch(`${API_BASE_URL}/api/student/profile`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
