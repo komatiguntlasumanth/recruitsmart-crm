@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_BASE_URL from '../config/api';
 
 const JobBoard = ({ user }) => {
     const [jobs, setJobs] = useState([]);
@@ -19,7 +20,7 @@ const JobBoard = ({ user }) => {
     const fetchProfile = async () => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch('http://localhost:8080/api/student/profile', {
+            const res = await fetch(`${API_BASE_URL}/api/student/profile`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -32,7 +33,7 @@ const JobBoard = ({ user }) => {
 
     const fetchJobs = async () => {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/jobs', { // Changed to fetch ALL jobs
+        const response = await fetch(`${API_BASE_URL}/api/jobs`, { // Changed to fetch ALL jobs
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
@@ -72,7 +73,7 @@ const JobBoard = ({ user }) => {
 
     const handleApply = async (jobId) => {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8080/api/applications/apply/${jobId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/applications/apply/${jobId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -86,7 +87,7 @@ const JobBoard = ({ user }) => {
     const handlePostJob = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/jobs', {
+        const response = await fetch(`${API_BASE_URL}/api/jobs`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ const JobBoard = ({ user }) => {
     const handleViewApplicants = async (jobId) => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`http://localhost:8080/api/applications/job/${jobId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/applications/job/${jobId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -124,7 +125,7 @@ const JobBoard = ({ user }) => {
     const handleUpdateStatus = async (appId, newStatus) => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`http://localhost:8080/api/applications/${appId}/status`, {
+            const res = await fetch(`${API_BASE_URL}/api/applications/${appId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
