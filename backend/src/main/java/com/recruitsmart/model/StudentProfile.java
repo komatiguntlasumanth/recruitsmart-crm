@@ -39,6 +39,10 @@ public class StudentProfile {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String profilePictureUrl;
+    
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String resumeUrl;
 
     @ElementCollection
     private List<Education> education = new ArrayList<>();
@@ -110,4 +114,7 @@ public class StudentProfile {
     public void setInternships(List<Experience> internships) { this.internships = internships; }
     public List<Project> getCertificates() { return certificates; }
     public void setCertificates(List<Project> certificates) { this.certificates = certificates; }
+    
+    public String getResumeUrl() { return resumeUrl; }
+    public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
 }
