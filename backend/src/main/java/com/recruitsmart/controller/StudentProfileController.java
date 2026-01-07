@@ -72,7 +72,79 @@ public class StudentProfileController {
             existingInfo.getAchievements().clear();
             existingInfo.getAchievements().addAll(profile.getAchievements());
         }
+        if (profile.getCertificates() != null) {
+            existingInfo.getCertificates().clear();
+            existingInfo.getCertificates().addAll(profile.getCertificates());
+        }
+        if (profile.getInternships() != null) {
+            existingInfo.getInternships().clear();
+            existingInfo.getInternships().addAll(profile.getInternships());
+        }
+        if (profile.getResumeUrl() != null) {
+            existingInfo.setResumeUrl(profile.getResumeUrl());
+        }
+        if (profile.getWorkStatus() != null) {
+            existingInfo.setWorkStatus(profile.getWorkStatus());
+        }
+        if (profile.getGithubLink() != null) {
+            existingInfo.setGithubLink(profile.getGithubLink());
+        }
+        if (profile.getLinkedinLink() != null) {
+            existingInfo.setLinkedinLink(profile.getLinkedinLink());
+        }
 
         return profileRepository.save(existingInfo);
+    }
+    
+    @DeleteMapping("/certificate/{index}")
+    public StudentProfile deleteCertificate(@PathVariable int index, Principal principal) {
+        String email = principal.getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        StudentProfile profile = profileRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Profile not found"));
+        
+        if (index >= 0 && index < profile.getCertificates().size()) {
+            profile.getCertificates().remove(index);
+            return profileRepository.save(profile);
+        }
+        throw new RuntimeException("Invalid index");
+    }
+    
+    @DeleteMapping("/internship/{index}")
+    public StudentProfile deleteInternship(@PathVariable int index, Principal principal) {
+        String email = principal.getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        StudentProfile profile = profileRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Profile not found"));
+        
+        if (index >= 0 && index < profile.getInternships().size()) {
+            profile.getInternships().remove(index);
+            return profileRepository.save(profile);
+        }
+        throw new RuntimeException("Invalid index");
+    }
+    
+    @DeleteMapping("/project/{index}")
+    public StudentProfile deleteProject(@PathVariable int index, Principal principal) {
+        String email = principal.getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        StudentProfile profile = profileRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Profile not found"));
+        
+        if (index >= 0 && index < profile.getProjects().size()) {
+            profile.getProjects().remove(index);
+            return profileRepository.save(profile);
+        }
+        throw new RuntimeException("Invalid index");
+    }
+    
+    @DeleteMapping("/experience/{index}")
+    public StudentProfile deleteExperience(@PathVariable int index, Principal principal) {
+        String email = principal.getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        StudentProfile profile = profileRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Profile not found"));
+        
+        if (index >= 0 && index < profile.getExperiences().size()) {
+            profile.getExperiences().remove(index);
+            return profileRepository.save(profile);
+        }
+        throw new RuntimeException("Invalid index");
     }
 }

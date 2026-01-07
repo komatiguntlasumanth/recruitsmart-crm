@@ -26,6 +26,8 @@ public class Job {
     private String applicationLink;
     
     private String jobType; // "JOB" or "TRAINING"
+    
+    private String designation; // "Fresher", "Experienced", "Management"
 
     // PRO TIP: Always add a no-arg constructor for JPA
     public Job() {}
@@ -66,4 +68,7 @@ public class Job {
     
     public String getJobType() { return jobType; }
     public void setJobType(String jobType) { this.jobType = jobType; }
+    
+    public String getDesignation() { return designation; }
+    public void setDesignation(String designation) { this.designation = designation; }
 }
