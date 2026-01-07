@@ -2,6 +2,7 @@ package com.recruitsmart.controller;
 
 import com.recruitsmart.model.Job;
 import com.recruitsmart.repository.JobRepository;
+import com.recruitsmart.service.JobRecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -13,6 +14,9 @@ public class JobController {
 
     @Autowired
     private JobRepository jobRepository;
+    
+    @Autowired
+    private JobRecommendationService recommendationService;
 
     @GetMapping
     public List<Job> getAllJobs() {
@@ -33,6 +37,12 @@ public class JobController {
             job.setPostedDate(java.time.LocalDate.now());
         }
         return jobRepository.save(job);
+    }
+    
+    
+    @GetMapping("/recommended/{userId}")
+    public List<Job> getRecommendedJobs(@PathVariable Long userId) {
+        return recommendationService.getRecommendedJobs(userId);
     }
     
     @GetMapping("/{id}")

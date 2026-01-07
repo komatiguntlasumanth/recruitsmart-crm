@@ -18,7 +18,8 @@ const HRDashboard = ({ user }) => {
         salary: '',
         applicationLink: '',
         location: '',
-        jobType: 'JOB' // JOB or TRAINING
+        jobType: 'JOB', // JOB or TRAINING
+        designation: '' // Fresher, Experienced, Management
     });
 
     const API_BASE = `${API_BASE_URL}/api/jobs`;
@@ -101,7 +102,7 @@ const HRDashboard = ({ user }) => {
                 setShowModal(false);
                 setFormData({
                     title: '', companyName: '', description: '', eligibilityCriteria: '',
-                    salary: '', applicationLink: '', location: '', jobType: 'JOB'
+                    salary: '', applicationLink: '', location: '', jobType: 'JOB', designation: ''
                 });
                 fetchJobs(); // Refresh list
             } else {
@@ -257,6 +258,16 @@ const HRDashboard = ({ user }) => {
                                 </div>
 
                                 <input name="applicationLink" placeholder="Application/Registration Link" value={formData.applicationLink} onChange={handleInputChange} style={inputStyle} />
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#64748b', fontWeight: '500' }}>Designation Level</label>
+                                    <select name="designation" value={formData.designation} onChange={handleInputChange} required style={inputStyle}>
+                                        <option value="">Select Designation</option>
+                                        <option value="Fresher">Fresher</option>
+                                        <option value="Experienced">Experienced</option>
+                                        <option value="Management">Management</option>
+                                    </select>
+                                </div>
 
                                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                                     <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: '#e2e8f0', color: '#475569', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
