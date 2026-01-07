@@ -13,6 +13,9 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class AuthController {
 
+    public AuthController() {
+    }
+
     @Autowired
     private UserRepository userRepository;
 
@@ -54,11 +57,9 @@ public class AuthController {
         } else if (email.endsWith("@hr.com")) {
             user.setRole("ROLE_HR");
             user.setEnabled(false); // Requires Admin Approval
-        } else if (email.endsWith("@manager.com")) {
-            user.setRole("ROLE_MANAGER");
-            user.setEnabled(false); // Requires Admin Approval
         } else {
-            user.setRole("ROLE_STUDENT"); // Default to student
+            // Default to STUDENT for @gmail.com and any others not matching above
+            user.setRole("ROLE_STUDENT");
             user.setEnabled(true);
         }
         
@@ -78,22 +79,26 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> loginRequest) {
+    public org.springframework.http.ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("This email is not registered. Please go to the registration page."));
+        try {
+             User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("This email is not registered. Please go to the registration page."));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid email or password.");
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                return org.springframework.http.ResponseEntity.status(401).body(Map.of("message", "Invalid email or password."));
+            }
+            
+            if (!user.isEnabled()) {
+                return org.springframework.http.ResponseEntity.status(403).body(Map.of("message", "Account is pending approval. Please contact Admin."));
+            }
+            
+            String token = jwtUtil.generateToken(user.getEmail());
+            return org.springframework.http.ResponseEntity.ok(Map.of("token", token, "user", user));
+        } catch (RuntimeException e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
-        
-        if (!user.isEnabled()) {
-            throw new RuntimeException("Account is pending approval. Please contact Admin.");
-        }
-        
-        String token = jwtUtil.generateToken(user.getEmail());
-        return Map.of("token", token, "user", user);
     }
 }
