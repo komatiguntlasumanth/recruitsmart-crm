@@ -126,6 +126,37 @@ const StudentDashboard = ({ user }) => {
         setMsg('');
         const token = localStorage.getItem('token');
 
+        // Client-side validations
+        const phoneRegex = /^\+?[0-9]{10,15}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const urlRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-z]{2,}(:\d+)?(\/\S*)?$/;
+
+        if (profile.mobileNumber && !phoneRegex.test(profile.mobileNumber)) {
+            setMsg('❌ Invalid mobile number format.');
+            setLoading(false);
+            return;
+        }
+        if (profile.alternateEmail && !emailRegex.test(profile.alternateEmail)) {
+            setMsg('❌ Invalid alternate email format.');
+            setLoading(false);
+            return;
+        }
+        if (profile.alternateMobile && !phoneRegex.test(profile.alternateMobile)) {
+            setMsg('❌ Invalid alternate mobile number format.');
+            setLoading(false);
+            return;
+        }
+        if (profile.githubLink && !profile.githubLink.includes('github.com')) {
+            setMsg('❌ Invalid GitHub profile link.');
+            setLoading(false);
+            return;
+        }
+        if (profile.linkedinLink && !profile.linkedinLink.includes('linkedin.com')) {
+            setMsg('❌ Invalid LinkedIn profile link.');
+            setLoading(false);
+            return;
+        }
+
         // Comprehensive Sanitization
         const payload = { ...profile };
         delete payload.user;
@@ -145,19 +176,21 @@ const StudentDashboard = ({ user }) => {
                 body: JSON.stringify(payload)
             });
 
+            const data = await res.json().catch(() => ({}));
+
             if (res.ok) {
-                try {
-                    const savedProfile = await res.json();
-                    setProfile(savedProfile);
-                } catch (jsonErr) {
-                    console.error("JSON parse error:", jsonErr);
-                }
+                setProfile(data);
                 setMsg('✅ Profile saved successfully!');
                 setIsEditing(false); // Back to view mode
                 setTimeout(() => setMsg(''), 3000);
             } else {
-                const errorData = await res.json().catch(() => ({}));
-                setMsg(`❌ Failed to save: ${errorData.message || 'Server error (' + res.status + ')'}`);
+                if (data.errors) {
+                    // Standardized backend validation error handling
+                    const firstError = Object.values(data.errors)[0];
+                    setMsg(`❌ ${firstError || 'Validation failed'}`);
+                } else {
+                    setMsg(`❌ ${data.message || 'Failed to save profile'}`);
+                }
             }
         } catch (err) {
             console.error("Save error:", err);

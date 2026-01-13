@@ -21,11 +21,13 @@ public class CustomerController {
 
     @PostMapping
     public Customer createCustomer(@RequestBody Customer customer) {
+        if (customer == null) throw new IllegalArgumentException("Customer cannot be null");
         return customerRepository.save(customer);
     }
 
     @GetMapping("/{id}")
     public Customer getCustomerById(@PathVariable Long id) {
-        return customerRepository.findById(id).orElseThrow();
+        if (id == null) throw new IllegalArgumentException("ID cannot be null");
+        return customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 }

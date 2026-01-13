@@ -48,7 +48,16 @@ public class GeminiService {
             String urlWithKey = embeddingUrl + "?key=" + apiKey;
 
             JsonNode response = restTemplate.postForObject(urlWithKey, entity, JsonNode.class);
+            if (response == null || response.isMissingNode()) {
+                System.err.println("Gemini Embedding Error: Empty response");
+                return mockEmbedding(text);
+            }
+            
             JsonNode embeddingNode = response.path("embedding").path("values");
+            if (embeddingNode.isMissingNode()) {
+                System.err.println("Gemini Embedding Error: Values not found in response");
+                return mockEmbedding(text);
+            }
             
             List<Double> embedding = new ArrayList<>();
             for (JsonNode val : embeddingNode) {
@@ -83,7 +92,15 @@ public class GeminiService {
             String urlWithKey = chatUrl + "?key=" + apiKey;
 
             JsonNode response = restTemplate.postForObject(urlWithKey, entity, JsonNode.class);
-            return response.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
+            if (response == null || response.isMissingNode() || !response.has("candidates")) {
+                return "Error: Empty or invalid response from Gemini API";
+            }
+            
+            JsonNode candidates = response.path("candidates");
+            if (candidates.isArray() && candidates.size() > 0) {
+                return candidates.get(0).path("content").path("parts").get(0).path("text").asText();
+            }
+            return "Error: No candidates returned from Gemini API";
         } catch (Exception e) {
             return "Error calling Gemini API: " + e.getMessage();
         }

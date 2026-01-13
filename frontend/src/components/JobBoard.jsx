@@ -5,10 +5,12 @@ const JobBoard = ({ user }) => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [newJob, setNewJob] = useState({ title: '', companyName: '', location: '', salary: '', description: '' });
+    const [newJob, setNewJob] = useState({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', applicationLink: '', eligibilityCriteria: '' });
     const [jobFilter, setJobFilter] = useState('ALL'); // ALL, RECOMMENDED, OTHER
     const [recommendedJobs, setRecommendedJobs] = useState([]);
     const [profile, setProfile] = useState(null);
+    const [selectedJob, setSelectedJob] = useState(null); // For detailed view
+    const [appliedJobLink, setAppliedJobLink] = useState(null); // Link to show after applying
 
     useEffect(() => {
         fetchJobs();
@@ -43,31 +45,29 @@ const JobBoard = ({ user }) => {
         setLoading(false);
     };
 
-    // Calculate recommendations when profile or jobs change
-    // Calculate recommendations when profile or jobs change
-    useEffect(() => {
-        if (profile && jobs.length > 0 && user.role === 'ROLE_STUDENT') {
-            const designation = (profile.designation || '').toLowerCase().trim();
-            const rec = jobs.filter(job => {
-                if (!designation) return false;
-                const jobTitle = (job.title || '').toLowerCase();
-                // Check if job title contains designation or vice versa for a broader match
-                return jobTitle.includes(designation) || designation.includes(jobTitle);
+    const fetchRecommendedJobs = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/jobs/recommended/${user.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            setRecommendedJobs(rec);
+            if (res.ok) {
+                setRecommendedJobs(await res.json());
+            }
+        } catch (err) {
+            console.error("Error fetching recommended jobs", err);
         }
-    }, [profile, jobs, user.role]);
+    };
 
+    useEffect(() => {
+        if (jobFilter === 'RECOMMENDED' && user.role === 'ROLE_STUDENT') {
+            fetchRecommendedJobs();
+        }
+    }, [jobFilter]);
 
     const getFilteredJobs = () => {
-        let filtered = jobs;
-        if (user.role === 'ROLE_STUDENT') {
-            // Basic filtering if needed, e.g. active jobs only
-            // Assuming API returns relevant jobs
-        }
-
         if (jobFilter === 'RECOMMENDED') return recommendedJobs;
-        if (jobFilter === 'OTHER') return jobs.filter(j => !recommendedJobs.includes(j));
+        if (jobFilter === 'OTHER') return jobs.filter(j => !recommendedJobs.some(rj => rj.id === j.id));
         return jobs;
     };
 
@@ -77,10 +77,19 @@ const JobBoard = ({ user }) => {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
+
+        const data = await response.json();
+
         if (response.ok) {
             alert('Application submitted successfully!');
+            // Show the external apply link if available
+            const job = jobs.find(j => j.id === jobId);
+            if (job && job.applicationLink) {
+                setAppliedJobLink(job.applicationLink);
+            }
         } else {
-            alert('Failed to apply.');
+            // Handle error message from backend
+            alert(data.message || 'Failed to apply.');
         }
     };
 
@@ -98,7 +107,7 @@ const JobBoard = ({ user }) => {
 
         if (response.ok) {
             setShowModal(false);
-            setNewJob({ title: '', companyName: '', location: '', salary: '', description: '' });
+            setNewJob({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', applicationLink: '', eligibilityCriteria: '' });
             fetchJobs();
         }
     };
@@ -175,7 +184,7 @@ const JobBoard = ({ user }) => {
                             <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1rem' }}>{job.eligibilityCriteria}</p>
 
                             {user.role === 'ROLE_STUDENT' && (
-                                <button className="btn-primary" style={{ width: '100%' }} onClick={() => handleApply(job.id)}>
+                                <button className="btn-primary" style={{ width: '100%' }} onClick={() => setSelectedJob(job)}>
                                     Apply Now
                                 </button>
                             )}
@@ -190,17 +199,77 @@ const JobBoard = ({ user }) => {
                 </div>
             )}
 
+            {/* Job Details Modal */}
+            {selectedJob && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                    <div className="glass-card" style={{ padding: '2rem', width: '600px', background: '#ffffff', color: '#1e293b' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                            <h2 style={{ margin: 0 }}>{selectedJob.title}</h2>
+                            <button onClick={() => { setSelectedJob(null); setAppliedJobLink(null); }} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                        </div>
+                        <p style={{ color: 'var(--primary)', fontWeight: 'bold', fontSize: '1.2rem' }}>{selectedJob.companyName}</p>
+                        <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>📍 {selectedJob.location} | 💰 {selectedJob.salary}</p>
+
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <h4 style={{ marginBottom: '0.5rem' }}>Job Description:</h4>
+                            <p style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>{selectedJob.description}</p>
+                        </div>
+
+                        {selectedJob.eligibilityCriteria && (
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <h4 style={{ marginBottom: '0.5rem' }}>Eligibility Criteria:</h4>
+                                <p style={{ fontSize: '0.95rem', background: '#f8fafc', padding: '10px', borderRadius: '8px', borderLeft: '4px solid #6366f1' }}>{selectedJob.eligibilityCriteria}</p>
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                            {!appliedJobLink ? (
+                                <>
+                                    <button className="btn-primary" onClick={() => handleApply(selectedJob.id)}>Confirm & Apply</button>
+                                    <button className="button" onClick={() => setSelectedJob(null)} style={{ padding: '10px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', color: '#475569' }}>Back</button>
+                                </>
+                            ) : (
+                                <div style={{ width: '100%', textAlign: 'center' }}>
+                                    <div style={{ background: '#dcfce7', color: '#166534', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                                        Application submitted successfully on RecruitSmart!
+                                    </div>
+                                    <p style={{ marginBottom: '1rem', color: '#64748b' }}>Please complete the application process on the official portal:</p>
+                                    <a href={appliedJobLink} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                                        Open Official Apply Link
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Post Job Modal */}
             {showModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-                    <div className="glass-card" style={{ padding: '2rem', width: '500px', background: '#1e293b' }}>
+                    <div className="glass-card" style={{ padding: '2rem', width: '500px', background: '#1e293b', color: 'white' }}>
                         <h3>Post a New Job</h3>
                         <form onSubmit={handlePostJob} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                             <input placeholder="Job Title" value={newJob.title} onChange={e => setNewJob({ ...newJob, title: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
                             <input placeholder="Company Name" value={newJob.companyName} onChange={e => setNewJob({ ...newJob, companyName: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
+
+                            <select
+                                value={newJob.designation}
+                                onChange={e => setNewJob({ ...newJob, designation: e.target.value })}
+                                required
+                                style={{ padding: '10px', background: '#1e293b', border: '1px solid #333', color: 'white' }}
+                            >
+                                <option value="">Select Designation</option>
+                                <option value="Fresher">Fresher</option>
+                                <option value="Experienced">Experienced</option>
+                                <option value="Management">Management</option>
+                            </select>
+
                             <input placeholder="Location" value={newJob.location} onChange={e => setNewJob({ ...newJob, location: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
                             <input placeholder="Salary (e.g., $100k)" value={newJob.salary} onChange={e => setNewJob({ ...newJob, salary: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
+                            <input placeholder="Official Apply Link" value={newJob.applicationLink} onChange={e => setNewJob({ ...newJob, applicationLink: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
                             <textarea placeholder="Job Description" value={newJob.description} onChange={e => setNewJob({ ...newJob, description: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white', minHeight: '100px' }} />
+                            <textarea placeholder="Eligibility Criteria" value={newJob.eligibilityCriteria} onChange={e => setNewJob({ ...newJob, eligibilityCriteria: e.target.value })} style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
 
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                                 <button type="submit" className="btn-primary">Post Job</button>

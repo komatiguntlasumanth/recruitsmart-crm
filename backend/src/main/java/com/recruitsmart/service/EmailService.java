@@ -10,7 +10,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     
-    @Value("${spring.mail.username:noreply@recruitsmart.com}")
+    @Value("${spring.mail.username:jobapplication@recuritsmart.com}")
     private String fromEmail;
 
     public EmailService(JavaMailSender mailSender) {
@@ -20,16 +20,16 @@ public class EmailService {
     public void sendApplicationSuccessEmail(String toEmail, String jobTitle, String companyName) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
+            message.setFrom("jobapplication@recuritsmart.com");
             message.setTo(toEmail);
-            message.setSubject("Application Submitted Successfully - " + jobTitle);
+            message.setSubject("Job Application Received - " + jobTitle);
             message.setText(
                 "Dear Candidate,\n\n" +
-                "Your application for " + jobTitle + " at " + companyName + " has been successfully submitted through RecruitSmart.\n\n" +
+                "Your job application for " + jobTitle + " at " + companyName + " was received successfully through RecruitSmart.\n\n" +
                 "Our team will review your application and get back to you soon.\n\n" +
-                "Thank you for using RecruitSmart - Your gateway to the future!\n\n" +
+                "Thank you for using RecruitSmart!\n\n" +
                 "Best regards,\n" +
-                "The RecruitSmart Team"
+                "RecruitSmart Team"
             );
             mailSender.send(message);
         } catch (Exception e) {

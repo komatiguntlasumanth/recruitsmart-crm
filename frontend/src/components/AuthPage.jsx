@@ -22,6 +22,14 @@ const AuthPage = ({ onLogin }) => {
         setMessage('');
         setLoading(true);
 
+        // Client-side validations
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address.');
+            setLoading(false);
+            return;
+        }
+
         try {
             if (mode === 'register') {
                 if (!passwordRegex.test(password)) {
@@ -29,13 +37,26 @@ const AuthPage = ({ onLogin }) => {
                     setLoading(false);
                     return;
                 }
+                if (username.length < 3) {
+                    setError('Username must be at least 3 characters.');
+                    setLoading(false);
+                    return;
+                }
+
                 const response = await fetch(`${API_BASE}/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password, username })
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Registration failed');
+
+                if (!response.ok) {
+                    if (data.errors) {
+                        const errorMsg = Object.values(data.errors).join(', ');
+                        throw new Error(errorMsg || data.message || 'Registration failed');
+                    }
+                    throw new Error(data.message || 'Registration failed');
+                }
 
                 // Check if token exists (if not, it means pending approval)
                 if (!data.token) {

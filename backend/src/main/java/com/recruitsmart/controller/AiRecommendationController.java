@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,6 +37,7 @@ public class AiRecommendationController {
 
     @GetMapping("/recommend-jobs/{studentId}")
     public ResponseEntity<List<Job>> recommendJobs(@PathVariable Long studentId) {
+        Objects.requireNonNull(studentId, "Student ID cannot be null");
         StudentProfile student = studentProfileRepository.findById(studentId).orElse(null);
         if (student == null) return ResponseEntity.notFound().build();
 
@@ -46,12 +48,14 @@ public class AiRecommendationController {
         List<Double> embedding = geminiService.getEmbedding(content);
         List<Long> similarJobIds = vectorStoreService.findSimilarJobs(embedding, 5);
         
+        Objects.requireNonNull(similarJobIds, "Similar job IDs list cannot be null");
         List<Job> recommendedJobs = jobRepository.findAllById(similarJobIds);
         return ResponseEntity.ok(recommendedJobs);
     }
 
     @GetMapping("/rank-candidates/{jobId}")
     public ResponseEntity<List<StudentProfile>> rankCandidates(@PathVariable Long jobId) {
+        Objects.requireNonNull(jobId, "Job ID cannot be null");
         Job job = jobRepository.findById(jobId).orElse(null);
         if (job == null) return ResponseEntity.notFound().build();
 
@@ -60,6 +64,7 @@ public class AiRecommendationController {
         List<Double> embedding = geminiService.getEmbedding(content);
         List<Long> similarStudentIds = vectorStoreService.findSimilarStudents(embedding, 10);
         
+        Objects.requireNonNull(similarStudentIds, "Similar student IDs list cannot be null");
         List<StudentProfile> rankedStudents = studentProfileRepository.findAllById(similarStudentIds);
         return ResponseEntity.ok(rankedStudents);
     }

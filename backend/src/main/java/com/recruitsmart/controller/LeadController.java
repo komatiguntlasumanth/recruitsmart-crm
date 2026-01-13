@@ -6,6 +6,7 @@ import com.recruitsmart.service.MLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/leads")
@@ -33,6 +34,7 @@ public class LeadController {
 
     @PostMapping
     public Lead createLead(@RequestBody Lead lead) {
+        Objects.requireNonNull(lead, "Lead cannot be null"); // Added null check
         // Automatically calculate ML score when a lead is created
         lead.setMlScore(mlService.calculateLeadScore(lead));
         return leadRepository.save(lead);
@@ -40,11 +42,14 @@ public class LeadController {
 
     @GetMapping("/{id}")
     public Lead getLeadById(@PathVariable Long id) {
+        Objects.requireNonNull(id, "ID cannot be null"); // Changed to Objects.requireNonNull
         return leadRepository.findById(id).orElseThrow();
     }
 
     @PutMapping("/{id}")
     public Lead updateLead(@PathVariable Long id, @RequestBody Lead leadDetails) {
+        Objects.requireNonNull(id, "ID cannot be null"); // Changed to Objects.requireNonNull
+        Objects.requireNonNull(leadDetails, "Lead details cannot be null"); // Added null check
         Lead lead = leadRepository.findById(id).orElseThrow();
         lead.setName(leadDetails.getName());
         lead.setEmail(leadDetails.getEmail());
@@ -60,6 +65,7 @@ public class LeadController {
 
     @DeleteMapping("/{id}")
     public void deleteLead(@PathVariable Long id) {
+        Objects.requireNonNull(id, "ID cannot be null"); // Changed to Objects.requireNonNull
         leadRepository.deleteById(id);
     }
 }
