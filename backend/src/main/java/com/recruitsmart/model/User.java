@@ -1,6 +1,7 @@
 package com.recruitsmart.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "users")
@@ -9,9 +10,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username; // We'll use email as username now
+    
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
-    private String role; // ROLE_SALES_REP, ROLE_MANAGER, ROLE_STUDENT
+    
+    @NotBlank(message = "Role is required")
+    @Pattern(regexp = "^(ROLE_ADMIN|ROLE_HR|ROLE_STUDENT|ROLE_MANAGER)$", message = "Invalid role")
+    private String role; // ROLE_ADMIN, ROLE_HR, ROLE_STUDENT, ROLE_MANAGER
+    
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
     
     private boolean enabled = true; // Auto-enable users

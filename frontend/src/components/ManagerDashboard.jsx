@@ -67,15 +67,21 @@ const ManagerDashboard = ({ user }) => {
                 setShowModal(false);
                 setFormData({
                     title: '', companyName: '', description: '', eligibilityCriteria: '',
-                    salary: '', applicationLink: '', location: '', jobType: 'JOB'
+                    salary: '', applicationLink: '', location: '', jobType: 'JOB', designation: ''
                 });
                 fetchJobs(); // Refresh list
             } else {
-                alert("Failed to create " + modalMode.toLowerCase());
+                const data = await res.json().catch(() => ({}));
+                if (data.errors) {
+                    const errorMsg = Object.values(data.errors).join(', ');
+                    alert("Validation Error: " + errorMsg);
+                } else {
+                    alert("Failed to create " + modalMode.toLowerCase() + ": " + (data.message || 'Unknown error'));
+                }
             }
         } catch (err) {
             console.error("Error saving job", err);
-            alert("Error saving job");
+            alert("Error saving job: " + err.message);
         } finally {
             setLoading(false);
         }

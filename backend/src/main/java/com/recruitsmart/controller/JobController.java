@@ -29,7 +29,8 @@ public class JobController {
     }
 
     @PostMapping
-    public Job createJob(@RequestBody Job job) {
+    @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+    public Job createJob(@jakarta.validation.Valid @RequestBody Job job) {
         if (job.getStatus() == null) {
             job.setStatus("OPEN");
         }
@@ -47,6 +48,7 @@ public class JobController {
     
     @GetMapping("/{id}")
     public Job getJobById(@PathVariable Long id) {
+        if (id == null) throw new IllegalArgumentException("ID cannot be null");
         return jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
     }
 }

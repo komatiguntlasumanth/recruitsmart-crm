@@ -38,12 +38,14 @@ public class AdminController {
 
     @DeleteMapping("/users/{id}")
     public Map<String, String> deleteUser(@PathVariable Long id) {
+        if (id == null) throw new IllegalArgumentException("ID cannot be null");
         userRepository.deleteById(id);
         return Map.of("message", "User deleted successfully");
     }
 
     @PutMapping("/users/{id}/approve")
     public Map<String, String> approveUser(@PathVariable Long id) {
+        if (id == null) throw new IllegalArgumentException("ID cannot be null");
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setEnabled(true);
         userRepository.save(user);

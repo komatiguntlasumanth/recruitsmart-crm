@@ -1,6 +1,7 @@
 package com.recruitsmart.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 @Entity
@@ -9,15 +10,20 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Job is required")
     @ManyToOne
     @JoinColumn(name = "job_id")
     private Job job;
 
+    @NotNull(message = "Student is required")
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User student;
 
+    @Pattern(regexp = "^(APPLIED|REVIEWING|INTERVIEW|REJECTED|HIRED)$", message = "Invalid application status")
     private String status; // APPLIED, REVIEWING, INTERVIEW, REJECTED, HIRED
+    
+    @PastOrPresent(message = "Application date cannot be in the future")
     private LocalDate appliedDate;
 
     public Application() {}

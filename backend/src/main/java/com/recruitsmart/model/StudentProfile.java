@@ -1,6 +1,7 @@
 package com.recruitsmart.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,20 +18,34 @@ public class StudentProfile {
 
     // Contact & Basic Info
     private String dob;
+    
+    @NotBlank(message = "Mobile number is required")
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid mobile number format")
     private String mobileNumber;
+    
+    @Email(message = "Invalid alternate email format")
     private String alternateEmail;
+    
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid alternate mobile number format")
     private String alternateMobile;
+    
     private String currentLocation;
     private String permanentAddress;
 
     // Professional Info
     private String designation; // "Fresher", "Experienced", "Management" (from dropdown)
     private String workStatus; // "Student", "Working Professional", etc.
+    
+    @Min(value = 0, message = "Years of experience cannot be negative")
     private int yearsOfExperience;
     
     // Social Links
+    @Pattern(regexp = "^(https?://)?(www\\.)?github\\.com/.*$", message = "Invalid GitHub link")
     private String githubLink;
+    
+    @Pattern(regexp = "^(https?://)?(www\\.)?linkedin\\.com/.*$", message = "Invalid LinkedIn link")
     private String linkedinLink;
+    
     private String portfolioUrl; 
 
     

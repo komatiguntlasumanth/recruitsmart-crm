@@ -36,7 +36,13 @@ public class ApplicationController {
         String email = auth.getName();
         User student = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         
-        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        if (jobId == null) throw new IllegalArgumentException("Job ID cannot be null");
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job find error"));
+        
+        // Check if student already applied to this job
+        if (applicationRepository.existsByJobIdAndStudentId(jobId, student.getId())) {
+            throw new RuntimeException("your mail already applied to this job");
+        }
         
         Application application = new Application(job, student);
         Application saved = applicationRepository.save(application);
@@ -67,7 +73,8 @@ public class ApplicationController {
     
     @PutMapping("/{id}/status")
     public Application updateStatus(@PathVariable Long id, @RequestBody java.util.Map<String, String> statusMap) {
-        Application app = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Application not found"));
+        if (id == null) throw new IllegalArgumentException("ID cannot be null");
+        Application app = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Application find error"));
         app.setStatus(statusMap.get("status"));
         return applicationRepository.save(app);
     }

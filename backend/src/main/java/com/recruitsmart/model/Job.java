@@ -1,6 +1,7 @@
 package com.recruitsmart.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 @Entity
@@ -9,15 +10,27 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Job title is required")
+    @Size(max = 200, message = "Title must not exceed 200 characters")
     private String title;
+    
+    @NotBlank(message = "Company name is required")
+    @Size(max = 200, message = "Company name must not exceed 200 characters")
     private String companyName;
     
+    @NotBlank(message = "Job description is required")
+    @Size(max = 1000, message = "Description must not exceed 1000 characters")
     @Column(length = 1000)
     private String description;
     
+    @NotBlank(message = "Location is required")
     private String location;
+    
     private String salary;
+    
     private LocalDate postedDate;
+    
+    @Pattern(regexp = "^(OPEN|CLOSED)$", message = "Status must be either OPEN or CLOSED")
     private String status; // OPEN, CLOSED
     
     @Column(length = 2000)
@@ -25,8 +38,10 @@ public class Job {
     
     private String applicationLink;
     
+    @Pattern(regexp = "^(JOB|TRAINING)$", message = "Job type must be either JOB or TRAINING")
     private String jobType; // "JOB" or "TRAINING"
     
+    @Pattern(regexp = "^(Fresher|Experienced|Management)$", message = "Designation must be Fresher, Experienced, or Management")
     private String designation; // "Fresher", "Experienced", "Management"
 
     // PRO TIP: Always add a no-arg constructor for JPA

@@ -24,6 +24,7 @@ public class ConversionService {
 
     @Transactional
     public Customer convertLeadToCustomer(Long leadId) {
+        if (leadId == null) throw new IllegalArgumentException("Lead ID cannot be null");
         Lead lead = leadRepository.findById(leadId).orElseThrow();
         
         // 1. Create Customer from Lead data

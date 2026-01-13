@@ -28,7 +28,7 @@ public class StudentProfileController {
     }
 
     @PostMapping
-    public StudentProfile updateProfile(@RequestBody StudentProfile profile, Principal principal) {
+    public StudentProfile updateProfile(@jakarta.validation.Valid @RequestBody StudentProfile profile, Principal principal) {
         System.out.println("Updating profile for: " + principal.getName());
         String email = principal.getName();
         User user = userRepository.findByEmail(email)

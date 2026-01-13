@@ -1,6 +1,7 @@
 package com.recruitsmart.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 @Entity
@@ -9,10 +10,16 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotBlank(message = "Name is required")
     private String name;
+    
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
+    
     private String industry;
     private String address;
+
     
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Opportunity> opportunities;

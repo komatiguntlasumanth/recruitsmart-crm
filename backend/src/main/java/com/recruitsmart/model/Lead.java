@@ -1,6 +1,7 @@
 package com.recruitsmart.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,12 +11,23 @@ public class Lead {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotBlank(message = "Name is required")
     private String name;
+    
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
+    
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number format")
     private String phone;
+    
     private String company;
     private String source;
+    
+    @Pattern(regexp = "^(New|Contacted|Qualified|Lost)$", message = "Invalid status")
     private String status; // New, Contacted, Qualified, Lost
+
     
     private Double mlScore; // ML-predicted conversion probability
     
