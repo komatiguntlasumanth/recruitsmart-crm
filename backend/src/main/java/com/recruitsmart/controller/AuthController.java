@@ -54,7 +54,11 @@ public class AuthController {
         } else if (email.endsWith("@manager.com")) {
             user.setRole("ROLE_MANAGER");
             user.setEnabled(true);
+        } else if (email.endsWith("@gmail.com")) {
+            user.setRole("ROLE_STUDENT");
+            user.setEnabled(true);
         } else {
+            // Default role for any other domain
             user.setRole("ROLE_STUDENT");
             user.setEnabled(true);
         }
