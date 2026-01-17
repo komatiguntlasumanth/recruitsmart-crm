@@ -18,7 +18,6 @@ public class User {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
     
-    @NotBlank(message = "Role is required")
     @Pattern(regexp = "^(ROLE_ADMIN|ROLE_HR|ROLE_STUDENT|ROLE_MANAGER)$", message = "Invalid role")
     private String role; // ROLE_ADMIN, ROLE_HR, ROLE_STUDENT, ROLE_MANAGER
     
