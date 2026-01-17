@@ -28,12 +28,21 @@ public class JobRecommendationService {
             return jobRepository.findByStatus("OPEN");
         }
         
+        String studentLevel = profile.getLevel();
         String studentDesignation = profile.getDesignation();
         
-        // Filter jobs by matching designation
+        // Filter jobs by matching level (Status) and Designation (Position)
         List<Job> allJobs = jobRepository.findByStatus("OPEN");
         return allJobs.stream()
-            .filter(job -> job.getDesignation() != null && job.getDesignation().equals(studentDesignation))
+            .filter(job -> {
+                boolean levelMatch = (studentLevel == null || studentLevel.isEmpty() || 
+                                     (job.getLevel() != null && job.getLevel().equalsIgnoreCase(studentLevel)));
+                
+                boolean designationMatch = (studentDesignation == null || studentDesignation.isEmpty() || 
+                                           (job.getDesignation() != null && job.getDesignation().toLowerCase().contains(studentDesignation.toLowerCase())));
+                
+                return levelMatch && designationMatch;
+            })
             .collect(Collectors.toList());
     }
 }
