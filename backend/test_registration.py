@@ -4,7 +4,7 @@ import random
 import string
 import time
 
-API_URL = "http://localhost:8081/api/auth/register"
+API_URL = "http://localhost:8080/api/auth/register"
 
 def generate_random_string(length=5):
     return ''.join(random.choices(string.ascii_lowercase, k=length))
@@ -37,17 +37,18 @@ def register(description, email, password, username):
         print(f"Error: {e}")
     time.sleep(1)
 
-# 1. Admin Registration 
-register("Admin Test", "komatiguntlasumanths@admin.com", "Test@123", "SuperAdmin")
+# 1. Admin Registration (Should fail if already exists, but we use random to be sure)
+admin_rand = generate_random_string()
+register("Admin Test", "komatiguntlasumanths@admin.com", "Test@123", f"SuperAdmin_{admin_rand}")
 
 # 2. HR Registration
-rand_hr = f"hr_{generate_random_string()}@hr.com"
-register("HR Test", rand_hr, "Test@123", "HR_User")
+hr_rand = generate_random_string()
+register("HR Test", f"hr_{hr_rand}@hr.com", "Test@123", f"HR_User_{hr_rand}")
 
 # 3. Student Registration (Gmail)
-rand_student = f"student_{generate_random_string()}@gmail.com"
-register("Student Test", rand_student, "Test@123", "Student_User")
+student_rand = generate_random_string()
+register("Student Test", f"student_{student_rand}@gmail.com", "Test@123", f"Student_User_{student_rand}")
 
 # 4. Fake Admin Registration (Should be Student)
-rand_fake = f"fake_{generate_random_string()}@admin.com"
-register("Fake Admin Test", rand_fake, "Test@123", "Fake_Admin")
+fake_rand = generate_random_string()
+register("Fake Admin Test", f"fake_{fake_rand}@admin.com", "Test@123", f"Fake_Admin_{fake_rand}")

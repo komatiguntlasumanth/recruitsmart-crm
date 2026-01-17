@@ -5,7 +5,8 @@ const JobBoard = ({ user }) => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [newJob, setNewJob] = useState({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', applicationLink: '', eligibilityCriteria: '' });
+    const [editingJobId, setEditingJobId] = useState(null);
+    const [newJob, setNewJob] = useState({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', level: 'Fresher', applicationLink: '', eligibilityCriteria: '' });
     const [jobFilter, setJobFilter] = useState('ALL'); // ALL, RECOMMENDED, OTHER
     const [recommendedJobs, setRecommendedJobs] = useState([]);
     const [profile, setProfile] = useState(null);
@@ -96,8 +97,11 @@ const JobBoard = ({ user }) => {
     const handlePostJob = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/api/jobs`, {
-            method: 'POST',
+        const method = editingJobId ? 'PUT' : 'POST';
+        const url = editingJobId ? `${API_BASE_URL}/api/jobs/${editingJobId}` : `${API_BASE_URL}/api/jobs`;
+
+        const response = await fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -107,8 +111,43 @@ const JobBoard = ({ user }) => {
 
         if (response.ok) {
             setShowModal(false);
-            setNewJob({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', applicationLink: '', eligibilityCriteria: '' });
+            setEditingJobId(null);
+            setNewJob({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', level: 'Fresher', applicationLink: '', eligibilityCriteria: '' });
             fetchJobs();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Action failed');
+        }
+    };
+
+    const handleEditClick = (job) => {
+        setEditingJobId(job.id);
+        setNewJob({
+            title: job.title,
+            companyName: job.companyName,
+            location: job.location,
+            salary: job.salary,
+            description: job.description,
+            designation: job.designation,
+            level: job.level || 'Fresher',
+            applicationLink: job.applicationLink,
+            eligibilityCriteria: job.eligibilityCriteria
+        });
+        setShowModal(true);
+    };
+
+    const handleDeleteJob = async (jobId) => {
+        if (!window.confirm('Are you sure you want to delete this job?')) return;
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            fetchJobs();
+        } else {
+            alert('Failed to delete job');
         }
     };
 
@@ -179,6 +218,10 @@ const JobBoard = ({ user }) => {
                         <div key={job.id} className="glass-card" style={{ padding: '1.5rem', transition: '0.3s', ':hover': { transform: 'translateY(-5px)' } }}>
                             <h3 style={{ fontSize: '1.4rem' }}>{job.title}</h3>
                             <p style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{job.companyName}</p>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', margin: '0.5rem 0' }}>
+                                <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{job.level || 'Fresher'}</span>
+                                <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{job.designation || 'Role'}</span>
+                            </div>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0.5rem 0' }}>📍 {job.location} | 💰 {job.salary}</p>
                             <p style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#475569' }}>{job.description}</p>
                             <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1rem' }}>{job.eligibilityCriteria}</p>
@@ -189,7 +232,11 @@ const JobBoard = ({ user }) => {
                                 </button>
                             )}
                             {user.role === 'ROLE_HR' && (
-                                <button className="btn-secondary" style={{ width: '100%' }} onClick={() => handleViewApplicants(job.id)}>View Applicants</button>
+                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                                    <button className="btn-secondary" style={{ flex: 2 }} onClick={() => handleViewApplicants(job.id)}>View Applicants</button>
+                                    <button onClick={() => handleEditClick(job)} style={{ flex: 1, background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Edit">✏️</button>
+                                    <button onClick={() => handleDeleteJob(job.id)} style={{ flex: 1, background: '#fee2e2', border: 'none', borderRadius: '8px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Delete">🗑️</button>
+                                </div>
                             )}
                         </div>
                     ))}
@@ -208,6 +255,10 @@ const JobBoard = ({ user }) => {
                             <button onClick={() => { setSelectedJob(null); setAppliedJobLink(null); }} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                         </div>
                         <p style={{ color: 'var(--primary)', fontWeight: 'bold', fontSize: '1.2rem' }}>{selectedJob.companyName}</p>
+                        <div style={{ display: 'flex', gap: '0.8rem', margin: '0.5rem 0 1rem 0' }}>
+                            <span style={{ background: '#f1f5f9', color: '#475569', padding: '4px 12px', borderRadius: '6px', fontWeight: 'bold' }}>{selectedJob.level || 'Fresher'}</span>
+                            <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: '6px', fontWeight: 'bold' }}>{selectedJob.designation || 'Position'}</span>
+                        </div>
                         <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>📍 {selectedJob.location} | 💰 {selectedJob.salary}</p>
 
                         <div style={{ marginBottom: '1.5rem' }}>
@@ -248,22 +299,36 @@ const JobBoard = ({ user }) => {
             {showModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                     <div className="glass-card" style={{ padding: '2rem', width: '500px', background: '#1e293b', color: 'white' }}>
-                        <h3>Post a New Job</h3>
+                        <h3>{editingJobId ? 'Edit Job' : 'Post a New Job'}</h3>
                         <form onSubmit={handlePostJob} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                             <input placeholder="Job Title" value={newJob.title} onChange={e => setNewJob({ ...newJob, title: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
                             <input placeholder="Company Name" value={newJob.companyName} onChange={e => setNewJob({ ...newJob, companyName: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
 
-                            <select
-                                value={newJob.designation}
-                                onChange={e => setNewJob({ ...newJob, designation: e.target.value })}
-                                required
-                                style={{ padding: '10px', background: '#1e293b', border: '1px solid #333', color: 'white' }}
-                            >
-                                <option value="">Select Designation</option>
-                                <option value="Fresher">Fresher</option>
-                                <option value="Experienced">Experienced</option>
-                                <option value="Management">Management</option>
-                            </select>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.3rem', display: 'block' }}>Status (Level)</label>
+                                    <select
+                                        value={newJob.level}
+                                        onChange={e => setNewJob({ ...newJob, level: e.target.value })}
+                                        required
+                                        style={{ padding: '10px', background: '#1e293b', border: '1px solid #333', color: 'white', width: '100%' }}
+                                    >
+                                        <option value="Fresher">Fresher</option>
+                                        <option value="Experienced">Experienced</option>
+                                        <option value="Management">Management</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.3rem', display: 'block' }}>Position/Designation</label>
+                                    <input
+                                        placeholder="e.g. Software Engineer"
+                                        value={newJob.designation}
+                                        onChange={e => setNewJob({ ...newJob, designation: e.target.value })}
+                                        required
+                                        style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white', width: '100%' }}
+                                    />
+                                </div>
+                            </div>
 
                             <input placeholder="Location" value={newJob.location} onChange={e => setNewJob({ ...newJob, location: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
                             <input placeholder="Salary (e.g., $100k)" value={newJob.salary} onChange={e => setNewJob({ ...newJob, salary: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
@@ -272,8 +337,8 @@ const JobBoard = ({ user }) => {
                             <textarea placeholder="Eligibility Criteria" value={newJob.eligibilityCriteria} onChange={e => setNewJob({ ...newJob, eligibilityCriteria: e.target.value })} style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
 
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                <button type="submit" className="btn-primary">Post Job</button>
-                                <button type="button" onClick={() => setShowModal(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid #555', color: 'white', borderRadius: '8px' }}>Cancel</button>
+                                <button type="submit" className="btn-primary">{editingJobId ? 'Update Job' : 'Post Job'}</button>
+                                <button type="button" onClick={() => { setShowModal(false); setEditingJobId(null); }} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid #555', color: 'white', borderRadius: '8px' }}>Cancel</button>
                             </div>
                         </form>
                     </div>

@@ -41,8 +41,10 @@ public class Job {
     @Pattern(regexp = "^(JOB|TRAINING)$", message = "Job type must be either JOB or TRAINING")
     private String jobType; // "JOB" or "TRAINING"
     
-    @Pattern(regexp = "^(Fresher|Experienced|Management)$", message = "Designation must be Fresher, Experienced, or Management")
-    private String designation; // "Fresher", "Experienced", "Management"
+    private String designation; // Role Title (e.g. Software Engineer)
+    
+    @Pattern(regexp = "^(Fresher|Experienced|Management)$", message = "Level must be Fresher, Experienced, or Management")
+    private String level; // "Fresher", "Experienced", "Management" (Status in UI)
 
     // PRO TIP: Always add a no-arg constructor for JPA
     public Job() {}
@@ -86,4 +88,7 @@ public class Job {
     
     public String getDesignation() { return designation; }
     public void setDesignation(String designation) { this.designation = designation; }
+    
+    public String getLevel() { return level; }
+    public void setLevel(String level) { this.level = level; }
 }

@@ -6,6 +6,7 @@ import com.recruitsmart.service.JobRecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -50,5 +51,28 @@ public class JobController {
     public Job getJobById(@PathVariable Long id) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
         return jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+    }
+
+    @PutMapping("/{id}")
+    public Job updateJob(@PathVariable Long id, @jakarta.validation.Valid @RequestBody Job jobDetails) {
+        Job job = jobRepository.findById(Objects.requireNonNull(id)).orElseThrow(() -> new RuntimeException("Job not found"));
+        
+        job.setTitle(jobDetails.getTitle());
+        job.setCompanyName(jobDetails.getCompanyName());
+        job.setDescription(jobDetails.getDescription());
+        job.setLocation(jobDetails.getLocation());
+        job.setSalary(jobDetails.getSalary());
+        job.setDesignation(jobDetails.getDesignation());
+        job.setLevel(jobDetails.getLevel());
+        job.setApplicationLink(jobDetails.getApplicationLink());
+        job.setEligibilityCriteria(jobDetails.getEligibilityCriteria());
+        job.setStatus(jobDetails.getStatus());
+        
+        return jobRepository.save(job);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteJob(@PathVariable Long id) {
+        jobRepository.deleteById(Objects.requireNonNull(id));
     }
 }

@@ -33,7 +33,8 @@ public class StudentProfile {
     private String permanentAddress;
 
     // Professional Info
-    private String designation; // "Fresher", "Experienced", "Management" (from dropdown)
+    private String designation; // Role Title (e.g. Software Developer)
+    private String level; // "Fresher", "Experienced", "Management" (Status in UI)
     private String workStatus; // "Student", "Working Professional", etc.
     
     @Min(value = 0, message = "Years of experience cannot be negative")
@@ -99,6 +100,8 @@ public class StudentProfile {
     public void setPermanentAddress(String permanentAddress) { this.permanentAddress = permanentAddress; }
     public String getDesignation() { return designation; }
     public void setDesignation(String designation) { this.designation = designation; }
+    public String getLevel() { return level; }
+    public void setLevel(String level) { this.level = level; }
     public int getYearsOfExperience() { return yearsOfExperience; }
     public void setYearsOfExperience(int yearsOfExperience) { this.yearsOfExperience = yearsOfExperience; }
     public String getPortfolioUrl() { return portfolioUrl; }
