@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API_BASE_URL from '../config/api';
+import API_BASE_URL, { authFetch } from '../config/api';
 
 const AdminDashboard = ({ user }) => {
     const [stats, setStats] = useState({ registeredUsers: 0, activeUsers: 0, loggedInUsers: 0 });
@@ -24,14 +24,11 @@ const AdminDashboard = ({ user }) => {
     }, []);
 
     const fetchData = async () => {
-        const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-
         try {
-            const statsRes = await fetch(`${API_BASE_URL}/api/admin/stats`, { headers });
+            const statsRes = await authFetch(`${API_BASE_URL}/api/admin/stats`);
             if (statsRes.ok) setStats(await statsRes.json());
 
-            const usersRes = await fetch(`${API_BASE_URL}/api/admin/users`, { headers });
+            const usersRes = await authFetch(`${API_BASE_URL}/api/admin/users`);
             if (usersRes.ok) {
                 const data = await usersRes.json();
                 setUsers(data);
@@ -61,11 +58,9 @@ const AdminDashboard = ({ user }) => {
     };
 
     const handleApprove = async (id) => {
-        const token = localStorage.getItem('token');
         try {
-            await fetch(`${API_BASE_URL}/api/admin/users/${id}/approve`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}` }
+            await authFetch(`${API_BASE_URL}/api/admin/users/${id}/approve`, {
+                method: 'PUT'
             });
             fetchData(); // Refresh
         } catch (e) { console.error(e); }
@@ -73,11 +68,9 @@ const AdminDashboard = ({ user }) => {
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure?")) return;
-        const token = localStorage.getItem('token');
         try {
-            await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+            await authFetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+                method: 'DELETE'
             });
             fetchData();
         } catch (e) { console.error(e); }
