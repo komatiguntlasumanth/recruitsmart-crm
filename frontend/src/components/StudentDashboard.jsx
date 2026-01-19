@@ -202,7 +202,12 @@ const StudentDashboard = ({ user }) => {
             console.error("Network or parsing error:", err);
             setMsg('❌ Server Error: Check your internet connection.');
         } finally {
+            // Ensure visual states are cleared
             setLoading(false);
+            // Small delay before clearing message if it was a success
+            if (msg.includes('success')) {
+                setTimeout(() => setMsg(''), 3000);
+            }
         }
     };
 
@@ -228,61 +233,66 @@ const StudentDashboard = ({ user }) => {
 
     const renderProfileView = () => (
         <div style={{ padding: '1rem' }}>
-            {/* Profile Header Card */}
-            <div className="glass-card" style={{ padding: '3rem', marginBottom: '2rem', background: 'white', borderRadius: '30px', boxShadow: '0 15px 40px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '8px', background: 'linear-gradient(90deg, #ef4444, #f59e0b)' }}></div>
+            {/* Profile Header Card - Perfectly matching screenshot */}
+            <div className="glass-card" style={{ padding: '3.5rem', marginBottom: '2.5rem', background: 'white', borderRadius: '40px', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '10px', background: 'linear-gradient(90deg, #ef4444, #f59e0b)' }}></div>
 
-                <div style={{ display: 'flex', gap: '3rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Avatar with soft glow and exact border from screen */}
                     <div
-                        style={{ width: '150px', height: '150px', borderRadius: '40px', background: '#fff', border: '4px solid #fff1f1', overflow: 'hidden', flexShrink: 0, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+                        style={{ width: '180px', height: '180px', borderRadius: '50px', background: '#fff', border: '1px solid #f1f5f9', overflow: 'hidden', flexShrink: 0, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.08)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                     >
                         {profile.profilePictureUrl ? (
-                            <img src={profile.profilePictureUrl} alt="Propic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={profile.profilePictureUrl} alt="Propic" style={{ width: '85%', height: '85%', borderRadius: '50%', objectFit: 'cover' }} />
                         ) : (
-                            <div style={{ fontSize: '5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', background: '#f8fafc' }}>👤</div>
+                            <div style={{ fontSize: '6rem', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', background: '#fff1f1', borderRadius: '50%' }}>👤</div>
                         )}
                     </div>
 
-                    <div style={{ flex: 1, minWidth: '300px' }}>
+                    <div style={{ flex: 1, minWidth: '350px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
-                                <h3 style={{ fontSize: '2.8rem', margin: 0, color: '#1e293b', fontWeight: '900', letterSpacing: '-1px' }}>{displayName}</h3>
-                                <p style={{ fontSize: '1.4rem', color: '#ef4444', fontWeight: 'bold', margin: '5px 0' }}>{profile.designation || 'Product Specialist / Explorer'}</p>
+                                <h3 style={{ fontSize: '3.5rem', margin: 0, color: '#111827', fontWeight: '900', letterSpacing: '-2px', textTransform: 'lowercase' }}>{displayName}</h3>
+                                <p style={{ fontSize: '1.6rem', color: '#ef4444', fontWeight: '700', margin: '5px 0' }}>{profile.designation || 'Specialist'}</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '15px', color: '#4b5563', fontSize: '1.1rem' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>📧</span> <strong>{user.email}</strong>
+                                </div>
                             </div>
-                            <button onClick={() => setIsEditing(true)} style={{ ...btnStyle, width: 'auto', padding: '10px 25px', borderRadius: '12px' }}>✎ Edit Profile</button>
+                            <button onClick={() => setIsEditing(true)} style={{ ...btnStyle, width: 'auto', padding: '12px 30px', borderRadius: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>✎</span> Edit Profile
+                            </button>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}><span>📧</span> <strong>{user.email}</strong></div>
+                        <div style={{ display: 'flex', gap: '2rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                             {profile.mobileNumber && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}><span>📱</span> <strong>{profile.mobileNumber}</strong></div>}
                             {profile.currentLocation && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}><span>📍</span> <strong>{profile.currentLocation}</strong></div>}
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                            {profile.githubLink && <a href={profile.githubLink} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', background: '#333', color: 'white', padding: '6px 15px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>GitHub</a>}
-                            {profile.linkedinLink && <a href={profile.linkedinLink} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', background: '#0077b5', color: 'white', padding: '6px 15px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>LinkedIn</a>}
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                            {profile.githubLink && <a href={profile.githubLink} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', background: '#111827', color: 'white', padding: '8px 20px', borderRadius: '12px', fontSize: '0.95rem', fontWeight: 'bold' }}>GitHub</a>}
+                            {profile.linkedinLink && <a href={profile.linkedinLink} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', background: '#0077b5', color: 'white', padding: '8px 20px', borderRadius: '12px', fontSize: '0.95rem', fontWeight: 'bold' }}>LinkedIn</a>}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Application Overview */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>Applied</h4>
-                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#ef4444' }}>{myApplications.length}</p>
+            {/* Premium Application Overview */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '3rem' }}>
+                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', background: 'white', borderRadius: '25px', borderBottom: '5px solid #ef4444' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Applied</h4>
+                    <p style={{ margin: '15px 0 0', fontSize: '2.5rem', fontWeight: '900', color: '#111827' }}>{myApplications.length}</p>
                 </div>
-                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>In Review</h4>
-                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#f59e0b' }}>{myApplications.filter(a => a.status === 'REVIEWING' || a.status === 'INTERVIEW').length}</p>
+                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', background: 'white', borderRadius: '25px', borderBottom: '5px solid #f59e0b' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Interview</h4>
+                    <p style={{ margin: '15px 0 0', fontSize: '2.5rem', fontWeight: '900', color: '#111827' }}>{myApplications.filter(a => a.status === 'INTERVIEW').length}</p>
                 </div>
-                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>Offers</h4>
-                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#10b981' }}>{myApplications.filter(a => a.status === 'HIRED').length}</p>
+                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', background: 'white', borderRadius: '25px', borderBottom: '5px solid #10b981' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Selected</h4>
+                    <p style={{ margin: '15px 0 0', fontSize: '2.5rem', fontWeight: '900', color: '#111827' }}>{myApplications.filter(a => a.status === 'HIRED').length}</p>
                 </div>
-                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>Experience</h4>
-                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#6366f1' }}>{profile.yearsOfExperience || '0'}</p>
+                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', background: 'white', borderRadius: '25px', borderBottom: '5px solid #6366f1' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>XP Level</h4>
+                    <p style={{ margin: '15px 0 0', fontSize: '2.5rem', fontWeight: '900', color: '#111827' }}>{profile.level || 'Junior'}</p>
                 </div>
             </div>
 
@@ -836,16 +846,34 @@ const StudentDashboard = ({ user }) => {
             {/* Main Content */}
             <div style={mainStyle} className="main-content">
                 {section === 'home' && (
-                    <div>
-                        <h2>{getGreeting()}, {displayName}</h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
-                            <div className="glass-card" onClick={() => setSection('jobs')} style={{ padding: '2rem', textAlign: 'center', cursor: 'pointer', transition: '0.3s', ':hover': { transform: 'translateY(-5px)' } }}>
-                                <h3>Total Applications</h3>
-                                <p style={{ fontSize: '2rem', color: '#ef4444' }}>{myApplications.length}</p>
+                    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+                        <div style={{ marginBottom: '3rem' }}>
+                            <h2 style={{ fontSize: '2.8rem', fontWeight: '900', color: '#111827', margin: 0 }}>{getGreeting()}, {displayName}! 🚀</h2>
+                            <p style={{ fontSize: '1.2rem', color: '#6b7280', marginTop: '10px' }}>Your recruitment journey is looking professional and ready.</p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                            <div className="glass-card" onClick={() => setSection('jobs')} style={{ padding: '3rem', cursor: 'pointer', transition: '0.4s', background: 'white', borderRadius: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.03)', borderBottom: '8px solid #ef4444' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📄</div>
+                                <h3 style={{ fontSize: '1.5rem', color: '#374151' }}>Applied Career Positions</h3>
+                                <p style={{ fontSize: '3.5rem', margin: '10px 0', color: '#ef4444', fontWeight: '900' }}>{myApplications.length}</p>
+                                <p style={{ color: '#9ca3af', fontWeight: 'bold' }}>Track your status →</p>
                             </div>
-                            <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', cursor: 'pointer' }}>
-                                <h3>Pending Assessments</h3>
-                                <p style={{ fontSize: '2rem', color: '#f59e0b' }}>0</p>
+
+                            <div className="glass-card" style={{ padding: '3rem', background: 'white', borderRadius: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.03)', borderBottom: '8px solid #f59e0b' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚡</div>
+                                <h3 style={{ fontSize: '1.5rem', color: '#374151' }}>Skill Proficiency Index</h3>
+                                <p style={{ fontSize: '3.5rem', margin: '10px 0', color: '#f59e0b', fontWeight: '900' }}>{profile.skills.length}<span style={{ fontSize: '1rem', color: '#9ca3af' }}>/10</span></p>
+                                <p style={{ color: '#9ca3af', fontWeight: 'bold' }}>Update skills in profile</p>
+                            </div>
+
+                            <div className="glass-card" style={{ padding: '3rem', background: 'white', borderRadius: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.03)', borderBottom: '8px solid #6366f1' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📈</div>
+                                <h3 style={{ fontSize: '1.5rem', color: '#374151' }}>Profile Completeness</h3>
+                                <div style={{ height: '12px', background: '#f3f4f6', borderRadius: '6px', marginTop: '20px', overflow: 'hidden' }}>
+                                    <div style={{ width: '85%', height: '100%', background: 'linear-gradient(90deg, #6366f1, #a855f7)', borderRadius: '6px' }}></div>
+                                </div>
+                                <p style={{ marginTop: '15px', fontWeight: '800', color: '#4b5563' }}>85% Complete</p>
                             </div>
                         </div>
                     </div>
