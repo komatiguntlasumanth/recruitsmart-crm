@@ -125,17 +125,25 @@ const StudentDashboard = ({ user }) => {
 
     const handleSaveProfile = async () => {
         setLoading(true);
-        setMsg('');
+        setMsg('⏳ Saving your profile...');
         const token = localStorage.getItem('token');
 
-        // Client-side validations
+        // Mandatory Field Check
+        if (!profile.mobileNumber || profile.mobileNumber.trim() === '') {
+            setMsg('❌ Mobile number is required.');
+            setLoading(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        // Client-side format validations
         const phoneRegex = /^\+?[0-9]{10,15}$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const urlRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-z]{2,}(:\d+)?(\/\S*)?$/;
 
         if (profile.mobileNumber && !phoneRegex.test(profile.mobileNumber)) {
-            setMsg('❌ Invalid mobile number format.');
+            setMsg('❌ Invalid mobile number format (+1234567890).');
             setLoading(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
         if (profile.alternateEmail && !emailRegex.test(profile.alternateEmail)) {
@@ -144,31 +152,22 @@ const StudentDashboard = ({ user }) => {
             return;
         }
         if (profile.alternateMobile && !phoneRegex.test(profile.alternateMobile)) {
-            setMsg('❌ Invalid alternate mobile number format.');
-            setLoading(false);
-            return;
-        }
-        if (profile.githubLink && !profile.githubLink.includes('github.com')) {
-            setMsg('❌ Invalid GitHub profile link.');
-            setLoading(false);
-            return;
-        }
-        if (profile.linkedinLink && !profile.linkedinLink.includes('linkedin.com')) {
-            setMsg('❌ Invalid LinkedIn profile link.');
+            setMsg('❌ Invalid alternate mobile format.');
             setLoading(false);
             return;
         }
 
-        // Comprehensive Sanitization
+        // Prepare payload - Clean and sanitize
         const payload = { ...profile };
-        delete payload.user;
+        delete payload.user; // Don't send back the nested user object
 
-        // Ensure no null lists
-        ['education', 'experiences', 'projects', 'skills', 'achievements', 'internships', 'certificates'].forEach(field => {
-            if (!payload[field]) payload[field] = [];
+        // Ensure collections are arrays
+        ['education', 'experiences', 'projects', 'skills', 'achievements', 'internships', 'certificates'].forEach(f => {
+            if (!payload[f]) payload[f] = [];
         });
 
         try {
+            console.log("Saving profile payload:", payload);
             const res = await fetch(`${API_BASE_URL}/api/student/profile`, {
                 method: 'POST',
                 headers: {
@@ -178,35 +177,44 @@ const StudentDashboard = ({ user }) => {
                 body: JSON.stringify(payload)
             });
 
-            const data = await res.json().catch(() => ({}));
+            const data = await res.json().catch(() => null);
 
             if (res.ok) {
-                const savedProfile = {
-                    ...data,
-                    education: data.education || [],
-                    experiences: data.experiences || [],
-                    projects: data.projects || [],
-                    skills: data.skills || [],
-                    achievements: data.achievements || [],
-                    internships: data.internships || [],
-                    certificates: data.certificates || []
+                // Merge saved data with current state to avoid losing fields
+                const updatedProfile = {
+                    ...profile,
+                    ...(data || {}),
+                    education: (data && data.education) || profile.education || [],
+                    experiences: (data && data.experiences) || profile.experiences || [],
+                    projects: (data && data.projects) || profile.projects || [],
+                    skills: (data && data.skills) || profile.skills || [],
+                    achievements: (data && data.achievements) || profile.achievements || [],
+                    internships: (data && data.internships) || profile.internships || [],
+                    certificates: (data && data.certificates) || profile.certificates || []
                 };
-                setProfile(savedProfile);
-                setMsg('✅ Profile saved successfully!');
-                setIsEditing(false); // Back to view mode
-                setTimeout(() => setMsg(''), 3000);
+
+                setProfile(updatedProfile);
+                setMsg('✅ Profile successfully upgraded!');
+
+                // Immediate transition to professional view
+                setIsEditing(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Clear success message after 4 seconds
+                setTimeout(() => setMsg(''), 4000);
             } else {
-                if (data.errors) {
-                    // Standardized backend validation error handling
+                console.error("Save failed with status:", res.status, data);
+                if (data && data.errors) {
                     const firstError = Object.values(data.errors)[0];
-                    setMsg(`❌ ${firstError || 'Validation failed'}`);
+                    setMsg(`❌ ${firstError}`);
                 } else {
-                    setMsg(`❌ ${data.message || 'Failed to save profile'}`);
+                    setMsg(`❌ ${data?.message || 'Failed to save. Please check required fields.'}`);
                 }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } catch (err) {
-            console.error("Save error:", err);
-            setMsg('❌ Error: Could not connect to the server.');
+            console.error("Network or parsing error:", err);
+            setMsg('❌ Server Error: Check your internet connection.');
         } finally {
             setLoading(false);
         }
@@ -795,8 +803,26 @@ const StudentDashboard = ({ user }) => {
 
     return (
         <div style={containerStyle} className="dashboard-container">
+            {/* Saving Overlay */}
+            {loading && msg.includes('Saving') && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(5px)',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+                    zIndex: 9999, transition: '0.3s'
+                }}>
+                    <div className="spinner" style={{
+                        width: '50px', height: '50px', border: '5px solid #f3f3f3',
+                        borderTop: '5px solid #ef4444', borderRadius: '50%',
+                        animation: 'spin 1s linear infinite', marginBottom: '1rem'
+                    }}></div>
+                    <h2 style={{ color: '#ef4444', fontWeight: 'bold' }}>{msg}</h2>
+                </div>
+            )}
+
             <style>
                 {`
+                    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
                     @media (max-width: 768px) {
                         .sidebar-menu { display: none !important; }
                         .main-content { padding: 20px !important; width: 100% !important; margin: 0 !important; }
