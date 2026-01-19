@@ -20,14 +20,11 @@ public class StudentProfile {
     // Contact & Basic Info
     private String dob;
     
-    @NotBlank(message = "Mobile number is required")
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid mobile number format")
     private String mobileNumber;
     
     @Email(message = "Invalid alternate email format")
     private String alternateEmail;
     
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid alternate mobile number format")
     private String alternateMobile;
     
     private String currentLocation;
@@ -41,10 +38,8 @@ public class StudentProfile {
     private String yearsOfExperience;
     
     // Social Links
-    @Pattern(regexp = "^(https?://)?(www\\.)?github\\.com/.*$", message = "Invalid GitHub link")
     private String githubLink;
     
-    @Pattern(regexp = "^(https?://)?(www\\.)?linkedin\\.com/.*$", message = "Invalid LinkedIn link")
     private String linkedinLink;
     
     private String portfolioUrl; 
