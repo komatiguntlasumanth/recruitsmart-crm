@@ -17,6 +17,12 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private StudentProfileRepository studentProfileRepository;
+
+    @Autowired
+    private com.recruitsmart.repository.ApplicationRepository applicationRepository;
+
     @GetMapping("/stats")
     public Map<String, Object> getStats() {
         long totalUsers = userRepository.count();
@@ -37,10 +43,27 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public Map<String, String> deleteUser(@PathVariable Long id) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
-        userRepository.deleteById(id);
-        return Map.of("message", "User deleted successfully");
+        
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 1. Delete associated Student Profile (if any)
+        studentProfileRepository.findByUser(user).ifPresent(profile -> {
+            studentProfileRepository.delete(profile);
+        });
+
+        // 2. Delete associated Applications (if any)
+        List<com.recruitsmart.model.Application> applications = applicationRepository.findByStudent(user);
+        if (applications != null && !applications.isEmpty()) {
+            applicationRepository.deleteAll(applications);
+        }
+
+        // 3. Delete the User
+        userRepository.delete(user);
+        
+        return Map.of("message", "User and associated data deleted successfully");
     }
 
     @PutMapping("/users/{id}/approve")

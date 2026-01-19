@@ -92,6 +92,9 @@ public class StudentProfileController {
         if (profile.getLinkedinLink() != null) {
             existingInfo.setLinkedinLink(profile.getLinkedinLink());
         }
+        if (profile.getLevel() != null) {
+            existingInfo.setLevel(profile.getLevel());
+        }
 
         return profileRepository.save(existingInfo);
     }
