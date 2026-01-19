@@ -234,101 +234,187 @@ const StudentDashboard = ({ user }) => {
 
     const renderProfileView = () => (
         <div style={{ padding: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2 style={{ color: '#1e293b', fontSize: '2rem' }}>My Profile</h2>
-                <button onClick={() => setIsEditing(true)} style={{ ...btnStyle, width: 'auto', padding: '10px 20px', borderRadius: '10px' }}>✎ Edit Profile</button>
-            </div>
+            {/* Profile Header Card */}
+            <div className="glass-card" style={{ padding: '3rem', marginBottom: '2rem', background: 'white', borderRadius: '30px', boxShadow: '0 15px 40px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '8px', background: 'linear-gradient(90deg, #ef4444, #f59e0b)' }}></div>
 
-            <div className="glass-card" style={{ padding: '2.5rem', display: 'flex', gap: '3rem', alignItems: 'center', marginBottom: '2rem' }}>
-                <div
-                    style={{ width: '130px', height: '130px', borderRadius: '50%', background: '#fff', border: '3px solid var(--secondary)', overflow: 'hidden', flexShrink: 0, cursor: 'pointer', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-                    onClick={() => setIsEditing(true)}
-                >
-                    {profile.profilePictureUrl ? <img src={profile.profilePictureUrl} alt="Propic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '4rem', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>👤</span>}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                    <h3 style={{ fontSize: '2.2rem', margin: 0, color: 'var(--secondary)' }}>{displayName}</h3>
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                        {profile.githubLink && <a href={profile.githubLink} target="_blank" rel="noreferrer" style={{ color: '#333' }}>GitHub</a>}
-                        {profile.linkedinLink && <a href={profile.linkedinLink} target="_blank" rel="noreferrer" style={{ color: '#0077b5' }}>LinkedIn</a>}
+                <div style={{ display: 'flex', gap: '3rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div
+                        style={{ width: '150px', height: '150px', borderRadius: '40px', background: '#fff', border: '4px solid #fff1f1', overflow: 'hidden', flexShrink: 0, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+                    >
+                        {profile.profilePictureUrl ? (
+                            <img src={profile.profilePictureUrl} alt="Propic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            <div style={{ fontSize: '5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', background: '#f8fafc' }}>👤</div>
+                        )}
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1.5rem', color: '#475569', fontSize: '1.1rem' }}>
-                        <span>🆔 <strong>Email:</strong></span> <span>{user.email}</span>
-                        <span>📱 <strong>Mobile:</strong></span> <span>{profile.mobileNumber || 'Not provided'}</span>
-                        <span>💼 <strong>Position:</strong></span> <span>{profile.designation || 'N/A'}</span>
-                        <span>⏳ <strong>Experience:</strong></span> <span>{profile.yearsOfExperience || 'Fresher'}</span>
-                        <span>📍 <strong>Location:</strong></span> <span>{profile.currentLocation || 'Not specified'}</span>
+
+                    <div style={{ flex: 1, minWidth: '300px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                                <h3 style={{ fontSize: '2.8rem', margin: 0, color: '#1e293b', fontWeight: '900', letterSpacing: '-1px' }}>{displayName}</h3>
+                                <p style={{ fontSize: '1.4rem', color: '#ef4444', fontWeight: 'bold', margin: '5px 0' }}>{profile.designation || 'Product Specialist / Explorer'}</p>
+                            </div>
+                            <button onClick={() => setIsEditing(true)} style={{ ...btnStyle, width: 'auto', padding: '10px 25px', borderRadius: '12px' }}>✎ Edit Profile</button>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}><span>📧</span> <strong>{user.email}</strong></div>
+                            {profile.mobileNumber && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}><span>📱</span> <strong>{profile.mobileNumber}</strong></div>}
+                            {profile.currentLocation && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}><span>📍</span> <strong>{profile.currentLocation}</strong></div>}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                            {profile.githubLink && <a href={profile.githubLink} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', background: '#333', color: 'white', padding: '6px 15px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>GitHub</a>}
+                            {profile.linkedinLink && <a href={profile.linkedinLink} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', background: '#0077b5', color: 'white', padding: '6px 15px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>LinkedIn</a>}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="glass-card analytics-grid" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', textAlign: 'center' }}>
-                <div style={{ borderRight: '1px solid #f1f5f9' }}>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Total Applied</h4>
-                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#0ea5e9' }}>{myApplications.length}</p>
+            {/* Application Overview */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>Applied</h4>
+                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#ef4444' }}>{myApplications.length}</p>
                 </div>
-                <div style={{ borderRight: '1px solid #f1f5f9' }}>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Under Review</h4>
-                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#f59e0b' }}>{myApplications.filter(a => a.status === 'REVIEWING').length}</p>
+                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>In Review</h4>
+                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#f59e0b' }}>{myApplications.filter(a => a.status === 'REVIEWING' || a.status === 'INTERVIEW').length}</p>
                 </div>
-                <div style={{ borderRight: '1px solid #f1f5f9' }}>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Interviews</h4>
-                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#6366f1' }}>{myApplications.filter(a => a.status === 'INTERVIEW').length}</p>
+                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>Offers</h4>
+                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#10b981' }}>{myApplications.filter(a => a.status === 'HIRED').length}</p>
                 </div>
-                <div>
-                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Offers</h4>
-                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#10b981' }}>{myApplications.filter(a => a.status === 'HIRED').length}</p>
+                <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'white' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textTransform: 'uppercase' }}>Experience</h4>
+                    <p style={{ margin: '10px 0 0', fontSize: '2.2rem', fontWeight: '900', color: '#6366f1' }}>{profile.yearsOfExperience || '0'}</p>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-                <div className="glass-card" style={{ padding: '2rem' }}>
-                    <h3 style={{ borderBottom: '2px solid #f1f5f9', paddingBottom: '0.5rem', marginBottom: '1rem', color: '#1e293b' }}>About Me</h3>
-                    <p style={{ color: '#334155', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>{profile.profileSummary || 'Professional summary not provided yet.'}</p>
+            {/* Main Content Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                {/* Left Column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* About Me */}
+                    <div className="glass-card" style={{ padding: '2.5rem', background: 'white' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', color: '#1e293b', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
+                            <span>📝</span> About Me
+                        </h3>
+                        <p style={{ color: '#475569', lineHeight: '1.8', fontSize: '1.1rem', whiteSpace: 'pre-wrap' }}>
+                            {profile.profileSummary || "Professional summary not provided yet. Click Edit to add details about your career goals and expertise."}
+                        </p>
+                    </div>
+
+                    {/* Internships & Experience */}
+                    <div className="glass-card" style={{ padding: '2.5rem', background: 'white' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', color: '#1e293b', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
+                            <span>💼</span> Experience & Internships
+                        </h3>
+                        {[...profile.internships, ...profile.experiences].length === 0 ? (
+                            <p style={{ color: '#94a3b8' }}>No experience listed yet.</p>
+                        ) : (
+                            [...profile.internships, ...profile.experiences].map((exp, i) => (
+                                <div key={i} style={{ marginBottom: '2rem', paddingLeft: '1.5rem', borderLeft: '3px solid #ef4444', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: '-10px', top: '0', width: '16px', height: '16px', borderRadius: '50%', background: 'white', border: '3px solid #ef4444' }}></div>
+                                    <h4 style={{ margin: 0, color: '#1e293b', fontSize: '1.2rem' }}>{exp.designation}</h4>
+                                    <p style={{ margin: '5px 0', color: '#ef4444', fontWeight: 'bold' }}>{exp.companyName} | {exp.duration}</p>
+                                    <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>{exp.description}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Projects */}
+                    {profile.projects.length > 0 && (
+                        <div className="glass-card" style={{ padding: '2.5rem', background: 'white' }}>
+                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', color: '#1e293b', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
+                                <span>🚀</span> Key Projects
+                            </h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                {profile.projects.map((proj, i) => (
+                                    <div key={i} style={{ padding: '1.5rem', borderRadius: '15px', border: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                                        <h4 style={{ margin: '0 0 10px', color: '#1e293b' }}>{proj.title}</h4>
+                                        <p style={{ margin: '0 0 15px', fontSize: '0.9rem', color: '#64748b' }}>{proj.description}</p>
+                                        {proj.link && <a href={proj.link} target="_blank" rel="noreferrer" style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: 'bold' }}>View Project 🔗</a>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                <div className="glass-card" style={{ padding: '2rem' }}>
-                    <h3 style={{ borderBottom: '2px solid #f1f5f9', paddingBottom: '0.5rem', marginBottom: '1rem', color: '#1e293b' }}>Education</h3>
-                    {profile.education.length === 0 ? <p style={{ color: '#94a3b8' }}>Add your education details by clicking Edit.</p> : profile.education.map((edu, i) => (
-                        <div key={i} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed #f1f5f9' }}>
-                            <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{edu.course}</strong>
-                            <p style={{ margin: '0.2rem 0', color: '#64748b' }}>{edu.schoolName}</p>
-                            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: '600', color: 'var(--primary)' }}>Pass Out: {edu.yearOfPassing} | Score: {edu.result}</p>
+                {/* Right Column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* Skills */}
+                    <div className="glass-card" style={{ padding: '2.5rem', background: 'white' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem', color: '#1e293b', marginBottom: '1.5rem' }}>
+                            <span>🛠️</span> Skills
+                        </h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {profile.skills.length === 0 ? <p style={{ color: '#94a3b8' }}>No skills added.</p> : profile.skills.map((skill, i) => (
+                                <span key={i} style={{
+                                    padding: '6px 14px',
+                                    borderRadius: '10px',
+                                    background: skill.type === 'Technical' ? '#fff1f1' : '#f0f9ff',
+                                    color: skill.type === 'Technical' ? '#ef4444' : '#0369a1',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 'bold',
+                                    border: `1px solid ${skill.type === 'Technical' ? '#fecaca' : '#bae6fd'}`
+                                }}>
+                                    {skill.name}
+                                </span>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </div>
 
-                <div className="glass-card" style={{ padding: '2rem' }}>
-                    <h3 style={{ borderBottom: '2px solid #f1f5f9', paddingBottom: '0.5rem', marginBottom: '1rem', color: '#1e293b' }}>Internships</h3>
-                    {profile.internships.length === 0 ? <p style={{ color: '#94a3b8' }}>Add internships by clicking Edit.</p> : profile.internships.map((exp, i) => (
-                        <div key={i} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed #f1f5f9' }}>
-                            <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{exp.designation}</strong>
-                            <p style={{ margin: '0.2rem 0', color: 'var(--primary)', fontWeight: '600' }}>{exp.companyName} ({exp.duration})</p>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569' }}>{exp.description}</p>
-                        </div>
-                    ))}
-                </div>
+                    {/* Education */}
+                    <div className="glass-card" style={{ padding: '2.5rem', background: 'white' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem', color: '#1e293b', marginBottom: '1.5rem' }}>
+                            <span>🎓</span> Education
+                        </h3>
+                        {profile.education.map((edu, i) => (
+                            <div key={i} style={{ marginBottom: '1.5rem' }}>
+                                <h4 style={{ margin: 0, color: '#1e293b', fontSize: '1.1rem' }}>{edu.course}</h4>
+                                <p style={{ margin: '3px 0', color: '#64748b', fontSize: '0.9rem' }}>{edu.schoolName}</p>
+                                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: '#ef4444' }}>{edu.yearOfPassing} • {edu.result}</p>
+                            </div>
+                        ))}
+                    </div>
 
-                <div className="glass-card" style={{ padding: '2rem' }}>
-                    <h3 style={{ borderBottom: '2px solid #f1f5f9', paddingBottom: '0.5rem', marginBottom: '1rem', color: '#1e293b' }}>Work Experience</h3>
-                    {profile.experiences.length === 0 ? <p style={{ color: '#94a3b8' }}>Add your work history by clicking Edit.</p> : profile.experiences.map((exp, i) => (
-                        <div key={i} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed #f1f5f9' }}>
-                            <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{exp.designation}</strong>
-                            <p style={{ margin: '0.2rem 0', color: 'var(--primary)', fontWeight: '600' }}>{exp.companyName} ({exp.duration})</p>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569' }}>{exp.description}</p>
+                    {/* Achievements */}
+                    {profile.achievements.length > 0 && (
+                        <div className="glass-card" style={{ padding: '2.5rem', background: 'white' }}>
+                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem', color: '#1e293b', marginBottom: '1.5rem' }}>
+                                <span>🏆</span> Achievements
+                            </h3>
+                            {profile.achievements.map((ach, i) => (
+                                <div key={i} style={{ marginBottom: '1rem', display: 'flex', gap: '10px' }}>
+                                    <span style={{ color: '#f59e0b' }}>⭐</span>
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>{ach.title}</h4>
+                                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>{ach.description}</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    )}
 
-                <div className="glass-card" style={{ padding: '2rem' }}>
-                    <h3 style={{ borderBottom: '2px solid #f1f5f9', paddingBottom: '0.5rem', marginBottom: '1rem', color: '#1e293b' }}>Certificates</h3>
-                    {profile.certificates.length === 0 ? <p style={{ color: '#94a3b8' }}>Add certificates by clicking Edit.</p> : profile.certificates.map((cert, i) => (
-                        <div key={i} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed #f1f5f9' }}>
-                            <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{cert.title}</strong>
-                            <p style={{ margin: '0.2rem 0', color: '#64748b' }}>{cert.description}</p>
-                            {cert.link && <a href={cert.link} target="_blank" rel="noreferrer">View Credential</a>}
+                    {/* Certificates */}
+                    {profile.certificates.length > 0 && (
+                        <div className="glass-card" style={{ padding: '2.5rem', background: 'white' }}>
+                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.3rem', color: '#1e293b', marginBottom: '1.5rem' }}>
+                                <span>📜</span> Certificates
+                            </h3>
+                            {profile.certificates.map((cert, i) => (
+                                <div key={i} style={{ marginBottom: '1.5rem' }}>
+                                    <h4 style={{ margin: 0, color: '#1e293b', fontSize: '1rem' }}>{cert.title}</h4>
+                                    <p style={{ margin: '3px 0', fontSize: '0.8rem', color: '#64748b' }}>{cert.description}</p>
+                                    {cert.link && <a href={cert.link} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 'bold' }}>Verify 🔗</a>}
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
         </div>
