@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL from '../config/api';
+import ProgressStepper from './common/ProgressStepper';
+import './common/ProgressStepper.css';
 
 const StudentDashboard = ({ user }) => {
     const [section, setSection] = useState('home');
@@ -14,7 +16,7 @@ const StudentDashboard = ({ user }) => {
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
 
-    const [applicationCount, setApplicationCount] = useState(0);
+    const [myApplications, setMyApplications] = useState([]);
     const [recommendedJobs, setRecommendedJobs] = useState([]);
     const [allJobs, setAllJobs] = useState([]);
     const [jobFilter, setJobFilter] = useState('ALL'); // ALL, RECOMMENDED, OTHER
@@ -69,7 +71,7 @@ const StudentDashboard = ({ user }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setApplicationCount(data.length);
+                setMyApplications(data);
             }
         } catch (err) {
             console.error("Error fetching applications", err);
@@ -257,6 +259,25 @@ const StudentDashboard = ({ user }) => {
                         <span>⏳ <strong>Experience:</strong></span> <span>{profile.yearsOfExperience || 'Fresher'}</span>
                         <span>📍 <strong>Location:</strong></span> <span>{profile.currentLocation || 'Not specified'}</span>
                     </div>
+                </div>
+            </div>
+
+            <div className="glass-card analytics-grid" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', textAlign: 'center' }}>
+                <div style={{ borderRight: '1px solid #f1f5f9' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Total Applied</h4>
+                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#0ea5e9' }}>{myApplications.length}</p>
+                </div>
+                <div style={{ borderRight: '1px solid #f1f5f9' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Under Review</h4>
+                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#f59e0b' }}>{myApplications.filter(a => a.status === 'REVIEWING').length}</p>
+                </div>
+                <div style={{ borderRight: '1px solid #f1f5f9' }}>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Interviews</h4>
+                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#6366f1' }}>{myApplications.filter(a => a.status === 'INTERVIEW').length}</p>
+                </div>
+                <div>
+                    <h4 style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Offers</h4>
+                    <p style={{ margin: '5px 0', fontSize: '1.8rem', fontWeight: 'bold', color: '#10b981' }}>{myApplications.filter(a => a.status === 'HIRED').length}</p>
                 </div>
             </div>
 
@@ -566,9 +587,34 @@ const StudentDashboard = ({ user }) => {
             </div>
 
             {jobTab !== 'SEARCH' ? (
-                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
-                    <h3>{jobTab} Jobs</h3>
-                    <p style={{ color: '#666' }}>No {jobTab.toLowerCase()} jobs found yet. (Mock Data)</p>
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                    {myApplications.length === 0 ? (
+                        <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
+                            <p style={{ color: '#666' }}>No applications found yet.</p>
+                        </div>
+                    ) : (
+                        myApplications.map(app => (
+                            <div key={app.id} className="glass-card" style={{ padding: '1.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                                    <div>
+                                        <h3 style={{ margin: 0, color: '#1e293b' }}>{app.jobTitle}</h3>
+                                        <p style={{ margin: '5px 0', color: '#64748b' }}>{app.companyName} • Applied on {new Date(app.applicationDate).toLocaleDateString()}</p>
+                                    </div>
+                                    <span style={{
+                                        padding: '5px 12px',
+                                        borderRadius: '20px',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 'bold',
+                                        background: app.status === 'HIRED' ? '#dcfce7' : app.status === 'REJECTED' ? '#fee2e2' : '#f1f5f9',
+                                        color: app.status === 'HIRED' ? '#15803d' : app.status === 'REJECTED' ? '#b91c1c' : '#475569'
+                                    }}>
+                                        {app.status}
+                                    </span>
+                                </div>
+                                <ProgressStepper currentStatus={app.status} />
+                            </div>
+                        ))
+                    )}
                 </div>
             ) : (
                 <>
@@ -662,9 +708,22 @@ const StudentDashboard = ({ user }) => {
     );
 
     return (
-        <div style={containerStyle}>
+        <div style={containerStyle} className="dashboard-container">
+            <style>
+                {`
+                    @media (max-width: 768px) {
+                        .sidebar-menu { display: none !important; }
+                        .main-content { padding: 20px !important; width: 100% !important; margin: 0 !important; }
+                        .analytics-grid { grid-template-columns: 1fr 1fr !important; gap: 0.5rem !important; }
+                        .stepper-wrapper { flex-direction: column !important; align-items: flex-start !important; gap: 1rem !important; }
+                        .step-line { display: none !important; }
+                        .step-item { flex-direction: row !important; gap: 1rem !important; }
+                        .glass-card { padding: 1rem !important; }
+                    }
+                `}
+            </style>
             {/* Sidebar Menu */}
-            <div style={sidebarStyle}>
+            <div style={sidebarStyle} className="sidebar-menu">
                 <h3 style={{ marginBottom: '2rem', textAlign: 'center', color: '#ef4444', fontStyle: 'italic', background: 'linear-gradient(45deg, #ef4444, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: '900' }}>Student Hub</h3>
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <button onClick={() => setSection('home')} style={navItemStyle(section === 'home')}>Home / Dashboard</button>
@@ -677,14 +736,14 @@ const StudentDashboard = ({ user }) => {
             </div>
 
             {/* Main Content */}
-            <div style={mainStyle}>
+            <div style={mainStyle} className="main-content">
                 {section === 'home' && (
                     <div>
                         <h2>{getGreeting()}, {displayName}</h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
                             <div className="glass-card" onClick={() => setSection('jobs')} style={{ padding: '2rem', textAlign: 'center', cursor: 'pointer', transition: '0.3s', ':hover': { transform: 'translateY(-5px)' } }}>
                                 <h3>Total Applications</h3>
-                                <p style={{ fontSize: '2rem', color: '#ef4444' }}>{applicationCount}</p>
+                                <p style={{ fontSize: '2rem', color: '#ef4444' }}>{myApplications.length}</p>
                             </div>
                             <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', cursor: 'pointer' }}>
                                 <h3>Pending Assessments</h3>

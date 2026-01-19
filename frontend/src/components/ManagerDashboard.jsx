@@ -8,6 +8,8 @@ const ManagerDashboard = ({ user }) => {
     const [modalMode, setModalMode] = useState('JOB'); // JOB or TRAINING
     const [loading, setLoading] = useState(false);
     const [editingJobId, setEditingJobId] = useState(null);
+    const [showReport, setShowReport] = useState(false);
+    const [allApplications, setAllApplications] = useState([]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -27,7 +29,23 @@ const ManagerDashboard = ({ user }) => {
 
     useEffect(() => {
         fetchJobs();
+        fetchAllApplications();
     }, []);
+
+    const fetchAllApplications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/applications/all`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setAllApplications(data);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const fetchJobs = async () => {
         try {
@@ -159,6 +177,12 @@ const ManagerDashboard = ({ user }) => {
                 >
                     <span style={{ fontSize: '1.2rem' }}>+</span> Add Training
                 </button>
+                <button
+                    onClick={() => setShowReport(true)}
+                    style={{ background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '12px 24px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}
+                >
+                    📊 Generate Report
+                </button>
             </div>
 
             {/* Tabs for View */}
@@ -271,6 +295,72 @@ const ManagerDashboard = ({ user }) => {
             )}
         </div>
     );
+
+    function renderReport() {
+        const totalApps = allApplications.length;
+        const totalJobs = jobs.filter(j => j.jobType === 'JOB').length;
+        const hiredCount = allApplications.filter(a => a.status === 'HIRED').length;
+        const interviewCount = allApplications.filter(a => a.status === 'INTERVIEW').length;
+
+        return (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'white', zIndex: 2000, padding: '3rem', overflowY: 'auto' }}>
+                <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                    <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                        <button onClick={() => setShowReport(false)} style={{ padding: '10px 20px', background: '#e2e8f0', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Close Report</button>
+                        <button onClick={() => window.print()} style={{ padding: '10px 25px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>🖨️ Print to PDF</button>
+                    </div>
+
+                    <h1 style={{ textAlign: 'center', color: '#1e293b', marginBottom: '0.5rem' }}>RecruitSmart CRM Performance Report</h1>
+                    <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '3rem' }}>Report Date: {new Date().toLocaleDateString()}</p>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '4rem' }}>
+                        <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                            <h4 style={{ margin: 0, color: '#64748b' }}>Total Active Jobs</h4>
+                            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: '10px 0', color: '#6366f1' }}>{totalJobs}</p>
+                        </div>
+                        <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                            <h4 style={{ margin: 0, color: '#64748b' }}>Total Applications</h4>
+                            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: '10px 0', color: '#0ea5e9' }}>{totalApps}</p>
+                        </div>
+                        <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                            <h4 style={{ margin: 0, color: '#64748b' }}>Interviews Done</h4>
+                            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: '10px 0', color: '#f59e0b' }}>{interviewCount}</p>
+                        </div>
+                        <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                            <h4 style={{ margin: 0, color: '#64748b' }}>Hires Completed</h4>
+                            <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: '10px 0', color: '#10b981' }}>{hiredCount}</p>
+                        </div>
+                    </div>
+
+                    <h3 style={{ borderBottom: '2px solid #1e293b', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>Job Posting Summary</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '3rem' }}>
+                        <thead>
+                            <tr style={{ background: '#f1f5f9', textAlign: 'left' }}>
+                                <th style={{ padding: '12px', border: '1px solid #cbd5e1' }}>Job Title</th>
+                                <th style={{ padding: '12px', border: '1px solid #cbd5e1' }}>Location</th>
+                                <th style={{ padding: '12px', border: '1px solid #cbd5e1' }}>Apps</th>
+                                <th style={{ padding: '12px', border: '1px solid #cbd5e1' }}>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {jobs.map(j => (
+                                <tr key={j.id}>
+                                    <td style={{ padding: '12px', border: '1px solid #cbd5e1' }}>{j.title}</td>
+                                    <td style={{ padding: '12px', border: '1px solid #cbd5e1' }}>{j.location}</td>
+                                    <td style={{ padding: '12px', border: '1px solid #cbd5e1' }}>{allApplications.filter(a => a.jobId === j.id).length}</td>
+                                    <td style={{ padding: '12px', border: '1px solid #cbd5e1' }}>{j.status}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <div style={{ marginTop: '5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', fontSize: '0.9rem', color: '#94a3b8', textAlign: 'center' }}>
+                        Generated by RecruitSmart AI System
+                    </div>
+                </div>
+            </div>
+        );
+    }
 };
 
 const inputStyle = {
