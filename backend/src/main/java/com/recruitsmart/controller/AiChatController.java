@@ -1,6 +1,5 @@
 package com.recruitsmart.controller;
 
-import com.recruitsmart.model.User;
 import com.recruitsmart.repository.ApplicationRepository;
 import com.recruitsmart.repository.StudentProfileRepository;
 import com.recruitsmart.repository.UserRepository;

@@ -23,7 +23,7 @@ public class AdminController {
     private StudentProfileRepository studentProfileRepository;
 
     @Autowired
-    private com.recruitsmart.repository.ApplicationRepository applicationRepository;
+    private ApplicationRepository applicationRepository;
 
     @GetMapping("/stats")
     public Map<String, Object> getStats() {
@@ -53,7 +53,9 @@ public class AdminController {
 
         // 1. Delete associated Student Profile (if any)
         studentProfileRepository.findByUser(user).ifPresent(profile -> {
-            studentProfileRepository.delete(profile);
+            if (profile != null) {
+                studentProfileRepository.delete(profile);
+            }
         });
 
         // 2. Delete associated Applications (if any)
@@ -63,7 +65,9 @@ public class AdminController {
         }
 
         // 3. Delete the User
-        userRepository.delete(user);
+        if (user != null) {
+            userRepository.delete(user);
+        }
         
         return Map.of("message", "User and associated data deleted successfully");
     }
