@@ -9,6 +9,8 @@ const HRDashboard = ({ user }) => {
     const [pendingUsers, setPendingUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [editingJobId, setEditingJobId] = useState(null);
+    const [applications, setApplications] = useState([]);
+    const [selectedAppIds, setSelectedAppIds] = useState([]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -29,7 +31,23 @@ const HRDashboard = ({ user }) => {
     useEffect(() => {
         fetchJobs();
         fetchPendingUsers();
+        fetchAllApplications();
     }, []);
+
+    const fetchAllApplications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/applications/all`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setApplications(data);
+            }
+        } catch (err) {
+            console.error("Error fetching applications", err);
+        }
+    };
 
     const fetchPendingUsers = async () => {
         try {
@@ -222,6 +240,21 @@ const HRDashboard = ({ user }) => {
                     Training Programs
                 </button>
                 <button
+                    onClick={() => setModalMode('APPLICATIONS')}
+                    style={{
+                        padding: '10px 20px',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: modalMode === 'APPLICATIONS' ? '3px solid #10b981' : 'none',
+                        color: modalMode === 'APPLICATIONS' ? '#10b981' : '#64748b',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '1.1rem'
+                    }}
+                >
+                    Applications ({applications.length})
+                </button>
+                <button
                     onClick={() => setModalMode('APPROVALS')}
                     style={{
                         padding: '10px 20px',
@@ -242,7 +275,57 @@ const HRDashboard = ({ user }) => {
 
             {/* List */}
             <div className="glass-card" style={{ padding: '1rem' }}>
-                {modalMode === 'APPROVALS' ? (
+                {modalMode === 'APPLICATIONS' ? (
+                    <div>
+                        {selectedAppIds.length > 0 && (
+                            <div style={{ padding: '1rem', background: '#f0f9ff', border: '1px solid #0ea5e9', borderRadius: '8px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontWeight: '600', color: '#0369a1' }}>{selectedAppIds.length} selected</span>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    {['REVIEWING', 'INTERVIEW', 'HIRED', 'REJECTED'].map(s => (
+                                        <button
+                                            key={s}
+                                            onClick={() => handleBulkStatusUpdate(s)}
+                                            style={{ padding: '6px 12px', background: 'white', border: '1px solid #0ea5e9', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            {applications.length === 0 ? <p>No applications yet.</p> : applications.map(app => (
+                                <div key={app.id} style={{ padding: '1rem', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedAppIds.includes(app.id)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) setSelectedAppIds([...selectedAppIds, app.id]);
+                                            else setSelectedAppIds(selectedAppIds.filter(id => id !== app.id));
+                                        }}
+                                        style={{ width: '18px', height: '18px' }}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <h3 style={{ margin: 0, color: '#334155' }}>{app.studentName || app.studentEmail}</h3>
+                                        <p style={{ margin: '5px 0', color: '#64748b' }}>Applied for: <strong>{app.jobTitle}</strong></p>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <span style={{
+                                            padding: '4px 8px',
+                                            borderRadius: '4px',
+                                            background: app.status === 'HIRED' ? '#dcfce7' : '#f1f5f9',
+                                            color: app.status === 'HIRED' ? '#15803d' : '#475569',
+                                            fontSize: '0.85rem',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {app.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : modalMode === 'APPROVALS' ? (
                     <div style={{ display: 'grid', gap: '1rem' }}>
                         {pendingUsers.length === 0 ? <p>No pending approvals.</p> : pendingUsers.map(u => (
                             <div key={u.id} style={{ padding: '1.5rem', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -333,6 +416,31 @@ const HRDashboard = ({ user }) => {
             }
         </div >
     );
+
+    async function handleBulkStatusUpdate(status) {
+        if (!window.confirm(`Update ${selectedAppIds.length} applications to ${status}?`)) return;
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/applications/bulk-status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ ids: selectedAppIds, status: status })
+            });
+            if (res.ok) {
+                alert("Bulk update successful!");
+                setSelectedAppIds([]);
+                fetchAllApplications();
+            } else {
+                alert("Bulk update failed.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error updating status");
+        }
+    }
 };
 
 const inputStyle = {

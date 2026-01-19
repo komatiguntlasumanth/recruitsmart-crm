@@ -42,8 +42,8 @@ public class AiRecommendationController {
         if (student == null) return ResponseEntity.notFound().build();
 
         String skills = student.getSkills().stream().map(s -> s.getName()).collect(Collectors.joining(", "));
-        String content = String.format("Student: %s. Skills: %s. Experience: %d.", 
-                student.getDesignation(), skills, student.getYearsOfExperience());
+        String content = String.format("Student Designation: %s. Summary: %s. Skills: %s. Experience: %s years.",
+                student.getDesignation(), student.getProfileSummary(), skills, student.getYearsOfExperience());
         
         List<Double> embedding = geminiService.getEmbedding(content);
         List<Long> similarJobIds = vectorStoreService.findSimilarJobs(embedding, 5);

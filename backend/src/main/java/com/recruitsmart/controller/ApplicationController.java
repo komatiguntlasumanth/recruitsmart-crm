@@ -58,6 +58,11 @@ public class ApplicationController {
         return saved;
     }
 
+    @GetMapping("/all")
+    public List<Application> getAllApplications() {
+        return applicationRepository.findAll();
+    }
+
     @GetMapping("/my")
     public List<Application> getMyApplications() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -77,5 +82,24 @@ public class ApplicationController {
         Application app = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Application find error"));
         app.setStatus(statusMap.get("status"));
         return applicationRepository.save(app);
+    }
+
+    @PutMapping("/bulk-status")
+    public List<Application> updateBulkStatus(@RequestBody java.util.Map<String, Object> payload) {
+        @SuppressWarnings("unchecked")
+        List<Integer> ids = (List<Integer>) payload.get("ids");
+        String status = (String) payload.get("status");
+        
+        if (ids == null || status == null) throw new IllegalArgumentException("IDs and status are required");
+
+        java.util.List<Long> longIds = new java.util.ArrayList<>();
+        for (Integer id : ids) {
+            longIds.add(id.longValue());
+        }
+
+        java.util.Objects.requireNonNull(longIds, "IDs list cannot be null");
+        List<Application> apps = (List<Application>) applicationRepository.findAllById(longIds);
+        apps.forEach(app -> app.setStatus(status));
+        return applicationRepository.saveAll(apps);
     }
 }

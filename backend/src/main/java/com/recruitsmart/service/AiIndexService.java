@@ -55,7 +55,7 @@ public class AiIndexService {
         List<StudentProfile> students = studentProfileRepository.findAll();
         for (StudentProfile student : students) {
             String skills = student.getSkills().stream().map(s -> s.getName()).collect(Collectors.joining(", "));
-            String content = String.format("Student Designation: %s. Summary: %s. Skills: %s. Experience: %d years.",
+            String content = String.format("Student Designation: %s. Summary: %s. Skills: %s. Experience: %s years.",
                     student.getDesignation(), student.getProfileSummary(), skills, student.getYearsOfExperience());
             List<Double> embedding = geminiService.getEmbedding(content);
             vectorStoreService.saveStudentEmbedding(student.getId(), embedding);
