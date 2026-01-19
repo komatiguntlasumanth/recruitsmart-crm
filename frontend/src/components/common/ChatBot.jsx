@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import API_BASE_URL, { authFetch } from '../../config/api';
 import './ChatBot.css';
 import botIcon from '../../assets/bot-icon.png';
