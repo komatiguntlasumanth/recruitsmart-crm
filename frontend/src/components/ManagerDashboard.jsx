@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API_BASE_URL from '../config/api';
+import API_BASE_URL, { authFetch } from '../config/api';
 
 const ManagerDashboard = ({ user }) => {
     const [activeTab, setActiveTab] = useState('jobs'); // jobs, training
@@ -34,10 +34,7 @@ const ManagerDashboard = ({ user }) => {
 
     const fetchAllApplications = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/applications/all`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(`${API_BASE_URL}/api/applications/all`);
             if (res.ok) {
                 const data = await res.json();
                 setAllApplications(data);
@@ -49,10 +46,7 @@ const ManagerDashboard = ({ user }) => {
 
     const fetchJobs = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(API_BASE, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(API_BASE);
             if (res.ok) {
                 const data = await res.json();
                 setJobs(data);
@@ -69,20 +63,14 @@ const ManagerDashboard = ({ user }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const token = localStorage.getItem('token');
         const method = editingJobId ? 'PUT' : 'POST';
         const url = editingJobId ? `${API_BASE_URL}/api/jobs/${editingJobId}` : API_BASE;
-
         try {
             const payload = { ...formData, jobType: modalMode };
             if (!payload.status) payload.status = 'OPEN';
 
-            const res = await fetch(url, {
+            const res = await authFetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(payload)
             });
 
@@ -130,21 +118,16 @@ const ManagerDashboard = ({ user }) => {
     };
 
     const handleDeleteJob = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this?")) return;
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
+        if (confirm('Are you sure you want to delete this job?')) {
+            try {
+                await authFetch(`${API_BASE_URL}/api/jobs/${id}`, {
+                    method: 'DELETE'
+                });
                 fetchJobs();
-            } else {
-                alert("Failed to delete");
+            } catch (err) {
+                console.error(err);
+                alert("Error deleting: " + err.message);
             }
-        } catch (e) {
-            console.error(e);
-            alert("Error deleting");
         }
     };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API_BASE_URL from '../config/api';
+import API_BASE_URL, { authFetch } from '../config/api';
 
 const HRDashboard = ({ user }) => {
     const [activeTab, setActiveTab] = useState('jobs'); // jobs, training
@@ -36,10 +36,7 @@ const HRDashboard = ({ user }) => {
 
     const fetchAllApplications = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/applications/all`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(`${API_BASE_URL}/api/applications/all`);
             if (res.ok) {
                 const data = await res.json();
                 setApplications(data);
@@ -51,10 +48,7 @@ const HRDashboard = ({ user }) => {
 
     const fetchPendingUsers = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/admin/users`, { // Reusing admin endpoint
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(`${API_BASE_URL}/api/admin/users`); // Reusing admin endpoint
             if (res.ok) {
                 const allUsers = await res.json();
                 // Filter for disabled managers (HR approves managers)
@@ -67,11 +61,9 @@ const HRDashboard = ({ user }) => {
     };
 
     const handleApproveUser = async (id) => {
-        const token = localStorage.getItem('token');
         try {
-            await fetch(`${API_BASE_URL}/api/admin/users/${id}/approve`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}` }
+            await authFetch(`${API_BASE_URL}/api/admin/users/${id}/approve`, {
+                method: 'PUT'
             });
             fetchPendingUsers(); // Refresh
             alert("User approved!");
@@ -83,10 +75,7 @@ const HRDashboard = ({ user }) => {
 
     const fetchJobs = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(API_BASE, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(API_BASE);
             if (res.ok) {
                 const data = await res.json();
                 setJobs(data);
