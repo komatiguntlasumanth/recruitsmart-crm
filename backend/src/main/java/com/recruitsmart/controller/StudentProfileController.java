@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 
+import org.springframework.transaction.annotation.Transactional;
+
 @RestController
 @RequestMapping("/api/student/profile")
 public class StudentProfileController {
@@ -22,22 +24,29 @@ public class StudentProfileController {
 
     @GetMapping
     public StudentProfile getProfile(Principal principal) {
-        String email = principal.getName(); // In our case, username is email
+        String email = principal.getName();
+        System.out.println("Fetching profile for: " + email);
         return profileRepository.findByUserEmail(email)
-                .orElseGet(() -> new StudentProfile()); // Return empty if new
+                .orElseGet(() -> {
+                    StudentProfile newProfile = new StudentProfile();
+                    userRepository.findByEmail(email).ifPresent(newProfile::setUser);
+                    return newProfile;
+                });
     }
 
     @PostMapping
+    @Transactional
     public StudentProfile updateProfile(@jakarta.validation.Valid @RequestBody StudentProfile profile, Principal principal) {
-        System.out.println("Updating profile for: " + principal.getName());
         String email = principal.getName();
+        System.out.println("Updating profile for: " + email);
+        
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         // Find existing or create new
         StudentProfile existingInfo = profileRepository.findByUser(user).orElse(new StudentProfile());
         
-        // Update fields
+        // Update basic fields
         existingInfo.setUser(user);
         existingInfo.setDob(profile.getDob());
         existingInfo.setMobileNumber(profile.getMobileNumber());
@@ -50,53 +59,29 @@ public class StudentProfileController {
         existingInfo.setPortfolioUrl(profile.getPortfolioUrl());
         existingInfo.setProfileSummary(profile.getProfileSummary());
         existingInfo.setProfilePictureUrl(profile.getProfilePictureUrl());
+        existingInfo.setResumeUrl(profile.getResumeUrl());
+        existingInfo.setWorkStatus(profile.getWorkStatus());
+        existingInfo.setGithubLink(profile.getGithubLink());
+        existingInfo.setLinkedinLink(profile.getLinkedinLink());
+        existingInfo.setLevel(profile.getLevel());
         
-        // Update Collections - Use clear/addAll for Hibernate managed collections
-        if (profile.getEducation() != null) {
-            existingInfo.getEducation().clear();
-            existingInfo.getEducation().addAll(profile.getEducation());
-        }
-        if (profile.getExperiences() != null) {
-            existingInfo.getExperiences().clear();
-            existingInfo.getExperiences().addAll(profile.getExperiences());
-        }
-        if (profile.getProjects() != null) {
-            existingInfo.getProjects().clear();
-            existingInfo.getProjects().addAll(profile.getProjects());
-        }
-        if (profile.getSkills() != null) {
-            existingInfo.getSkills().clear();
-            existingInfo.getSkills().addAll(profile.getSkills());
-        }
-        if (profile.getAchievements() != null) {
-            existingInfo.getAchievements().clear();
-            existingInfo.getAchievements().addAll(profile.getAchievements());
-        }
-        if (profile.getCertificates() != null) {
-            existingInfo.getCertificates().clear();
-            existingInfo.getCertificates().addAll(profile.getCertificates());
-        }
-        if (profile.getInternships() != null) {
-            existingInfo.getInternships().clear();
-            existingInfo.getInternships().addAll(profile.getInternships());
-        }
-        if (profile.getResumeUrl() != null) {
-            existingInfo.setResumeUrl(profile.getResumeUrl());
-        }
-        if (profile.getWorkStatus() != null) {
-            existingInfo.setWorkStatus(profile.getWorkStatus());
-        }
-        if (profile.getGithubLink() != null) {
-            existingInfo.setGithubLink(profile.getGithubLink());
-        }
-        if (profile.getLinkedinLink() != null) {
-            existingInfo.setLinkedinLink(profile.getLinkedinLink());
-        }
-        if (profile.getLevel() != null) {
-            existingInfo.setLevel(profile.getLevel());
-        }
+        // Sync Collections - Avoid replacing the collection instance
+        updateCollection(existingInfo.getEducation(), profile.getEducation());
+        updateCollection(existingInfo.getExperiences(), profile.getExperiences());
+        updateCollection(existingInfo.getProjects(), profile.getProjects());
+        updateCollection(existingInfo.getSkills(), profile.getSkills());
+        updateCollection(existingInfo.getAchievements(), profile.getAchievements());
+        updateCollection(existingInfo.getCertificates(), profile.getCertificates());
+        updateCollection(existingInfo.getInternships(), profile.getInternships());
 
         return profileRepository.save(existingInfo);
+    }
+
+    private <T> void updateCollection(java.util.List<T> target, java.util.List<T> source) {
+        target.clear();
+        if (source != null) {
+            target.addAll(source);
+        }
     }
     
     @DeleteMapping("/certificate/{index}")
