@@ -627,9 +627,9 @@ const StudentDashboard = ({ user }) => {
                         </button>
                         {sidebarExpanded.training && (
                             <div className="sd-nav-sub">
-                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setSection('home'); setIsEditing(false); }}>Market Place</button>
-                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setSection('home'); setIsEditing(false); }}>My Courses</button>
-                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setSection('home'); setIsEditing(false); }}>Community</button>
+                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setMsg('🚧 Market Place Coming Soon!'); setTimeout(() => setMsg(''), 3000); }}>Market Place</button>
+                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setMsg('🚧 My Courses Coming Soon!'); setTimeout(() => setMsg(''), 3000); }}>My Courses</button>
+                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setMsg('🚧 Community Coming Soon!'); setTimeout(() => setMsg(''), 3000); }}>Community</button>
                             </div>
                         )}
                     </div>
