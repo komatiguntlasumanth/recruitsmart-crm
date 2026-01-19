@@ -37,8 +37,7 @@ public class StudentProfile {
     private String level; // "Fresher", "Experienced", "Management" (Status in UI)
     private String workStatus; // "Student", "Working Professional", etc.
     
-    @Min(value = 0, message = "Years of experience cannot be negative")
-    private int yearsOfExperience;
+    private String yearsOfExperience;
     
     // Social Links
     @Pattern(regexp = "^(https?://)?(www\\.)?github\\.com/.*$", message = "Invalid GitHub link")
@@ -102,8 +101,8 @@ public class StudentProfile {
     public void setDesignation(String designation) { this.designation = designation; }
     public String getLevel() { return level; }
     public void setLevel(String level) { this.level = level; }
-    public int getYearsOfExperience() { return yearsOfExperience; }
-    public void setYearsOfExperience(int yearsOfExperience) { this.yearsOfExperience = yearsOfExperience; }
+    public String getYearsOfExperience() { return yearsOfExperience; }
+    public void setYearsOfExperience(String yearsOfExperience) { this.yearsOfExperience = yearsOfExperience; }
     public String getPortfolioUrl() { return portfolioUrl; }
     public void setPortfolioUrl(String portfolioUrl) { this.portfolioUrl = portfolioUrl; }
     public String getProfileSummary() { return profileSummary; }
