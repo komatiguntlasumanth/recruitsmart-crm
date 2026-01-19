@@ -427,28 +427,11 @@ const StudentDashboard = ({ user }) => {
     const renderHome = () => (
         <div className="fadeIn">
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2.2rem', fontWeight: 800 }}>{getGreeting()}, {displayName}! 🚀</h1>
-                <p style={{ color: 'var(--sd-text-muted)', fontSize: '1.1rem' }}>Welcome back to your personalized professional workspace.</p>
+                <h1 style={{ fontSize: '2.2rem', fontWeight: 700, color: '#1e293b' }}>{getGreeting().replace('Hey ', '')}, {displayName}!</h1>
+                <p style={{ color: 'var(--sd-text-muted)', fontSize: '1.1rem' }}>Here is your daily professional overview.</p>
             </div>
             <div className="sd-home-grid">
                 <div className="sd-home-left">
-                    <div className="sd-section-header">
-                        <h3 className="sd-section-title">Latest Skill Assessments</h3>
-                        <button className="sd-view-all">Explore Tests →</button>
-                    </div>
-                    <div className="sd-assessment-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-                        <div className="sd-card sd-assessment-card">
-                            <span className="sd-for-you-badge">Recommended</span>
-                            <h4>Java Fullstack Mastery</h4>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)', margin: '1rem 0' }}>45 mins | 30 MCQs | Live Coding</p>
-                            <button className="sd-nav-item active" style={{ justifyContent: 'center', height: '40px' }}>Start Assessment</button>
-                        </div>
-                        <div className="sd-card sd-assessment-card">
-                            <h4>JavaScript Data Structures</h4>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)', margin: '1rem 0' }}>30 mins | 20 MCQs | Analysis</p>
-                            <button className="sd-nav-item active" style={{ justifyContent: 'center', height: '40px' }}>Start Assessment</button>
-                        </div>
-                    </div>
 
                     <div className="sd-section-header">
                         <h3 className="sd-section-title">Recommended for You</h3>
