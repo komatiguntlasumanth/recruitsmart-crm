@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API_BASE_URL from '../config/api';
+import API_BASE_URL, { authFetch } from '../config/api';
 import ProgressStepper from './common/ProgressStepper';
 import './common/ProgressStepper.css';
 
@@ -42,10 +42,7 @@ const StudentDashboard = ({ user }) => {
     const fetchRecommendedJobs = async () => {
         // Fetch All Jobs first
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/jobs`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(`${API_BASE_URL}/api/jobs`);
             if (res.ok) {
                 const allJobs = await res.json();
                 setAllJobs(allJobs);
@@ -64,11 +61,8 @@ const StudentDashboard = ({ user }) => {
     };
 
     const fetchApplicationCount = async () => {
-        const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE_URL}/api/applications/my`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(`${API_BASE_URL}/api/applications/my`);
             if (res.ok) {
                 const data = await res.json();
                 setMyApplications(data);
@@ -79,11 +73,8 @@ const StudentDashboard = ({ user }) => {
     };
 
     const fetchProfile = async () => {
-        const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE_URL}/api/student/profile`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await authFetch(`${API_BASE_URL}/api/student/profile`);
             if (res.ok) {
                 const data = await res.json();
                 // Ensure arrays are initialized
@@ -167,13 +158,8 @@ const StudentDashboard = ({ user }) => {
         });
 
         try {
-            console.log("Saving profile payload:", payload);
-            const res = await fetch(`${API_BASE_URL}/api/student/profile`, {
+            const res = await authFetch(`${API_BASE_URL}/api/student/profile`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(payload)
             });
 
