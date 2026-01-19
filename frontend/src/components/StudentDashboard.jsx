@@ -508,9 +508,26 @@ const StudentDashboard = ({ user }) => {
     );
 
     const renderJobs = () => {
-        let jobsToShow = jobTab === 'APPLIED'
-            ? myApplications.map(app => ({ ...app.job, appStatus: app.status }))
-            : allJobs;
+        let jobsToShow = allJobs;
+
+        if (jobTab === 'APPLIED') {
+            jobsToShow = myApplications.map(app => ({ ...app.job, appStatus: app.status }));
+        } else if (jobTab === 'RECOMMENDED') {
+            if (profile.designation) {
+                const designKeywords = profile.designation.toLowerCase().split(' ').filter(w => w.length > 2);
+                jobsToShow = allJobs.filter(job => {
+                    const text = (job.title + ' ' + (job.description || '')).toLowerCase();
+                    return designKeywords.some(k => text.includes(k));
+                });
+            } else if (profile.skills.length > 0) {
+                // Fallback to skills if no designation
+                const skillNames = profile.skills.map(s => s.name.toLowerCase());
+                jobsToShow = allJobs.filter(job => {
+                    const text = (job.title + ' ' + (job.description || '')).toLowerCase();
+                    return skillNames.some(s => text.includes(s));
+                });
+            }
+        }
 
         if (searchTerm) {
             const query = searchTerm.toLowerCase();
@@ -527,6 +544,7 @@ const StudentDashboard = ({ user }) => {
                     <h2 className="sd-section-title">{jobTab === 'APPLIED' ? 'My Applications' : 'Career Opportunities'}</h2>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button className={`sd-card ${jobTab === 'SEARCH' ? 'active' : ''}`} style={{ padding: '8px 15px', cursor: 'pointer', background: jobTab === 'SEARCH' ? '#fee2e2' : 'white' }} onClick={() => setJobTab('SEARCH')}>Search</button>
+                        <button className={`sd-card ${jobTab === 'RECOMMENDED' ? 'active' : ''}`} style={{ padding: '8px 15px', cursor: 'pointer', background: jobTab === 'RECOMMENDED' ? '#fee2e2' : 'white' }} onClick={() => setJobTab('RECOMMENDED')}>Recommended</button>
                         <button className={`sd-card ${jobTab === 'APPLIED' ? 'active' : ''}`} style={{ padding: '8px 15px', cursor: 'pointer', background: jobTab === 'APPLIED' ? '#fee2e2' : 'white' }} onClick={() => setJobTab('APPLIED')}>Applied</button>
                     </div>
                 </div>
@@ -565,7 +583,10 @@ const StudentDashboard = ({ user }) => {
                                 </button>
                             </div>
                         );
-                    }) : <div style={{ textAlign: 'center', padding: '3rem' }}><h3>No {jobTab === 'APPLIED' ? 'applications' : 'jobs'} found.</h3></div>}
+                    }) : <div style={{ textAlign: 'center', padding: '3rem' }}>
+                        <h3>No jobs found.</h3>
+                        {jobTab === 'RECOMMENDED' && <p>Update your profile designation or skills to get better recommendations.</p>}
+                    </div>}
                 </div>
             </div>
         );
