@@ -10,7 +10,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     
-    @Value("${spring.mail.username:jobapplication@recuritsmart.com}")
+    @Value("${spring.mail.username:jobapplication@recruitsmart.com}")
     private String fromEmail;
 
     public EmailService(JavaMailSender mailSender) {
@@ -20,7 +20,7 @@ public class EmailService {
     public void sendApplicationSuccessEmail(String toEmail, String jobTitle, String companyName) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("jobapplication@recuritsmart.com");
+            message.setFrom("jobapplication@recruitsmart.com");
             message.setTo(toEmail);
             message.setSubject("Job Application Received - " + jobTitle);
             message.setText(
