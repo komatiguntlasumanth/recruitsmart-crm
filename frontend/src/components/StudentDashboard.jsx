@@ -179,7 +179,17 @@ const StudentDashboard = ({ user }) => {
             const data = await res.json().catch(() => ({}));
 
             if (res.ok) {
-                setProfile(data);
+                const savedProfile = {
+                    ...data,
+                    education: data.education || [],
+                    experiences: data.experiences || [],
+                    projects: data.projects || [],
+                    skills: data.skills || [],
+                    achievements: data.achievements || [],
+                    internships: data.internships || [],
+                    certificates: data.certificates || []
+                };
+                setProfile(savedProfile);
                 setMsg('✅ Profile saved successfully!');
                 setIsEditing(false); // Back to view mode
                 setTimeout(() => setMsg(''), 3000);
@@ -242,6 +252,7 @@ const StudentDashboard = ({ user }) => {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1.5rem', color: '#475569', fontSize: '1.1rem' }}>
                         <span>🆔 <strong>Email:</strong></span> <span>{user.email}</span>
+                        <span>📱 <strong>Mobile:</strong></span> <span>{profile.mobileNumber || 'Not provided'}</span>
                         <span>💼 <strong>Position:</strong></span> <span>{profile.designation || 'N/A'}</span>
                         <span>⏳ <strong>Experience:</strong></span> <span>{profile.yearsOfExperience || 'Fresher'}</span>
                         <span>📍 <strong>Location:</strong></span> <span>{profile.currentLocation || 'Not specified'}</span>
@@ -360,6 +371,14 @@ const StudentDashboard = ({ user }) => {
                     <div>
                         <label style={labelStyle}>Years of Experience / Details</label>
                         <input type="text" placeholder="e.g. 2+ years in Java" value={profile.yearsOfExperience} onChange={e => setProfile({ ...profile, yearsOfExperience: e.target.value })} style={inputStyle} />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Mobile Number *</label>
+                        <input type="text" placeholder="e.g. +1234567890" value={profile.mobileNumber} onChange={e => setProfile({ ...profile, mobileNumber: e.target.value })} style={inputStyle} required />
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Current Location</label>
+                        <input type="text" placeholder="e.g. Hyderabad, India" value={profile.currentLocation} onChange={e => setProfile({ ...profile, currentLocation: e.target.value })} style={inputStyle} />
                     </div>
                     <div style={{ gridColumn: 'span 2' }}>
                         <label style={labelStyle}>Professional Summary</label>
