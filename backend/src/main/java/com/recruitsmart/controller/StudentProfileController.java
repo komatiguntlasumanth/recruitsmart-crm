@@ -34,6 +34,14 @@ public class StudentProfileController {
                 });
     }
 
+    @GetMapping("/user/{userId}")
+    public StudentProfile getProfileByUserId(@PathVariable Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return profileRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+    }
+
     @PostMapping
     @Transactional
     public StudentProfile updateProfile(@jakarta.validation.Valid @RequestBody StudentProfile profile, Principal principal) {
