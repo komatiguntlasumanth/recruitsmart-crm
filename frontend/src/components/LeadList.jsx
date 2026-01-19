@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import API_BASE_URL from '../config/api';
+import API_BASE_URL, { authFetch } from '../config/api';
 const API_BASE = `${API_BASE_URL}/api`;
 
 const LeadList = (props) => {
@@ -13,13 +12,7 @@ const LeadList = (props) => {
 
     const fetchLeads = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE}/leads`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await authFetch(`${API_BASE}/leads`);
             if (!response.ok) throw new Error('Failed to fetch leads');
             const data = await response.json();
             setLeads(data);
@@ -38,13 +31,8 @@ const LeadList = (props) => {
 
     const handleConvert = async (leadId) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE}/leads/${leadId}/convert`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+            const response = await authFetch(`${API_BASE}/leads/${leadId}/convert`, {
+                method: 'POST'
             });
             if (!response.ok) throw new Error('Conversion failed');
             alert('Lead converted to customer successfully!');

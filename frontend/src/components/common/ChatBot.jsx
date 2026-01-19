@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import API_BASE_URL from '../../config/api';
+import API_BASE_URL, { authFetch } from '../../config/api';
 import './ChatBot.css';
 import botIcon from '../../assets/bot-icon.png';
 
@@ -30,16 +28,18 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
         setInput('');
         setLoading(true);
 
-        const token = localStorage.getItem('token');
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/ai/chat`, {
-                message: input,
-                context: context
-            }, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const response = await authFetch(`${API_BASE_URL}/api/ai/chat`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    message: input,
+                    context: context
+                })
             });
 
-            const fullText = response.data.response;
+            if (!response.ok) throw new Error('AI response failed');
+            const data = await response.json();
+            const fullText = data.response;
             setLoading(false);
 
             // Simulate typing effect

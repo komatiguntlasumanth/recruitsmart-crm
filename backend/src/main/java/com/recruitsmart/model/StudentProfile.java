@@ -1,3 +1,4 @@
+
 package com.recruitsmart.model;
 
 import jakarta.persistence.*;

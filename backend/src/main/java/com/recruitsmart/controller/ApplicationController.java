@@ -1,3 +1,4 @@
+
 package com.recruitsmart.controller;
 
 import com.recruitsmart.model.Application;

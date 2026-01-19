@@ -1,0 +1,682 @@
+/* StudentDashboard.css */
+
+:root {
+    --sd-bg: #fffcfc;
+    /* White with subtle red tint */
+    --sd-primary: #ef4444;
+    /* Standard Red */
+    --sd-secondary: #dc2626;
+    /* Darker Red */
+    --sd-accent: #b91c1c;
+    /* Deep Red */
+    --sd-sidebar-bg: #ffffff;
+    --sd-text-main: #1e293b;
+    --sd-text-muted: #64748b;
+    --sd-border: #f1f1f1;
+    --sd-card-shadow: 0 4px 12px rgba(185, 28, 28, 0.05);
+}
+
+.sd-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--sd-bg);
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Sidebar Styling */
+.sd-sidebar {
+    width: 280px;
+    background: var(--sd-sidebar-bg);
+    border-right: 1px solid var(--sd-border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+}
+
+.sd-logo-container {
+    padding: 0 0.5rem 2rem 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--sd-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sd-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sd-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    color: var(--sd-text-main);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.sd-nav-item:hover {
+    background: #f1f5f9;
+}
+
+.sd-nav-item.active {
+    background: #fee2e2;
+    color: var(--sd-primary);
+    font-weight: 600;
+}
+
+.sd-nav-item-sub {
+    padding-left: 2.75rem;
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
+}
+
+.sd-nav-expand {
+    margin-left: auto;
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+}
+
+.sd-nav-item.expanded .sd-nav-expand {
+    transform: rotate(180deg);
+}
+
+/* Main Content Area */
+.sd-main {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    overflow-y: auto;
+}
+
+.sd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.sd-breadcrumb {
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sd-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.sd-notification-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.sd-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--sd-accent);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 5px;
+    border-radius: 10px;
+}
+
+/* Home Grid Layout */
+.sd-home-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.sd-home-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.sd-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.sd-section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--sd-text-main);
+}
+
+.sd-view-all {
+    color: var(--sd-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Cards Styling */
+.sd-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: var(--sd-card-shadow);
+    border: 1px solid var(--sd-border);
+}
+
+.sd-assessment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.sd-assessment-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.sd-for-you-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #dbeafe;
+    color: var(--sd-primary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Right Sidebar in Home */
+.sd-home-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sd-stats-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.sd-stat-card {
+    padding: 1rem;
+    text-align: center;
+}
+
+.sd-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--sd-text-main);
+}
+
+.sd-stat-label {
+    font-size: 0.8rem;
+    color: var(--sd-text-muted);
+}
+
+/* Profile / Resume Builder Styling */
+.sd-profile-header {
+    background: var(--sd-primary);
+    color: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.sd-profile-avatar-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.sd-profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid white;
+    object-fit: cover;
+}
+
+.sd-profile-progress-circle {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    color: var(--sd-text-main);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sd-profile-info h2 {
+    font-size: 2rem;
+    margin: 0;
+}
+
+.sd-profile-info p {
+    opacity: 0.9;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.sd-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    font-size: 0.85rem;
+}
+
+.sd-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Step Bar Styling */
+.sd-step-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+    padding: 0 1rem;
+}
+
+.sd-step-bar::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 1rem;
+    right: 1rem;
+    height: 2px;
+    background: var(--sd-border);
+    z-index: 1;
+}
+
+.sd-step-item {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    cursor: pointer;
+}
+
+.sd-step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--sd-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.sd-step-item.active .sd-step-circle {
+    border-color: var(--sd-primary);
+    background: var(--sd-primary);
+    color: white;
+}
+
+.sd-step-item.completed .sd-step-circle {
+    border-color: var(--sd-primary);
+    background: var(--sd-primary);
+    color: white;
+}
+
+.sd-step-label {
+    font-size: 0.75rem;
+    color: var(--sd-text-muted);
+    font-weight: 600;
+}
+
+.sd-step-item.active .sd-step-label {
+    color: var(--sd-primary);
+}
+
+/* Responsive Table / Certificate List */
+.sd-cert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sd-cert-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+/* Search Bar & Filters */
+.sd-search-container {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.sd-search-input {
+    width: 100%;
+    padding: 15px 20px 15px 45px;
+    border-radius: 12px;
+    border: 1px solid var(--sd-border);
+    background: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.sd-search-input:focus {
+    border-color: var(--sd-primary);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.sd-search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sd-text-muted);
+}
+
+/* Document Management */
+.sd-doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.sd-doc-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--sd-border);
+    transition: transform 0.2s;
+    position: relative;
+}
+
+.sd-doc-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--sd-card-shadow);
+}
+
+.sd-doc-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.sd-doc-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.sd-doc-delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.sd-upload-box {
+    border: 2px dashed var(--sd-border);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sd-upload-box:hover {
+    border-color: var(--sd-primary);
+    background: #fffcfc;
+}
+
+.sd-drag-handle {
+    color: #cbd5e1;
+    cursor: grab;
+}
+
+.sd-cert-icon {
+    width: 40px;
+    height: 40px;
+    background: #eff6ff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sd-primary);
+}
+
+.sd-cert-content {
+    flex: 1;
+}
+
+.sd-cert-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sd-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--sd-border);
+    background: white;
+    cursor: pointer;
+    color: var(--sd-text-muted);
+}
+
+.sd-icon-btn:hover {
+    background: #f1f5f9;
+}
+
+.sd-icon-btn.delete:hover {
+    background: #fee2e2;
+    color: var(--sd-accent);
+}
+
+/* Activities / FAQ Panels */
+.sd-side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sd-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sd-activity-item {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.sd-activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sd-primary);
+    margin-top: 5px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* New layout helpers */
+.sd-content-scrollable {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.sd-content-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sd-content-scrollable::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Form Styling */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--sd-text-main);
+}
+
+.sd-card input,
+.sd-card select,
+.sd-card textarea {
+    border: 1px solid var(--sd-border);
+    border-radius: 10px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.sd-card input:focus,
+.sd-card select:focus,
+.sd-card textarea:focus {
+    outline: none;
+    border-color: var(--sd-primary);
+}
+
+/* Toast Message */
+.sd-msg-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: #1e293b;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Sidebar Submenu */
+.sd-nav-sub {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 0.5rem;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .sd-home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sd-sidebar {
+        width: 80px;
+        padding: 1rem 0.5rem;
+    }
+
+    .sd-nav-item span,
+    .sd-logo-container {
+        display: none;
+    }
+}

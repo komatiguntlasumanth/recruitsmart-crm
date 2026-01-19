@@ -92,20 +92,12 @@ const HRDashboard = ({ user }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const token = localStorage.getItem('token');
-        const method = editingJobId ? 'PUT' : 'POST';
-        const url = editingJobId ? `${API_BASE_URL}/api/jobs/${editingJobId}` : API_BASE;
-
         try {
             const payload = { ...formData, jobType: modalMode };
             if (!payload.status) payload.status = 'OPEN';
 
-            const res = await fetch(url, {
+            const res = await authFetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(payload)
             });
 
@@ -148,11 +140,9 @@ const HRDashboard = ({ user }) => {
 
     const handleDeleteJob = async (id) => {
         if (!window.confirm("Are you sure you want to delete this?")) return;
-        const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await authFetch(`${API_BASE_URL}/api/jobs/${id}`, {
+                method: 'DELETE'
             });
             if (res.ok) {
                 fetchJobs();
@@ -408,14 +398,9 @@ const HRDashboard = ({ user }) => {
 
     async function handleBulkStatusUpdate(status) {
         if (!window.confirm(`Update ${selectedAppIds.length} applications to ${status}?`)) return;
-        const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_BASE_URL}/api/applications/bulk-status`, {
+            const res = await authFetch(`${API_BASE_URL}/api/applications/bulk-status`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify({ ids: selectedAppIds, status: status })
             });
             if (res.ok) {
