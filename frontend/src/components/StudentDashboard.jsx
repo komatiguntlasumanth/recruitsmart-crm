@@ -6,7 +6,7 @@ const StudentDashboard = ({ user }) => {
     const [profile, setProfile] = useState({
         dob: '', mobileNumber: '', alternateEmail: '', alternateMobile: '',
         currentLocation: '', permanentAddress: '',
-        designation: '', level: 'Fresher', workStatus: 'Student', yearsOfExperience: 0,
+        designation: '', level: 'Fresher', workStatus: 'Student', yearsOfExperience: '',
         githubLink: '', linkedinLink: '', portfolioUrl: '',
         profileSummary: '', education: [], experiences: [], skills: [], projects: [], achievements: [],
         internships: [], certificates: []
@@ -243,9 +243,7 @@ const StudentDashboard = ({ user }) => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1.5rem', color: '#475569', fontSize: '1.1rem' }}>
                         <span>🆔 <strong>Email:</strong></span> <span>{user.email}</span>
                         <span>💼 <strong>Position:</strong></span> <span>{profile.designation || 'N/A'}</span>
-                        <span>🎓 <strong>Status:</strong></span> <span>{profile.level || 'Fresher'}</span>
-                        <span>⌛ <strong>Availability:</strong></span> <span>{profile.workStatus || 'Student'}</span>
-                        <span>⏳ <strong>Experience:</strong></span> <span>{profile.yearsOfExperience || 0} Years</span>
+                        <span>⏳ <strong>Experience:</strong></span> <span>{profile.yearsOfExperience || 'Fresher'}</span>
                         <span>📍 <strong>Location:</strong></span> <span>{profile.currentLocation || 'Not specified'}</span>
                     </div>
                 </div>
@@ -360,24 +358,8 @@ const StudentDashboard = ({ user }) => {
                         <input type="text" placeholder="e.g. Software Developer" value={profile.designation} onChange={e => setProfile({ ...profile, designation: e.target.value })} style={inputStyle} />
                     </div>
                     <div>
-                        <label style={labelStyle}>Status (Level)</label>
-                        <select value={profile.level} onChange={e => setProfile({ ...profile, level: e.target.value })} style={inputStyle}>
-                            <option value="Fresher">Fresher</option>
-                            <option value="Experienced">Experienced</option>
-                            <option value="Management">Management</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style={labelStyle}>Availability Status</label>
-                        <select value={profile.workStatus} onChange={e => setProfile({ ...profile, workStatus: e.target.value })} style={inputStyle}>
-                            <option value="Student">Student</option>
-                            <option value="Working Professional">Working Professional</option>
-                            <option value="Job Seeker">Job Seeker</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style={labelStyle}>Years of Experience</label>
-                        <input type="number" value={profile.yearsOfExperience} onChange={e => setProfile({ ...profile, yearsOfExperience: parseInt(e.target.value) || 0 })} style={inputStyle} />
+                        <label style={labelStyle}>Years of Experience / Details</label>
+                        <input type="text" placeholder="e.g. 2+ years in Java" value={profile.yearsOfExperience} onChange={e => setProfile({ ...profile, yearsOfExperience: e.target.value })} style={inputStyle} />
                     </div>
                     <div style={{ gridColumn: 'span 2' }}>
                         <label style={labelStyle}>Professional Summary</label>

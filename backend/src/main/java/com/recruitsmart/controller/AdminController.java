@@ -2,6 +2,8 @@ package com.recruitsmart.controller;
 
 import com.recruitsmart.model.User;
 import com.recruitsmart.repository.UserRepository;
+import com.recruitsmart.repository.StudentProfileRepository;
+import com.recruitsmart.repository.ApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
