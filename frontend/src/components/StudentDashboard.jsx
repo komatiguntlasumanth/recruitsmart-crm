@@ -571,6 +571,119 @@ const StudentDashboard = ({ user }) => {
         );
     };
 
+    const renderMarketPlace = () => {
+        const trainingJobs = allJobs.filter(j => j.jobType === 'TRAINING');
+        return (
+            <div className="fadeIn">
+                <div className="sd-section-header">
+                    <h2 className="sd-section-title">Training Marketplace</h2>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input type="text" placeholder="Search trainings..." className="sd-card" style={{ padding: '8px 15px', background: '#fff', border: '1px solid #e2e8f0' }} />
+                    </div>
+                </div>
+
+                <div className="sd-grid-3">
+                    {trainingJobs.length > 0 ? trainingJobs.map(training => (
+                        <div key={training.id} className="sd-card">
+                            <div style={{ height: '120px', background: 'linear-gradient(135deg, #a5f3fc 0%, #0ea5e9 100%)', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '3rem' }}>
+                                🎓
+                            </div>
+                            <div style={{ padding: '1rem' }}>
+                                <span className="sd-status-badge open" style={{ fontSize: '0.7rem', marginBottom: '0.5rem', display: 'inline-block' }}>{training.level || 'All Levels'}</span>
+                                <h4 style={{ margin: '0 0 0.5rem 0' }}>{training.title}</h4>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--sd-text-muted)', marginBottom: '1rem' }}>By {training.companyName}</p>
+                                <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>{training.description ? training.description.substring(0, 80) + '...' : 'Unlock your potential with this course.'}</p>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                                    <span style={{ fontWeight: 700, color: 'var(--sd-secondary)' }}>{training.salary || 'Free'}</span>
+                                    <button className="sd-nav-item active" style={{ width: 'auto', padding: '5px 15px', fontSize: '0.9rem' }} onClick={() => handleApply(training.id)}>Enroll Now</button>
+                                </div>
+                            </div>
+                        </div>
+                    )) : <p style={{ padding: '2rem', textAlign: 'center', gridColumn: '1/-1', color: 'var(--sd-text-muted)' }}>No training programs available at the moment.</p>}
+                </div>
+            </div>
+        );
+    };
+
+    const renderMyCourses = () => {
+        const enrolledCourses = myApplications.filter(app => app.job.jobType === 'TRAINING');
+        return (
+            <div className="fadeIn">
+                <div className="sd-section-header">
+                    <h2 className="sd-section-title">My Learning</h2>
+                </div>
+                <div className="sd-cert-list">
+                    {enrolledCourses.length > 0 ? enrolledCourses.map(app => (
+                        <div key={app.id} className="sd-card" style={{ display: 'flex', gap: '1rem', padding: '1.5rem', alignItems: 'center' }}>
+                            <div style={{ width: '80px', height: '80px', background: '#e0f2fe', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '2rem' }}>
+                                📚
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <h3 style={{ margin: '0 0 0.5rem 0' }}>{app.job.title}</h3>
+                                <p style={{ margin: 0, color: 'var(--sd-text-muted)' }}>Organizer: {app.job.companyName}</p>
+                                <div style={{ marginTop: '0.5rem', width: '100%', height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
+                                    <div style={{ width: '0%', height: '100%', background: '#0ea5e9' }}></div>
+                                </div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--sd-text-muted)', marginTop: '4px' }}>0% Completed</p>
+                            </div>
+                            <button className="sd-nav-item" style={{ width: 'auto', padding: '8px 20px', background: '#e2e8f0', color: '#475569' }}>Continue</button>
+                        </div>
+                    )) : <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--sd-text-muted)' }}>
+                        <h3>You haven't enrolled in any courses yet.</h3>
+                        <button className="sd-nav-item active" style={{ width: 'auto', margin: '1rem auto' }} onClick={() => setSection('marketplace')}>Browse Marketplace</button>
+                    </div>}
+                </div>
+            </div>
+        );
+    };
+
+    const renderCommunity = () => (
+        <div className="fadeIn">
+            <div className="sd-home-grid">
+                <div className="sd-home-left">
+                    <div className="sd-section-header">
+                        <h2 className="sd-section-title">Community Feed</h2>
+                        <button className="sd-nav-item active" style={{ width: 'auto', padding: '0 20px' }}>+ New Post</button>
+                    </div>
+                    {[1, 2].map(i => (
+                        <div key={i} className="sd-card" style={{ marginBottom: '1.5rem' }}>
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
+                                <div className="sd-profile-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem' }}>👤</div>
+                                <div>
+                                    <h4 style={{ margin: 0 }}>John Doe</h4>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--sd-text-muted)' }}>Full Stack Developer • 2h ago</p>
+                                </div>
+                            </div>
+                            <p style={{ lineHeight: '1.6' }}>Just finished the "Advanced React Patterns" course! Highly recommend it to anyone looking to level up their frontend skills. 🚀 #ReactJS #Learning</p>
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sd-text-muted)' }}>❤️ 24 Likes</button>
+                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sd-text-muted)' }}>💬 5 Comments</button>
+                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sd-text-muted)' }}>↗️ Share</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="sd-home-right">
+                    <div className="sd-card">
+                        <h4 style={{ marginBottom: '1rem' }}>Upcoming Events</h4>
+                        <div className="sd-activity-list">
+                            <div className="sd-activity-item">📅 Hackathon 2026 (Jan 25)</div>
+                            <div className="sd-activity-item">🎤 Resume Webinar (Jan 28)</div>
+                        </div>
+                    </div>
+                    <div className="sd-card">
+                        <h4 style={{ marginBottom: '1rem' }}>Top Contributors</h4>
+                        <div className="sd-activity-list">
+                            <div className="sd-activity-item">🥇 Sarah Smith</div>
+                            <div className="sd-activity-item">🥈 Mike Johnson</div>
+                            <div className="sd-activity-item">🥉 Emily Davis</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     const renderDocuments = () => (
         <div className="fadeIn">
             <div className="sd-section-header">
@@ -627,9 +740,9 @@ const StudentDashboard = ({ user }) => {
                         </button>
                         {sidebarExpanded.training && (
                             <div className="sd-nav-sub">
-                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setMsg('🚧 Market Place Coming Soon!'); setTimeout(() => setMsg(''), 3000); }}>Market Place</button>
-                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setMsg('🚧 My Courses Coming Soon!'); setTimeout(() => setMsg(''), 3000); }}>My Courses</button>
-                                <button className="sd-nav-item sd-nav-item-sub" onClick={() => { setMsg('🚧 Community Coming Soon!'); setTimeout(() => setMsg(''), 3000); }}>Community</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'marketplace' ? 'active' : ''}`} onClick={() => { setSection('marketplace'); setIsEditing(false); }}>Market Place</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'mycourses' ? 'active' : ''}`} onClick={() => { setSection('mycourses'); setIsEditing(false); }}>My Courses</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'community' ? 'active' : ''}`} onClick={() => { setSection('community'); setIsEditing(false); }}>Community</button>
                             </div>
                         )}
                     </div>
@@ -654,6 +767,9 @@ const StudentDashboard = ({ user }) => {
                     {section === 'home' && !isEditing && renderHome()}
                     {section === 'profile' && !isEditing && renderProfileView()}
                     {section === 'jobs' && !isEditing && renderJobs()}
+                    {section === 'marketplace' && !isEditing && renderMarketPlace()}
+                    {section === 'mycourses' && !isEditing && renderMyCourses()}
+                    {section === 'community' && !isEditing && renderCommunity()}
                     {section === 'documents' && !isEditing && renderDocuments()}
                     {isEditing && renderProfileForm()}
                 </div>
