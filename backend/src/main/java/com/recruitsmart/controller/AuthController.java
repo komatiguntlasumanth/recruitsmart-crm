@@ -70,11 +70,20 @@ public class AuthController {
             token = jwtUtil.generateToken(user.getEmail());
         }
 
-        return Map.of(
-            "message", "Registration successful!",
-            "token", token != null ? token : "",
-            "user", user
-        );
+        // Return different response based on approval status
+        if (token != null) {
+            return Map.of(
+                "message", "Registration successful!",
+                "token", token,
+                "user", user
+            );
+        } else {
+            // For pending approval (HR users)
+            return Map.of(
+                "message", "Registration pending admin approval",
+                "user", user
+            );
+        }
     }
 
     @PostMapping("/login")
