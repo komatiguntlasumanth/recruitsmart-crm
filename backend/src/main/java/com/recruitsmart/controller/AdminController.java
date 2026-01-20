@@ -14,6 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
+// Verified imports and package structure
 public class AdminController {
 
     @Autowired

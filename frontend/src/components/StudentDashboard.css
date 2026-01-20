@@ -1,7 +1,7 @@
 /* StudentDashboard.css */
 
 :root {
-    --sd-bg: #fffcfc;
+    --sd-bg: linear-gradient(135deg, #fff5f5 0%, #e0f2fe 100%);
     /* White with subtle red tint */
     --sd-primary: #ef4444;
     /* Standard Red */
