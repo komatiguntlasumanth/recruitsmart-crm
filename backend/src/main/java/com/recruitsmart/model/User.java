@@ -27,6 +27,16 @@ public class User {
     private String email;
     
     private boolean enabled = true; // Auto-enable users
+    
+    @Column(updatable = false)
+    private java.time.LocalDateTime createdAt;
+    
+    private java.time.LocalDateTime lastLogin;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -75,5 +85,21 @@ public class User {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public java.time.LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(java.time.LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }

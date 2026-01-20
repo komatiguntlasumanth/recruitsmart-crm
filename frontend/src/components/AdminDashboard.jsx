@@ -197,6 +197,8 @@ const AdminDashboard = ({ user }) => {
                             <p><strong>Username:</strong> {selectedUser.username}</p>
                             <p><strong>Role:</strong> {selectedUser.role}</p>
                             <p><strong>Status:</strong> {selectedUser.enabled ? 'Enabled' : 'Disabled'}</p>
+                            <p><strong>Registered:</strong> {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : 'N/A'}</p>
+                            <p><strong>Last Login:</strong> {selectedUser.lastLogin ? new Date(selectedUser.lastLogin).toLocaleString() : 'Never'}</p>
                         </div>
                         <div style={{ marginTop: '2rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
                             <p style={{ fontStyle: 'italic', color: '#64748b' }}>Admin cannot edit student/user details directly.</p>

@@ -114,6 +114,10 @@ public class AuthController {
             return org.springframework.http.ResponseEntity.status(403).body(Map.of("message", "Account is pending approval. Please contact Admin."));
         }
         
+        // Update Last Login
+        user.setLastLogin(java.time.LocalDateTime.now());
+        userRepository.save(user);
+        
         String token = jwtUtil.generateToken(user.getEmail());
         return org.springframework.http.ResponseEntity.ok(Map.of("token", token, "user", user));
     }
