@@ -45,25 +45,37 @@ public class AuthController {
         
         // Auto-assign role based on specific rules
         String email = user.getEmail().toLowerCase();
+        System.out.println("========== REGISTRATION DEBUG ==========");
+        System.out.println("Email: " + email);
+        
         if (email.equals("komatiguntlasumanths@admin.com")) {
             user.setRole("ROLE_ADMIN");
             user.setEnabled(true);
+            System.out.println("Role assigned: ROLE_ADMIN, Enabled: true");
         } else if (email.endsWith("@hr.com")) {
             user.setRole("ROLE_HR");
             user.setEnabled(false); // Requires Admin Approval
+            System.out.println("Role assigned: ROLE_HR, Enabled: false - PENDING APPROVAL");
         } else if (email.endsWith("@manager.com")) {
             user.setRole("ROLE_MANAGER");
             user.setEnabled(true);
+            System.out.println("Role assigned: ROLE_MANAGER, Enabled: true");
         } else if (email.endsWith("@gmail.com")) {
             user.setRole("ROLE_STUDENT");
             user.setEnabled(true);
+            System.out.println("Role assigned: ROLE_STUDENT, Enabled: true");
         } else {
             // Default role for any other domain
             user.setRole("ROLE_STUDENT");
             user.setEnabled(true);
+            System.out.println("Role assigned: ROLE_STUDENT (default), Enabled: true");
         }
         
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        System.out.println("User saved with ID: " + savedUser.getId());
+        System.out.println("Final enabled status: " + savedUser.isEnabled());
+        System.out.println("Final role: " + savedUser.getRole());
+        System.out.println("========================================");
         
         String token = null;
         if (user.isEnabled()) {
