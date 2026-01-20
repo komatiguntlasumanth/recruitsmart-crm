@@ -22,6 +22,9 @@ public class StudentProfileController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private com.recruitsmart.service.EmailService emailService;
+
     @GetMapping
     public StudentProfile getProfile(Principal principal) {
         String email = principal.getName();
@@ -35,7 +38,7 @@ public class StudentProfileController {
     }
 
     @GetMapping("/user/{userId}")
-    public StudentProfile getProfileByUserId(@PathVariable Long userId) {
+    public StudentProfile getProfileByUserId(@PathVariable long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return profileRepository.findByUser(user)
@@ -82,7 +85,16 @@ public class StudentProfileController {
         updateCollection(existingInfo.getCertificates(), profile.getCertificates());
         updateCollection(existingInfo.getInternships(), profile.getInternships());
 
-        return profileRepository.save(existingInfo);
+        StudentProfile savedProfile = profileRepository.save(existingInfo);
+        
+        // Send email notification
+        try {
+            emailService.sendProfileUpdateEmail(user.getEmail(), "your profile details have been successfully updated.");
+        } catch (Exception e) {
+            System.err.println("Error sending update email: " + e.getMessage());
+        }
+
+        return savedProfile;
     }
 
     private <T> void updateCollection(java.util.List<T> target, java.util.List<T> source) {
@@ -100,7 +112,9 @@ public class StudentProfileController {
         
         if (index >= 0 && index < profile.getCertificates().size()) {
             profile.getCertificates().remove(index);
-            return profileRepository.save(profile);
+            StudentProfile saved = profileRepository.save(profile);
+            emailService.sendProfileUpdateEmail(email, "a certificate has been removed from your profile.");
+            return saved;
         }
         throw new RuntimeException("Invalid index");
     }
@@ -113,7 +127,9 @@ public class StudentProfileController {
         
         if (index >= 0 && index < profile.getInternships().size()) {
             profile.getInternships().remove(index);
-            return profileRepository.save(profile);
+            StudentProfile saved = profileRepository.save(profile);
+            emailService.sendProfileUpdateEmail(email, "an internship has been removed from your profile.");
+            return saved;
         }
         throw new RuntimeException("Invalid index");
     }
@@ -126,7 +142,9 @@ public class StudentProfileController {
         
         if (index >= 0 && index < profile.getProjects().size()) {
             profile.getProjects().remove(index);
-            return profileRepository.save(profile);
+            StudentProfile saved = profileRepository.save(profile);
+            emailService.sendProfileUpdateEmail(email, "a project has been removed from your profile.");
+            return saved;
         }
         throw new RuntimeException("Invalid index");
     }
@@ -139,7 +157,9 @@ public class StudentProfileController {
         
         if (index >= 0 && index < profile.getExperiences().size()) {
             profile.getExperiences().remove(index);
-            return profileRepository.save(profile);
+            StudentProfile saved = profileRepository.save(profile);
+            emailService.sendProfileUpdateEmail(email, "an experience entry has been removed from your profile.");
+            return saved;
         }
         throw new RuntimeException("Invalid index");
     }

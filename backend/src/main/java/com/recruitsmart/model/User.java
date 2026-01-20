@@ -14,7 +14,7 @@ public class User {
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username; // We'll use email as username now
     
-    @com.fasterxml.jackson.annotation.JsonIgnore
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
