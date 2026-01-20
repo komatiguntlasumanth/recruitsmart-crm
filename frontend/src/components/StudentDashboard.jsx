@@ -694,67 +694,24 @@ const StudentDashboard = ({ user }) => {
                         <button className="sd-view-all" onClick={() => { setSection('jobs'); setJobTab('SEARCH'); }}>View All Jobs →</button>
                     </div>
                     <div className="sd-cert-list">
-                        {recommendedJobs.length > 0 ? recommendedJobs.slice(0, 3).map((job, idx) => {
+                        {recommendedJobs.length > 0 ? recommendedJobs.slice(0, 10).map((job, idx) => {
                             const isApplied = myApplications.some(app => app.job.id === job.id);
-                            // Mock premium check: First job is free, others locked unless user has premium status (simulated here)
-                            const isPremium = idx >= 1;
-                            const isLocked = isPremium && !user.isPremium; // Assuming user object has isPremium or similar, or just mock it
 
                             return (
-                                <div key={job.id} className="sd-cert-item" style={{ position: 'relative', opacity: isLocked ? 0.7 : 1 }}>
-                                    {isLocked && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '10px',
-                                            right: '10px',
-                                            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-                                            padding: '4px 12px',
-                                            borderRadius: '20px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: '700',
-                                            color: '#000',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '4px',
-                                            boxShadow: '0 2px 8px rgba(255,215,0,0.4)',
-                                            zIndex: 2
-                                        }}>
-                                            🔒 Premium
-                                        </div>
-                                    )}
-                                    <div className="sd-cert-icon" style={{ background: '#f0fdf4', color: '#16a34a', filter: isLocked ? 'grayscale(100%)' : 'none' }}>💼</div>
+                                <div key={job.id} className="sd-cert-item" style={{ position: 'relative' }}>
+                                    <div className="sd-cert-icon" style={{ background: '#f0fdf4', color: '#16a34a' }}>💼</div>
                                     <div className="sd-cert-content">
                                         <h4 style={{ margin: 0 }}>{job.title}</h4>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)' }}>{job.companyName} • {job.location}</p>
                                     </div>
-                                    {isLocked ? (
-                                        <button
-                                            className="sd-icon-btn"
-                                            style={{
-                                                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-                                                color: '#000',
-                                                padding: '5px 15px',
-                                                width: 'auto',
-                                                borderRadius: '8px',
-                                                fontWeight: '700',
-                                                boxShadow: '0 2px 8px rgba(255,215,0,0.4)',
-                                                border: 'none',
-                                                cursor: 'pointer'
-                                            }}
-                                            onClick={() => setMsg('⭐ Upgrade to Premium to access exclusive job recommendations!')}
-                                        >
-                                            🔓 Unlock
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className={`sd-icon-btn ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
-                                            style={{ background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', padding: '5px 15px', width: 'auto', borderRadius: '8px' }}
-                                            onClick={() => handleApply(job.id)}
-                                            disabled={isApplied || applyingId === job.id}
-                                        >
-                                            {isApplied ? 'Applied' : (applyingId === job.id ? '...' : 'Apply')}
-                                        </button>
-                                    )}
+                                    <button
+                                        className={`sd-icon-btn ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
+                                        style={{ background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', padding: '5px 15px', width: 'auto', borderRadius: '8px' }}
+                                        onClick={() => handleApply(job.id)}
+                                        disabled={isApplied || applyingId === job.id}
+                                    >
+                                        {isApplied ? 'Applied' : (applyingId === job.id ? '...' : 'Apply')}
+                                    </button>
                                 </div>
                             );
                         }) : <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--sd-text-muted)' }}>Complete your profile designation to get personalized recommendations!</p>}
