@@ -50,6 +50,11 @@ const AuthPage = ({ onLogin }) => {
                 });
                 const data = await response.json();
 
+                // Debug logging
+                console.log('Registration response:', data);
+                console.log('Token value:', data.token);
+                console.log('User enabled:', data.user?.enabled);
+
                 if (!response.ok) {
                     if (data.errors) {
                         const errorMsg = Object.values(data.errors).join(', ');
@@ -59,9 +64,10 @@ const AuthPage = ({ onLogin }) => {
                 }
 
                 // Check if token exists (if not, it means pending approval)
-                if (!data.token) {
+                if (!data.token || data.token === "") {
                     alert("Your request is sent to Admin. Once the Admin approves, you can access the HR Dashboard.");
                     setMode('login');
+                    localStorage.removeItem('token'); // Ensure no token is stored
                     return;
                 }
 

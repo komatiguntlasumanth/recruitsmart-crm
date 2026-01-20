@@ -31,6 +31,8 @@ const AdminDashboard = ({ user }) => {
             const usersRes = await authFetch(`${API_BASE_URL}/api/admin/users`);
             if (usersRes.ok) {
                 const data = await usersRes.json();
+                console.log('All users fetched:', data);
+                console.log('HR pending approvals:', data.filter(u => !u.enabled && u.role === 'ROLE_HR'));
                 setUsers(data);
                 setFilteredUsers(data);
             }
@@ -67,13 +69,24 @@ const AdminDashboard = ({ user }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure?")) return;
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
         try {
-            await authFetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+            const response = await authFetch(`${API_BASE_URL}/api/admin/users/${id}`, {
                 method: 'DELETE'
             });
-            fetchData();
-        } catch (e) { console.error(e); }
+
+            if (!response.ok) {
+                const error = await response.json();
+                alert(`Failed to delete user: ${error.message || 'Unknown error'}`);
+                return;
+            }
+
+            alert('User deleted successfully!');
+            fetchData(); // Refresh the list
+        } catch (e) {
+            console.error('Delete error:', e);
+            alert(`Error deleting user: ${e.message}`);
+        }
     };
 
     return (
@@ -135,6 +148,7 @@ const AdminDashboard = ({ user }) => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead style={{ background: '#f1f5f9', borderBottom: '2px solid #e2e8f0' }}>
                         <tr>
+                            <th style={{ padding: '1rem' }}>#</th>
                             <th style={{ padding: '1rem' }}>ID</th>
                             <th style={{ padding: '1rem' }}>Username/Email</th>
                             <th style={{ padding: '1rem' }}>Role</th>
@@ -144,9 +158,10 @@ const AdminDashboard = ({ user }) => {
                     </thead>
                     <tbody>
                         {filteredUsers.length === 0 ? (
-                            <tr><td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found for this category.</td></tr>
-                        ) : filteredUsers.map(u => (
+                            <tr><td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No users found for this category.</td></tr>
+                        ) : filteredUsers.map((u, index) => (
                             <tr key={u.id} style={{ borderTop: '1px solid #f1f5f9' }}>
+                                <td style={{ padding: '1rem', fontWeight: '600', color: '#64748b' }}>{index + 1}</td>
                                 <td style={{ padding: '1rem' }}>{u.id}</td>
                                 <td style={{ padding: '1rem' }}>{u.username || u.email}<br /><small style={{ color: '#64748b' }}>{u.email}</small></td>
                                 <td style={{ padding: '1rem' }}>
