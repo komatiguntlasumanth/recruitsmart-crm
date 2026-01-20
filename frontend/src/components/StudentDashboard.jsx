@@ -50,14 +50,32 @@ const StudentDashboard = ({ user }) => {
             if (res.ok) {
                 const data = await res.json();
                 setAllJobs(data);
-                if (profile.skills && profile.skills.length > 0) {
+
+                let recommended = [];
+
+                // Priority 1: Designation matching
+                if (profile.designation) {
+                    const designKeywords = profile.designation.toLowerCase().split(' ').filter(w => w.length > 2);
+                    recommended = data.filter(job => {
+                        const text = (job.title + ' ' + (job.description || '')).toLowerCase();
+                        return designKeywords.some(k => text.includes(k));
+                    });
+                }
+
+                // Priority 2: Skills matching (if designation didn't match enough)
+                if (recommended.length < 3 && profile.skills && profile.skills.length > 0) {
                     const studentSkills = profile.skills.map(s => s.name.toLowerCase());
-                    const rec = data.filter(job => {
+                    const skillMatched = data.filter(job => {
                         const text = (job.title + ' ' + (job.description || '') + ' ' + (job.eligibilityCriteria || '')).toLowerCase();
                         return studentSkills.some(skill => text.includes(skill));
                     });
-                    setRecommendedJobs(rec);
+                    // Combine and remove duplicates
+                    const existingIds = new Set(recommended.map(j => j.id));
+                    const newJobs = skillMatched.filter(j => !existingIds.has(j.id));
+                    recommended = [...recommended, ...newJobs].slice(0, 10);
                 }
+
+                setRecommendedJobs(recommended);
             }
         } catch (err) { console.error(err); }
     };
@@ -157,6 +175,20 @@ const StudentDashboard = ({ user }) => {
         }
     };
 
+    const handleProfilePictureUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Convert to base64 for preview (in production, upload to server)
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfile({ ...profile, profilePictureUrl: reader.result });
+                setMsg('✅ Profile picture updated!');
+                setTimeout(() => setMsg(''), 3000);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleDeleteDoc = (id) => {
         setDocuments(documents.filter(doc => doc.id !== id));
         setMsg('🗑️ Document removed.');
@@ -177,18 +209,74 @@ const StudentDashboard = ({ user }) => {
 
     const addItem = (field, template) => setProfile({ ...profile, [field]: [...profile[field], template] });
 
+    const calculateProfileCompletion = () => {
+        let totalFields = 0;
+        let filledFields = 0;
+
+        // Basic fields (14 fields)
+        const basicFields = ['designation', 'mobileNumber', 'currentLocation', 'dob',
+            'alternateEmail', 'githubLink', 'linkedinLink', 'portfolioUrl',
+            'profileSummary', 'permanentAddress', 'profilePictureUrl', 'level',
+            'alternateMobile', 'workStatus'];
+
+        basicFields.forEach(field => {
+            totalFields++;
+            if (profile[field] && profile[field].toString().trim().length > 0) filledFields++;
+        });
+
+        // Array fields - count if has at least one entry (7 fields)
+        const arrayFields = ['education', 'experiences', 'skills', 'projects',
+            'achievements', 'certificates', 'internships'];
+
+        arrayFields.forEach(field => {
+            totalFields++;
+            if (profile[field] && profile[field].length > 0) filledFields++;
+        });
+
+        return Math.round((filledFields / totalFields) * 100);
+    };
+
     const renderProfileView = () => {
         const steps = ['Education', 'Experience', 'Skills', 'Project', 'Achievement', 'Resume'];
         return (
             <div className="fadeIn">
                 <div className="sd-profile-header">
-                    <div className="sd-profile-avatar-container">
+                    <div className="sd-profile-avatar-container" style={{ position: 'relative' }}>
                         {profile.profilePictureUrl ? (
                             <img src={profile.profilePictureUrl} className="sd-profile-avatar" alt="Profile" />
                         ) : (
                             <div className="sd-profile-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', fontSize: '3rem' }}>👤</div>
                         )}
-                        <div className="sd-profile-progress-circle">85%</div>
+                        <div className="sd-profile-progress-circle">{calculateProfileCompletion()}%</div>
+
+                        {/* Profile Picture Upload Button */}
+                        <label htmlFor="profile-pic-upload" style={{
+                            position: 'absolute',
+                            bottom: '0',
+                            right: '0',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'var(--sd-primary)',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            border: '3px solid white',
+                            fontSize: '1.5rem',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                            fontWeight: '700'
+                        }}>
+                            +
+                        </label>
+                        <input
+                            type="file"
+                            id="profile-pic-upload"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleProfilePictureUpload}
+                        />
                     </div>
                     <div className="sd-profile-info">
                         <h2>{displayName}</h2>
@@ -369,6 +457,22 @@ const StudentDashboard = ({ user }) => {
                             <label>LinkedIn</label>
                             <input type="text" placeholder="LinkedIn URL" className="sd-card" style={{ padding: '12px', width: '100%' }} value={profile.linkedinLink} onChange={e => setProfile({ ...profile, linkedinLink: e.target.value })} />
                         </div>
+                        <div className="form-group">
+                            <label>Alternate Email</label>
+                            <input type="email" placeholder="Alternate Email" className="sd-card" style={{ padding: '12px', width: '100%' }} value={profile.alternateEmail} onChange={e => setProfile({ ...profile, alternateEmail: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" className="sd-card" style={{ padding: '12px', width: '100%' }} value={profile.dob} onChange={e => setProfile({ ...profile, dob: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                            <label>Portfolio URL</label>
+                            <input type="text" placeholder="Portfolio Website" className="sd-card" style={{ padding: '12px', width: '100%' }} value={profile.portfolioUrl} onChange={e => setProfile({ ...profile, portfolioUrl: e.target.value })} />
+                        </div>
+                        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                            <label>Profile Summary</label>
+                            <textarea placeholder="Brief introduction about yourself" className="sd-card" style={{ padding: '12px', width: '100%', height: '80px', resize: 'vertical' }} value={profile.profileSummary} onChange={e => setProfile({ ...profile, profileSummary: e.target.value })} />
+                        </div>
                     </div>
                 </div>
 
@@ -420,6 +524,55 @@ const StudentDashboard = ({ user }) => {
                         ))}
                     </div>
                 </div>
+
+                <div className="sd-card" style={{ marginTop: '1.5rem' }}>
+                    <div className="sd-section-header">
+                        <h4>Projects</h4>
+                        <button className="sd-icon-btn" style={{ background: 'var(--sd-primary)', color: 'white' }} onClick={() => addItem('projects', { title: '', description: '', link: '' })}>+</button>
+                    </div>
+                    {profile.projects.map((proj, i) => (
+                        <div key={i} style={{ marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 40px', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                <input type="text" placeholder="Project Title" className="sd-card" style={{ padding: '8px' }} value={proj.title} onChange={e => updateItem('projects', i, 'title', e.target.value)} />
+                                <input type="text" placeholder="Project Link" className="sd-card" style={{ padding: '8px' }} value={proj.link} onChange={e => updateItem('projects', i, 'link', e.target.value)} />
+                                <button className="sd-icon-btn delete" onClick={() => deleteItem('projects', i)}>🗑️</button>
+                            </div>
+                            <textarea placeholder="Description" className="sd-card" style={{ padding: '8px', width: '100%', height: '60px', resize: 'vertical' }} value={proj.description} onChange={e => updateItem('projects', i, 'description', e.target.value)} />
+                        </div>
+                    ))}
+                </div>
+
+                <div className="sd-card" style={{ marginTop: '1.5rem' }}>
+                    <div className="sd-section-header">
+                        <h4>Achievements</h4>
+                        <button className="sd-icon-btn" style={{ background: 'var(--sd-primary)', color: 'white' }} onClick={() => addItem('achievements', { title: '', description: '' })}>+</button>
+                    </div>
+                    {profile.achievements.map((ach, i) => (
+                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 40px', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'start' }}>
+                            <div>
+                                <input type="text" placeholder="Achievement Title" className="sd-card" style={{ padding: '8px', width: '100%', marginBottom: '0.5rem' }} value={ach.title} onChange={e => updateItem('achievements', i, 'title', e.target.value)} />
+                                <textarea placeholder="Description" className="sd-card" style={{ padding: '8px', width: '100%', height: '60px', resize: 'vertical' }} value={ach.description} onChange={e => updateItem('achievements', i, 'description', e.target.value)} />
+                            </div>
+                            <button className="sd-icon-btn delete" onClick={() => deleteItem('achievements', i)}>🗑️</button>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="sd-card" style={{ marginTop: '1.5rem' }}>
+                    <div className="sd-section-header">
+                        <h4>Certificates</h4>
+                        <button className="sd-icon-btn" style={{ background: 'var(--sd-primary)', color: 'white' }} onClick={() => addItem('certificates', { title: '', description: '' })}>+</button>
+                    </div>
+                    {profile.certificates.map((cert, i) => (
+                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                            <div>
+                                <input type="text" placeholder="Certificate Name" className="sd-card" style={{ padding: '8px', width: '100%', marginBottom: '0.5rem' }} value={cert.title} onChange={e => updateItem('certificates', i, 'title', e.target.value)} />
+                                <textarea placeholder="Issued by / Description" className="sd-card" style={{ padding: '8px', width: '100%', height: '60px', resize: 'vertical' }} value={cert.description} onChange={e => updateItem('certificates', i, 'description', e.target.value)} />
+                            </div>
+                            <button className="sd-icon-btn delete" style={{ gridColumn: '1', justifySelf: 'start' }} onClick={() => deleteItem('certificates', i)}>🗑️</button>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -438,26 +591,70 @@ const StudentDashboard = ({ user }) => {
                         <button className="sd-view-all" onClick={() => { setSection('jobs'); setJobTab('SEARCH'); }}>View All Jobs →</button>
                     </div>
                     <div className="sd-cert-list">
-                        {recommendedJobs.length > 0 ? recommendedJobs.slice(0, 3).map(job => {
+                        {recommendedJobs.length > 0 ? recommendedJobs.slice(0, 3).map((job, idx) => {
                             const isApplied = myApplications.some(app => app.job.id === job.id);
+                            // Mock premium check: First job is free, others locked unless user has premium status (simulated here)
+                            const isPremium = idx >= 1;
+                            const isLocked = isPremium && !user.isPremium; // Assuming user object has isPremium or similar, or just mock it
+
                             return (
-                                <div key={job.id} className="sd-cert-item">
-                                    <div className="sd-cert-icon" style={{ background: '#f0fdf4', color: '#16a34a' }}>💼</div>
+                                <div key={job.id} className="sd-cert-item" style={{ position: 'relative', opacity: isLocked ? 0.7 : 1 }}>
+                                    {isLocked && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            right: '10px',
+                                            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                            padding: '4px 12px',
+                                            borderRadius: '20px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '700',
+                                            color: '#000',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            boxShadow: '0 2px 8px rgba(255,215,0,0.4)',
+                                            zIndex: 2
+                                        }}>
+                                            🔒 Premium
+                                        </div>
+                                    )}
+                                    <div className="sd-cert-icon" style={{ background: '#f0fdf4', color: '#16a34a', filter: isLocked ? 'grayscale(100%)' : 'none' }}>💼</div>
                                     <div className="sd-cert-content">
                                         <h4 style={{ margin: 0 }}>{job.title}</h4>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)' }}>{job.companyName} • {job.location}</p>
                                     </div>
-                                    <button
-                                        className={`sd-icon-btn ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
-                                        style={{ background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', padding: '5px 15px', width: 'auto', borderRadius: '8px' }}
-                                        onClick={() => handleApply(job.id)}
-                                        disabled={isApplied || applyingId === job.id}
-                                    >
-                                        {isApplied ? 'Applied' : (applyingId === job.id ? '...' : 'Apply')}
-                                    </button>
+                                    {isLocked ? (
+                                        <button
+                                            className="sd-icon-btn"
+                                            style={{
+                                                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                                color: '#000',
+                                                padding: '5px 15px',
+                                                width: 'auto',
+                                                borderRadius: '8px',
+                                                fontWeight: '700',
+                                                boxShadow: '0 2px 8px rgba(255,215,0,0.4)',
+                                                border: 'none',
+                                                cursor: 'pointer'
+                                            }}
+                                            onClick={() => setMsg('⭐ Upgrade to Premium to access exclusive job recommendations!')}
+                                        >
+                                            🔓 Unlock
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className={`sd-icon-btn ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
+                                            style={{ background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', padding: '5px 15px', width: 'auto', borderRadius: '8px' }}
+                                            onClick={() => handleApply(job.id)}
+                                            disabled={isApplied || applyingId === job.id}
+                                        >
+                                            {isApplied ? 'Applied' : (applyingId === job.id ? '...' : 'Apply')}
+                                        </button>
+                                    )}
                                 </div>
                             );
-                        }) : <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--sd-text-muted)' }}>No matching jobs found based on your skills.</p>}
+                        }) : <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--sd-text-muted)' }}>Complete your profile designation to get personalized recommendations!</p>}
                     </div>
                 </div>
                 <div className="sd-home-right">
@@ -465,9 +662,9 @@ const StudentDashboard = ({ user }) => {
                         <h4 style={{ marginBottom: '1.5rem' }}>Profile Completion</h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             <div style={{ flex: 1, height: '10px', background: '#e2e8f0', borderRadius: '5px', overflow: 'hidden' }}>
-                                <div style={{ width: '85%', height: '100%', background: 'linear-gradient(90deg, var(--sd-primary), var(--sd-secondary))' }}></div>
+                                <div style={{ width: `${calculateProfileCompletion()}%`, height: '100%', background: 'linear-gradient(90deg, var(--sd-primary), var(--sd-secondary))' }}></div>
                             </div>
-                            <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>85%</span>
+                            <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{calculateProfileCompletion()}%</span>
                         </div>
                         <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)', marginTop: '1rem' }}>Excellent! Complete your Experience section to reach 100%.</p>
                         <button className="sd-view-all" style={{ marginTop: '1rem', width: '100%', textAlign: 'center', border: '1px solid #eee' }} onClick={() => setSection('profile')}>Complete Profile</button>
