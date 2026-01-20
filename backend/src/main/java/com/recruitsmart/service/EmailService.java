@@ -20,7 +20,7 @@ public class EmailService {
     public void sendApplicationSuccessEmail(String toEmail, String jobTitle, String companyName) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("jobapplication@recruitsmart.com");
+            message.setFrom(fromEmail);
             message.setTo(toEmail);
             message.setSubject("Job Application Received - " + jobTitle);
             message.setText(
@@ -35,6 +35,26 @@ public class EmailService {
         } catch (Exception e) {
             // Log error but don't fail the application submission
             System.err.println("Failed to send email: " + e.getMessage());
+        }
+    }
+
+
+    public void sendProfileUpdateEmail(String toEmail, String updateDetails) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("RecruitSmart - Profile Updated");
+            message.setText(
+                "Dear Candidate,\n\n" +
+                "This is to inform you that " + updateDetails + "\n\n" +
+                "If you did not make this change, please contact support immediately.\n\n" +
+                "Best regards,\n" +
+                "RecruitSmart Team"
+            );
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Failed to send profile update email: " + e.getMessage());
         }
     }
 }
