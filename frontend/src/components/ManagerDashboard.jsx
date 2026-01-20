@@ -152,7 +152,7 @@ const ManagerDashboard = ({ user }) => {
     );
 
     return (
-        <div className="fadeIn" style={{ padding: '2rem', minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+        <div className="fadeIn" style={{ padding: '2rem', minHeight: '100vh', background: 'linear-gradient(135deg, #fff5f5 0%, #e0f2fe 100%)' }}>
             <h2 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#1e293b', fontWeight: 800, letterSpacing: '-1px' }}>
                 HR Dashboard <span style={{ fontSize: '1rem', fontWeight: 400, color: '#64748b', marginLeft: '1rem' }}>Manage Recruitment & Training</span>
             </h2>

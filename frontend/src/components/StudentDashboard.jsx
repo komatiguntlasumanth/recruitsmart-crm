@@ -25,9 +25,21 @@ const StudentDashboard = ({ user }) => {
     const [applyingId, setApplyingId] = useState(null);
     const [documents, setDocuments] = useState([
         { id: 1, name: 'Resume_Ver1.pdf', type: 'PDF', size: '1.2 MB', date: '2025-01-10' },
-        { id: 2, name: 'Degree_Certificate.jpg', type: 'Image', size: '2.5 MB', date: '2025-01-12' },
-        { id: 3, name: 'Internship_Letter.pdf', type: 'PDF', size: '0.8 MB', date: '2025-01-15' }
     ]);
+
+    // Predefined Skills List
+    const SKILL_SUGGESTIONS = [
+        "Java", "Python", "C++", "JavaScript", "React", "Angular", "Vue.js", "Node.js", "Express.js",
+        "Spring Boot", "Hibernate", "SQL", "MySQL", "PostgreSQL", "MongoDB", "AWS", "Azure", "Docker",
+        "Kubernetes", "Git", "GitHub", "HTML", "CSS", "SASS", "Tailwind CSS", "Bootstrap", "Machine Learning",
+        "Data Science", "Artificial Intelligence", "Deep Learning", "NLP", "Computer Vision", "Cybersecurity",
+        "Blockchain", "DevOps", "Agile", "Scrum", "JIRA", "Linux", "Shell Scripting", "TypeScript", "Go", "Rust",
+        "Kotlin", "Swift", "Flutter", "React Native", "Android Development", "iOS Development"
+    ];
+
+    const [skillInput, setSkillInput] = useState('');
+    const [filteredSkills, setFilteredSkills] = useState([]);
+    const [showSkillSuggestions, setShowSkillSuggestions] = useState(false);
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -41,42 +53,66 @@ const StudentDashboard = ({ user }) => {
     useEffect(() => {
         fetchProfile();
         fetchApplicationCount();
-        fetchRecommendedJobs();
+        // fetchRecommendedJobs is now triggered when profile.id is available
     }, []);
 
+    useEffect(() => {
+        if (profile.id) {
+            fetchRecommendedJobs();
+        }
+    }, [profile.id]);
+
     const fetchRecommendedJobs = async () => {
+        // Fallback or Initial Load without AI
         try {
-            const res = await authFetch(`${API_BASE_URL}/api/jobs`);
-            if (res.ok) {
-                const data = await res.json();
-                setAllJobs(data);
+            const allRes = await authFetch(`${API_BASE_URL}/api/jobs`); // Always fetch all jobs for search/market
+            if (allRes.ok) {
+                const allData = await allRes.json();
+                setAllJobs(allData);
 
+                // Default local fallback if no profile or error
+                if (!profile.id) {
+                    setRecommendedJobs(allData.slice(0, 5)); // Just show some jobs
+                    return;
+                }
+            }
+
+            // Try AI Recommendation
+            try {
+                const aiRes = await authFetch(`${API_BASE_URL}/api/ai/recommend-jobs/${profile.id}`);
+                if (aiRes.ok) {
+                    const aiData = await aiRes.json();
+                    if (aiData.length > 0) {
+                        setRecommendedJobs(aiData);
+                        return; // Successfully got AI jobs
+                    }
+                }
+            } catch (ignore) { console.warn("AI Recommendation unavailable, using fallback."); }
+
+            // Local Logic Fallback (if AI failed or returned empty)
+            // Re-use logic: Designation > Skills
+            if (allJobs.length > 0) {
                 let recommended = [];
-
-                // Priority 1: Designation matching
                 if (profile.designation) {
                     const designKeywords = profile.designation.toLowerCase().split(' ').filter(w => w.length > 2);
-                    recommended = data.filter(job => {
+                    recommended = allJobs.filter(job => {
                         const text = (job.title + ' ' + (job.description || '')).toLowerCase();
                         return designKeywords.some(k => text.includes(k));
                     });
                 }
-
-                // Priority 2: Skills matching (if designation didn't match enough)
                 if (recommended.length < 3 && profile.skills && profile.skills.length > 0) {
                     const studentSkills = profile.skills.map(s => s.name.toLowerCase());
-                    const skillMatched = data.filter(job => {
+                    const skillMatched = allJobs.filter(job => {
                         const text = (job.title + ' ' + (job.description || '') + ' ' + (job.eligibilityCriteria || '')).toLowerCase();
                         return studentSkills.some(skill => text.includes(skill));
                     });
-                    // Combine and remove duplicates
                     const existingIds = new Set(recommended.map(j => j.id));
                     const newJobs = skillMatched.filter(j => !existingIds.has(j.id));
                     recommended = [...recommended, ...newJobs].slice(0, 10);
                 }
-
-                setRecommendedJobs(recommended);
+                setRecommendedJobs(recommended.length > 0 ? recommended : allJobs.slice(0, 5));
             }
+
         } catch (err) { console.error(err); }
     };
 
@@ -208,6 +244,35 @@ const StudentDashboard = ({ user }) => {
     };
 
     const addItem = (field, template) => setProfile({ ...profile, [field]: [...profile[field], template] });
+
+    // Skills Logic
+    const handleSkillInputChange = (e) => {
+        const value = e.target.value;
+        setSkillInput(value);
+        if (value.trim()) {
+            const temp = SKILL_SUGGESTIONS.filter(s => s.toLowerCase().includes(value.toLowerCase()) && !profile.skills.some(ps => ps.name === s));
+            setFilteredSkills(temp);
+            setShowSkillSuggestions(true);
+        } else {
+            setFilteredSkills([]);
+            setShowSkillSuggestions(false);
+        }
+    };
+
+    const handleSkillInputFocus = () => {
+        // Show some defaults or all remaining skills if empty
+        const remaining = SKILL_SUGGESTIONS.filter(s => !profile.skills.some(ps => ps.name === s)).slice(0, 10);
+        setFilteredSkills(remaining);
+        setShowSkillSuggestions(true);
+    };
+
+    const addSkill = (skillName) => {
+        if (!profile.skills.some(s => s.name === skillName)) {
+            setProfile({ ...profile, skills: [...profile.skills, { name: skillName, type: 'Technical' }] });
+        }
+        setSkillInput('');
+        setShowSkillSuggestions(false);
+    };
 
     const calculateProfileCompletion = () => {
         let totalFields = 0;
@@ -510,16 +575,54 @@ const StudentDashboard = ({ user }) => {
                     ))}
                 </div>
 
-                <div className="sd-card" style={{ marginTop: '1.5rem' }}>
+                <div className="sd-card" style={{ marginTop: '1.5rem', overflow: 'visible' }}>
                     <div className="sd-section-header">
                         <h4>Skills</h4>
-                        <button className="sd-icon-btn" style={{ background: 'var(--sd-primary)', color: 'white' }} onClick={() => addItem('skills', { name: '', type: 'Technical' })}>+</button>
                     </div>
+                    <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                        <input
+                            type="text"
+                            placeholder="Type a skill (e.g. Java, React)..."
+                            className="sd-card"
+                            style={{ padding: '12px', width: '100%' }}
+                            value={skillInput}
+                            onChange={handleSkillInputChange}
+                            onFocus={handleSkillInputFocus}
+                            onBlur={() => setTimeout(() => setShowSkillSuggestions(false), 200)} // Delay to allow click
+                        />
+                        {showSkillSuggestions && filteredSkills.length > 0 && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                right: 0,
+                                background: 'white',
+                                border: '1px solid var(--sd-border)',
+                                borderRadius: '0 0 10px 10px',
+                                maxHeight: '200px',
+                                overflowY: 'auto',
+                                zIndex: 10,
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            }}>
+                                {filteredSkills.map(skill => (
+                                    <div
+                                        key={skill}
+                                        style={{ padding: '10px 15px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}
+                                        onMouseDown={() => addSkill(skill)} // onMouseDown fires before onBlur
+                                        className="sd-suggestion-item"
+                                    >
+                                        + {skill}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                         {profile.skills.map((skill, i) => (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--sd-bg)', padding: '5px 10px', borderRadius: '20px', border: '1px solid var(--sd-border)' }}>
-                                <input type="text" value={skill.name} onChange={e => updateItem('skills', i, 'name', e.target.value)} style={{ border: 'none', background: 'transparent', width: '100px', outline: 'none' }} />
-                                <button onClick={() => deleteItem('skills', i)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#eff6ff', padding: '6px 12px', borderRadius: '20px', border: '1px solid #dbeafe', color: '#1e40af', fontSize: '0.9rem', fontWeight: 500 }}>
+                                <span>{skill.name}</span>
+                                <button onClick={() => deleteItem('skills', i)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2rem', color: '#64748b', display: 'flex', alignItems: 'center' }}>×</button>
                             </div>
                         ))}
                     </div>
