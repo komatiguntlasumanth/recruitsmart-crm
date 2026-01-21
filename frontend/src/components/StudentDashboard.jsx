@@ -815,23 +815,48 @@ const StudentDashboard = ({ user }) => {
                     {jobsToShow.length > 0 ? jobsToShow.map(job => {
                         const isApplied = myApplications.some(app => app.job.id === job.id);
                         return (
-                            <div key={job.id} className="sd-card" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem' }}>
+                            <div key={job.id} className="sd-card" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+                                {/* Status Badge Logic */}
+                                {job.appStatus && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                        background:
+                                            job.appStatus === 'HIRED' ? '#22c55e' :
+                                                job.appStatus === 'REJECTED' ? '#ef4444' :
+                                                    job.appStatus === 'INTERVIEW' ? '#a855f7' :
+                                                        job.appStatus === 'REVIEWING' ? '#f59e0b' :
+                                                            '#3b82f6', // APPLIED or default
+                                        color: 'white',
+                                        padding: '5px 15px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 'bold',
+                                        borderRadius: '0 0 0 10px'
+                                    }}>
+                                        {job.appStatus}
+                                    </div>
+                                )}
+
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <h3 style={{ margin: '0 0 5px 0' }}>{job.title}</h3>
-                                        {job.appStatus && <span className={`sd-status-badge ${job.appStatus.toLowerCase()}`}>{job.appStatus}</span>}
+                                        {/* Fallback small badge if needs to be inline, but using absolute top-right is cleaner for "card" look */}
                                     </div>
                                     <p style={{ margin: 0, color: 'var(--sd-text-muted)', fontWeight: 500 }}>{job.companyName} | {job.location} | {job.salary}</p>
                                     <p style={{ margin: '10px 0 0 0', fontSize: '0.9rem', opacity: 0.8 }}>{job.description ? job.description.substring(0, 120) + '...' : 'No description available.'}</p>
                                 </div>
-                                <button
-                                    className={`sd-nav-item ${isApplied ? '' : 'active'} ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
-                                    style={{ width: 'auto', padding: '0 30px', background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white' }}
-                                    onClick={() => !isApplied && handleApply(job.id)}
-                                    disabled={isApplied || applyingId === job.id}
-                                >
-                                    {isApplied ? 'Applied' : (applyingId === job.id ? 'Applying...' : 'Apply Now')}
-                                </button>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'end', gap: '0.5rem' }}>
+                                    <button
+                                        className={`sd-nav-item ${isApplied ? '' : 'active'} ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
+                                        style={{ width: 'auto', padding: '0 30px', background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', border: isApplied ? '1px solid #bbf7d0' : 'none' }}
+                                        onClick={() => !isApplied && handleApply(job.id)}
+                                        disabled={isApplied || applyingId === job.id}
+                                    >
+                                        {isApplied ? 'Applied' : (applyingId === job.id ? 'Applying...' : 'Apply Now')}
+                                    </button>
+                                    {isApplied && job.appStatus && <span style={{ fontSize: '0.8rem', color: 'var(--sd-text-muted)' }}>Current Status: <strong>{job.appStatus}</strong></span>}
+                                </div>
                             </div>
                         );
                     }) : <div style={{ textAlign: 'center', padding: '3rem' }}>
