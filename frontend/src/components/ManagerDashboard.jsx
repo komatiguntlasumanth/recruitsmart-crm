@@ -202,7 +202,7 @@ const ManagerDashboard = ({ user }) => {
                                     </div>
                                     <div className="stat-pill">
                                         <span className="label">Applicants</span>
-                                        <span className="value">{allApplications.filter(a => a.jobId === item.id).length}</span>
+                                        <span className="value">{allApplications.filter(a => a.job?.id === item.id).length}</span>
                                     </div>
                                 </div>
                                 <div className="action-row">
@@ -447,7 +447,7 @@ const ManagerDashboard = ({ user }) => {
                                         <td style={{ padding: '12px' }}>{j.location}</td>
                                         <td style={{ padding: '12px' }}>
                                             <span style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                                                {allApplications.filter(a => a.jobId === j.id).length}
+                                                {allApplications.filter(a => a.job?.id === j.id).length}
                                             </span>
                                         </td>
                                         <td style={{ padding: '12px' }}>
