@@ -64,6 +64,13 @@ const JobBoard = ({ user }) => {
     };
 
     const handleApply = async (jobId) => {
+        // Immediate action: Open external link if available
+        const job = jobs.find(j => j.id === jobId);
+        if (job && job.applicationLink) {
+            window.open(job.applicationLink, '_blank');
+        }
+
+        // Background application tracking
         const response = await authFetch(`${API_BASE_URL}/api/applications/apply/${jobId}`, {
             method: 'POST'
         });
@@ -71,23 +78,13 @@ const JobBoard = ({ user }) => {
         const data = await response.json();
 
         if (response.ok) {
-            alert('Application submitted successfully!');
-            // Show the external apply link if available
-            const job = jobs.find(j => j.id === jobId);
+            alert('Application submitted successfully on RecruitSmart!');
             if (job && job.applicationLink) {
                 setAppliedJobLink(job.applicationLink);
             }
         } else {
             // Handle error message from backend
             alert(data.message || 'Failed to apply.');
-        }
-
-        // Open external link if available regardless of backend success/failure (maybe? No, only on success probably, or parallel)
-        // User requirements: "by clicking on the apply button it will open the url site and goto that job application site"
-        // I will do it after the alert if successful, or maybe just do it.
-        const job = jobs.find(j => j.id === jobId);
-        if (job && job.applicationLink) {
-            window.open(job.applicationLink, '_blank');
         }
     };
 
