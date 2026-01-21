@@ -28,7 +28,9 @@ const ManagerDashboard = ({ user }) => {
         location: '',
         jobType: 'JOB',
         designation: '',
-        level: 'Fresher'
+        level: 'Fresher',
+        startDate: '',
+        applicationEndDate: ''
     });
 
     const API_BASE = `${API_BASE_URL}/api/jobs`;
@@ -115,7 +117,8 @@ const ManagerDashboard = ({ user }) => {
                 setEditingJobId(null);
                 setFormData({
                     title: '', companyName: '', description: '', eligibilityCriteria: '',
-                    salary: '', applicationLink: '', location: '', jobType: 'JOB', designation: '', level: 'Fresher'
+                    salary: '', applicationLink: '', location: '', jobType: 'JOB', designation: '', level: 'Fresher',
+                    startDate: '', applicationEndDate: ''
                 });
                 fetchJobs();
             } else {
@@ -133,7 +136,8 @@ const ManagerDashboard = ({ user }) => {
             title: job.title, companyName: job.companyName, description: job.description,
             eligibilityCriteria: job.eligibilityCriteria, salary: job.salary,
             applicationLink: job.applicationLink, location: job.location,
-            jobType: job.jobType || 'JOB', designation: job.designation, level: job.level || 'Fresher'
+            jobType: job.jobType || 'JOB', designation: job.designation, level: job.level || 'Fresher',
+            startDate: job.startDate || '', applicationEndDate: job.applicationEndDate || ''
         });
         setShowModal(true);
     };
@@ -313,6 +317,17 @@ const ManagerDashboard = ({ user }) => {
                                 <input name="salary" placeholder="Salary" value={formData.salary} onChange={handleInputChange} className="input-field" />
                                 <input name="location" placeholder="Location" value={formData.location} onChange={handleInputChange} className="input-field" required />
                             </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                <div>
+                                    <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>Start Date</label>
+                                    <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className="input-field" />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>End Date</label>
+                                    <input type="date" name="applicationEndDate" value={formData.applicationEndDate} onChange={handleInputChange} className="input-field" />
+                                </div>
+                            </div>
+                            <input name="applicationLink" placeholder="Application URL" value={formData.applicationLink} onChange={handleInputChange} className="input-field" />
                             <input name="designation" placeholder="Designation (Important for Recommendations)" value={formData.designation} onChange={handleInputChange} className="input-field" required />
                             <textarea name="description" placeholder="Description" value={formData.description} onChange={handleInputChange} className="input-field" rows={4} required />
                             <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
