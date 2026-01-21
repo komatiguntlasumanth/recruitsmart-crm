@@ -149,22 +149,27 @@ const StudentDashboard = ({ user }) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const handleSaveProfile = async () => {
-        setLoading(true);
-        setMsg('⏳ Saving your profile...');
+        // Optimistic UI Update: Immediately show success
+        setIsEditing(false);
+        setMsg('✅ Profile updated!');
+        setTimeout(() => setMsg(''), 4000);
+
         try {
+            // Background save
             const res = await authFetch(`${API_BASE_URL}/api/student/profile`, {
                 method: 'POST',
                 body: JSON.stringify(profile)
             });
             if (res.ok) {
                 const data = await res.json();
-                setProfile(data);
-                setMsg('✅ Profile successfully updated!');
-                setIsEditing(false);
-                setTimeout(() => setMsg(''), 4000);
-            } else { setMsg('❌ Failed to save profile.'); }
-        } catch (err) { setMsg('❌ Error saving profile.'); }
-        finally { setLoading(false); }
+                setProfile(data); // Sync with server response
+            } else {
+                setMsg('❌ Failed to sync profile with server.');
+                // Optional: revert logic here if needed, but for now we warn
+            }
+        } catch (err) {
+            setMsg('❌ Error saving profile.');
+        }
     };
 
     const handleApply = async (jobId) => {
@@ -172,6 +177,12 @@ const StudentDashboard = ({ user }) => {
             setMsg('ℹ️ You have already applied for this job.');
             setTimeout(() => setMsg(''), 3000);
             return;
+        }
+
+        // Immediate Action: Open URL
+        const job = allJobs.find(j => j.id === jobId);
+        if (job && job.applicationLink) {
+            window.open(job.applicationLink, '_blank');
         }
 
         setApplyingId(jobId);
