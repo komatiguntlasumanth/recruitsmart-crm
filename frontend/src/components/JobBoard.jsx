@@ -6,7 +6,7 @@ const JobBoard = ({ user }) => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingJobId, setEditingJobId] = useState(null);
-    const [newJob, setNewJob] = useState({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', level: 'Fresher', applicationLink: '', eligibilityCriteria: '' });
+    const [newJob, setNewJob] = useState({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', level: 'Fresher', applicationLink: '', eligibilityCriteria: '', startDate: '', applicationEndDate: '' });
     const [jobFilter, setJobFilter] = useState('ALL'); // ALL, RECOMMENDED, OTHER
     const [recommendedJobs, setRecommendedJobs] = useState([]);
     const [profile, setProfile] = useState(null);
@@ -81,6 +81,14 @@ const JobBoard = ({ user }) => {
             // Handle error message from backend
             alert(data.message || 'Failed to apply.');
         }
+
+        // Open external link if available regardless of backend success/failure (maybe? No, only on success probably, or parallel)
+        // User requirements: "by clicking on the apply button it will open the url site and goto that job application site"
+        // I will do it after the alert if successful, or maybe just do it.
+        const job = jobs.find(j => j.id === jobId);
+        if (job && job.applicationLink) {
+            window.open(job.applicationLink, '_blank');
+        }
     };
 
     const handlePostJob = async (e) => {
@@ -96,7 +104,9 @@ const JobBoard = ({ user }) => {
         if (response.ok) {
             setShowModal(false);
             setEditingJobId(null);
-            setNewJob({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', level: 'Fresher', applicationLink: '', eligibilityCriteria: '' });
+            setShowModal(false);
+            setEditingJobId(null);
+            setNewJob({ title: '', companyName: '', location: '', salary: '', description: '', designation: '', level: 'Fresher', applicationLink: '', eligibilityCriteria: '', startDate: '', applicationEndDate: '' });
             fetchJobs();
         } else {
             const error = await response.json();
@@ -114,8 +124,11 @@ const JobBoard = ({ user }) => {
             description: job.description,
             designation: job.designation,
             level: job.level || 'Fresher',
+            level: job.level || 'Fresher',
             applicationLink: job.applicationLink,
-            eligibilityCriteria: job.eligibilityCriteria
+            eligibilityCriteria: job.eligibilityCriteria,
+            startDate: job.startDate || '',
+            applicationEndDate: job.applicationEndDate || ''
         });
         setShowModal(true);
     };
@@ -201,9 +214,23 @@ const JobBoard = ({ user }) => {
                             <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1rem' }}>{job.eligibilityCriteria}</p>
 
                             {user.role === 'ROLE_STUDENT' && (
-                                <button className="btn-primary" style={{ width: '100%' }} onClick={() => setSelectedJob(job)}>
-                                    Apply Now
-                                </button>
+                                (() => {
+                                    const isClosed = job.applicationEndDate && new Date(job.applicationEndDate) < new Date();
+                                    return (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            {job.applicationEndDate && <small style={{ color: isClosed ? 'red' : '#64748b' }}>Apply by: {job.applicationEndDate}</small>}
+                                            {isClosed ? (
+                                                <button className="btn-primary" style={{ width: '100%', background: '#EF4444', cursor: 'not-allowed' }} disabled>
+                                                    Closed
+                                                </button>
+                                            ) : (
+                                                <button className="btn-primary" style={{ width: '100%' }} onClick={() => setSelectedJob(job)}>
+                                                    Apply Now
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })()
                             )}
                             {user.role === 'ROLE_HR' && (
                                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
@@ -250,7 +277,13 @@ const JobBoard = ({ user }) => {
                         <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                             {!appliedJobLink ? (
                                 <>
-                                    <button className="btn-primary" onClick={() => handleApply(selectedJob.id)}>Confirm & Apply</button>
+                                    <button
+                                        className="btn-primary"
+                                        onClick={() => handleApply(selectedJob.id)}
+                                        disabled={selectedJob.applicationEndDate && new Date(selectedJob.applicationEndDate) < new Date()}
+                                    >
+                                        {(selectedJob.applicationEndDate && new Date(selectedJob.applicationEndDate) < new Date()) ? 'Closed' : 'Confirm & Apply'}
+                                    </button>
                                     <button className="button" onClick={() => setSelectedJob(null)} style={{ padding: '10px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', color: '#475569' }}>Back</button>
                                 </>
                             ) : (
@@ -277,6 +310,17 @@ const JobBoard = ({ user }) => {
                         <form onSubmit={handlePostJob} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                             <input placeholder="Job Title" value={newJob.title} onChange={e => setNewJob({ ...newJob, title: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
                             <input placeholder="Company Name" value={newJob.companyName} onChange={e => setNewJob({ ...newJob, companyName: e.target.value })} required style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white' }} />
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.3rem', display: 'block' }}>Start Date</label>
+                                    <input type="date" value={newJob.startDate} onChange={e => setNewJob({ ...newJob, startDate: e.target.value })} style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white', width: '100%' }} />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.3rem', display: 'block' }}>End Date</label>
+                                    <input type="date" value={newJob.applicationEndDate} onChange={e => setNewJob({ ...newJob, applicationEndDate: e.target.value })} style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: 'white', width: '100%' }} />
+                                </div>
+                            </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>

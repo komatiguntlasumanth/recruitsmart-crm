@@ -46,6 +46,9 @@ public class Job {
     @Pattern(regexp = "^(Fresher|Experienced|Management)$", message = "Level must be Fresher, Experienced, or Management")
     private String level; // "Fresher", "Experienced", "Management" (Status in UI)
 
+    private LocalDate startDate;
+    private LocalDate applicationEndDate;
+
     // PRO TIP: Always add a no-arg constructor for JPA
     public Job() {}
 
@@ -91,4 +94,10 @@ public class Job {
     
     public String getLevel() { return level; }
     public void setLevel(String level) { this.level = level; }
+
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+    public LocalDate getApplicationEndDate() { return applicationEndDate; }
+    public void setApplicationEndDate(LocalDate applicationEndDate) { this.applicationEndDate = applicationEndDate; }
 }

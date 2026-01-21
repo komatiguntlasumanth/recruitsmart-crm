@@ -23,7 +23,9 @@ const HRDashboard = ({ user }) => {
         location: '',
         jobType: 'JOB', // JOB or TRAINING
         designation: '', // Role Title (e.g. Software Engineer)
-        level: 'Fresher' // Fresher, Experienced, Management (Status)
+        level: 'Fresher', // Fresher, Experienced, Management (Status)
+        startDate: '',
+        applicationEndDate: ''
     });
 
     const API_BASE = `${API_BASE_URL}/api/jobs`;
@@ -106,7 +108,8 @@ const HRDashboard = ({ user }) => {
                 setEditingJobId(null);
                 setFormData({
                     title: '', companyName: '', description: '', eligibilityCriteria: '',
-                    salary: '', applicationLink: '', location: '', jobType: 'JOB', designation: '', level: 'Fresher'
+                    salary: '', applicationLink: '', location: '', jobType: 'JOB', designation: '', level: 'Fresher',
+                    startDate: '', applicationEndDate: ''
                 });
                 fetchJobs();
             } else {
@@ -133,7 +136,9 @@ const HRDashboard = ({ user }) => {
             location: job.location,
             jobType: job.jobType || 'JOB',
             designation: job.designation,
-            level: job.level || 'Fresher'
+            level: job.level || 'Fresher',
+            startDate: job.startDate || '',
+            applicationEndDate: job.applicationEndDate || ''
         });
         setShowModal(true);
     };
@@ -363,6 +368,17 @@ const HRDashboard = ({ user }) => {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <input name="salary" placeholder={modalMode === 'JOB' ? "Stipend/Salary" : "Cost/Fees"} value={formData.salary} onChange={handleInputChange} style={inputStyle} />
                                     <input name="location" placeholder="Location (or Remote)" value={formData.location} onChange={handleInputChange} required style={inputStyle} />
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#64748b', fontWeight: '500', fontSize: '0.9rem' }}>Start Date</label>
+                                        <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} style={{ ...inputStyle, width: '100%' }} />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#64748b', fontWeight: '500', fontSize: '0.9rem' }}>Application End Date</label>
+                                        <input type="date" name="applicationEndDate" value={formData.applicationEndDate} onChange={handleInputChange} style={{ ...inputStyle, width: '100%' }} />
+                                    </div>
                                 </div>
 
                                 <input name="applicationLink" placeholder="Application/Registration Link" value={formData.applicationLink} onChange={handleInputChange} style={inputStyle} />
