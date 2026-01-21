@@ -67,6 +67,8 @@ public class JobController {
         job.setApplicationLink(jobDetails.getApplicationLink());
         job.setEligibilityCriteria(jobDetails.getEligibilityCriteria());
         job.setStatus(jobDetails.getStatus());
+        job.setStartDate(jobDetails.getStartDate());
+        job.setApplicationEndDate(jobDetails.getApplicationEndDate());
         
         return jobRepository.save(job);
     }
