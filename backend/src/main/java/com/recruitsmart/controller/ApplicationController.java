@@ -81,8 +81,24 @@ public class ApplicationController {
     public Application updateStatus(@PathVariable Long id, @RequestBody java.util.Map<String, String> statusMap) {
         if (id == null) throw new IllegalArgumentException("ID cannot be null");
         Application app = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Application find error"));
-        app.setStatus(statusMap.get("status"));
-        return applicationRepository.save(app);
+        String oldStatus = app.getStatus();
+        String newStatus = statusMap.get("status");
+        app.setStatus(newStatus);
+        Application saved = applicationRepository.save(app);
+        
+        // Trigger emails if status changed
+        if (newStatus != null && !newStatus.equalsIgnoreCase(oldStatus)) {
+            try {
+                if (newStatus.equalsIgnoreCase("SHORTLISTED") || newStatus.equalsIgnoreCase("INTERVIEW") || newStatus.equalsIgnoreCase("HIRED")) {
+                    emailService.sendShortlistedEmail(app.getStudent().getEmail(), app.getJob().getTitle(), app.getJob().getCompanyName());
+                } else if (newStatus.equalsIgnoreCase("REJECTED")) {
+                    emailService.sendRejectedEmail(app.getStudent().getEmail(), app.getJob().getTitle(), app.getJob().getCompanyName());
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to send status update email: " + e.getMessage());
+            }
+        }
+        return saved;
     }
 
     @PutMapping("/bulk-status")
@@ -100,7 +116,18 @@ public class ApplicationController {
 
         java.util.Objects.requireNonNull(longIds, "IDs list cannot be null");
         List<Application> apps = (List<Application>) applicationRepository.findAllById(longIds);
-        apps.forEach(app -> app.setStatus(status));
+        apps.forEach(app -> {
+            app.setStatus(status);
+            try {
+                if (status.equalsIgnoreCase("SHORTLISTED") || status.equalsIgnoreCase("INTERVIEW") || status.equalsIgnoreCase("HIRED")) {
+                    emailService.sendShortlistedEmail(app.getStudent().getEmail(), app.getJob().getTitle(), app.getJob().getCompanyName());
+                } else if (status.equalsIgnoreCase("REJECTED")) {
+                    emailService.sendRejectedEmail(app.getStudent().getEmail(), app.getJob().getTitle(), app.getJob().getCompanyName());
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to send bulk status update email: " + e.getMessage());
+            }
+        });
         return applicationRepository.saveAll(apps);
     }
 }

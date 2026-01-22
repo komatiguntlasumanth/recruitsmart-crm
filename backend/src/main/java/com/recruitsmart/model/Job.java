@@ -48,6 +48,7 @@ public class Job {
 
     private LocalDate startDate;
     private LocalDate applicationEndDate;
+    private String postedByEmail;
 
     // PRO TIP: Always add a no-arg constructor for JPA
     public Job() {}
@@ -100,4 +101,7 @@ public class Job {
 
     public LocalDate getApplicationEndDate() { return applicationEndDate; }
     public void setApplicationEndDate(LocalDate applicationEndDate) { this.applicationEndDate = applicationEndDate; }
+
+    public String getPostedByEmail() { return postedByEmail; }
+    public void setPostedByEmail(String postedByEmail) { this.postedByEmail = postedByEmail; }
 }

@@ -57,4 +57,43 @@ public class EmailService {
             System.err.println("Failed to send profile update email: " + e.getMessage());
         }
     }
+
+    public void sendShortlistedEmail(String toEmail, String jobTitle, String companyName) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Congratulations! You've been shortlisted - " + jobTitle);
+            message.setText(
+                "Dear Candidate,\n\n" +
+                "We are pleased to inform you that you have been shortlisted for the " + jobTitle + " position at " + companyName + ".\n\n" +
+                "Our team will reach out to you soon regarding the next steps and interview schedule.\n\n" +
+                "Best regards,\n" +
+                "RecruitSmart Hiring Team"
+            );
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Failed to send shortlist email: " + e.getMessage());
+        }
+    }
+
+    public void sendRejectedEmail(String toEmail, String jobTitle, String companyName) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Application Update - " + jobTitle);
+            message.setText(
+                "Dear Candidate,\n\n" +
+                "Thank you for your interest in the " + jobTitle + " position at " + companyName + ".\n\n" +
+                "After careful review of your application, we regret to inform you that we will not be moving forward with your candidacy at this time.\n\n" +
+                "We wish you the best in your job search.\n\n" +
+                "Best regards,\n" +
+                "RecruitSmart Hiring Team"
+            );
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Failed to send rejection email: " + e.getMessage());
+        }
+    }
 }

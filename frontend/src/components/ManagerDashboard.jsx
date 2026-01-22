@@ -15,6 +15,7 @@ const ManagerDashboard = ({ user }) => {
     const [viewingApplicantsForJob, setViewingApplicantsForJob] = useState(null);
     const [applicants, setApplicants] = useState([]);
     const [selectedCandidate, setSelectedCandidate] = useState(null);
+    const [selectedApplication, setSelectedApplication] = useState(null);
     const [candidateProfile, setCandidateProfile] = useState(null);
 
     // Form State
@@ -82,7 +83,7 @@ const ManagerDashboard = ({ user }) => {
         finally { setLoading(false); }
     };
 
-    const fetchCandidateProfile = async (userId) => {
+    const fetchCandidateProfile = async (userId, application = null) => {
         setLoading(true);
         try {
             const res = await authFetch(`${API_BASE_URL}/api/student/profile/user/${userId}`);
@@ -90,6 +91,7 @@ const ManagerDashboard = ({ user }) => {
                 const data = await res.json();
                 setCandidateProfile(data);
                 setSelectedCandidate(userId);
+                setSelectedApplication(application);
             } else {
                 alert("Profile details not found for this candidate.");
             }
@@ -232,7 +234,7 @@ const ManagerDashboard = ({ user }) => {
                         </div>
                         <div className="applicants-list">
                             {applicants.length > 0 ? applicants.map(app => (
-                                <div key={app.id} className="applicant-item" onClick={() => fetchCandidateProfile(app.student.id)}>
+                                <div key={app.id} className="applicant-item" onClick={() => fetchCandidateProfile(app.student.id, app)}>
                                     <div className="applicant-avatar">{app.student.username.charAt(0).toUpperCase()}</div>
                                     <div className="applicant-info">
                                         <h4>{app.student.username}</h4>
@@ -255,7 +257,7 @@ const ManagerDashboard = ({ user }) => {
                     <div className="modal-content large">
                         <div className="modal-header">
                             <h3>Candidate Profile</h3>
-                            <button onClick={() => { setSelectedCandidate(null); setCandidateProfile(null); }} className="close-btn">×</button>
+                            <button onClick={() => { setSelectedCandidate(null); setCandidateProfile(null); setSelectedApplication(null); }} className="close-btn">×</button>
                         </div>
                         <div className="profile-view-scroll">
                             <div className="profile-header-section">
@@ -298,8 +300,8 @@ const ManagerDashboard = ({ user }) => {
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button onClick={() => { alert('Shortlist functionality coming soon!'); }} className="btn-premium primary">Shortlist Candidate</button>
-                            <button onClick={() => { alert('Reject functionality coming soon!'); }} className="btn-premium report" style={{ background: '#ef4444' }}>Reject</button>
+                            <button onClick={() => handleStatusChange(selectedApplication?.id, 'SHORTLISTED')} className="btn-premium primary">Shortlist Candidate</button>
+                            <button onClick={() => handleStatusChange(selectedApplication?.id, 'REJECTED')} className="btn-premium report" style={{ background: '#ef4444', color: 'white' }}>Reject</button>
                         </div>
                     </div>
                 </div>
@@ -402,6 +404,39 @@ const ManagerDashboard = ({ user }) => {
             {showReport && renderReport()}
         </div>
     );
+    async function handleStatusChange(appId, newStatus) {
+        if (!appId) {
+            alert("Application reference missing.");
+            return;
+        }
+        if (!window.confirm(`Are you sure you want to ${newStatus} this candidate?`)) return;
+
+        setLoading(true);
+        try {
+            const res = await authFetch(`${API_BASE_URL}/api/applications/${appId}/status`, {
+                method: 'PUT',
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                alert(`Candidate ${newStatus} successfully! Email notification sent.`);
+                setSelectedCandidate(null);
+                setCandidateProfile(null);
+                setSelectedApplication(null);
+                if (viewingApplicantsForJob) {
+                    fetchApplicants(viewingApplicantsForJob);
+                }
+                fetchAllApplications();
+            } else {
+                alert("Failed to update status.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error updating status");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     function renderReport() {
         const totalApps = allApplications.length;
         const totalJobs = jobs.filter(j => j.jobType === 'JOB').length;
