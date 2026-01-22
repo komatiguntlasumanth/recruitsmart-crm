@@ -8,7 +8,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
     org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration.class,
     org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration.class,
     org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration.class,
-    org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration.class
+    org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration.class
 })
 public class RecruitSmartApplication {
     public static void main(String[] args) {
