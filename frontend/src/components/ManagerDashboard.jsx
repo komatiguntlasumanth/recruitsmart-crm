@@ -10,6 +10,7 @@ const ManagerDashboard = ({ user }) => {
     const [editingJobId, setEditingJobId] = useState(null);
     const [showReport, setShowReport] = useState(false);
     const [allApplications, setAllApplications] = useState([]);
+    const [hrStats, setHrStats] = useState({ totalJobs: 0, totalApplications: 0, shortlisted: 0, rejected: 0, hired: 0 });
 
     // Applicant Viewing State
     const [viewingApplicantsForJob, setViewingApplicantsForJob] = useState(null);
@@ -39,7 +40,18 @@ const ManagerDashboard = ({ user }) => {
     useEffect(() => {
         fetchJobs();
         fetchAllApplications();
+        fetchHrStats();
     }, []);
+
+    const fetchHrStats = async () => {
+        try {
+            const res = await authFetch(`${API_BASE_URL}/api/jobs/hr-stats`);
+            if (res.ok) {
+                const data = await res.json();
+                setHrStats(data);
+            }
+        } catch (err) { console.error("Error fetching HR stats", err); }
+    };
 
     const fetchAllApplications = async () => {
         try {
@@ -163,23 +175,71 @@ const ManagerDashboard = ({ user }) => {
                 HR Dashboard <span style={{ fontSize: '1rem', fontWeight: 400, color: '#64748b', marginLeft: '1rem' }}>Manage Recruitment & Training</span>
             </h2>
 
-            {/* Quick Actions */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem' }}>
-                <button onClick={() => { setModalMode('JOB'); setShowModal(true); }} className="btn-premium primary">
-                    <span style={{ fontSize: '1.2rem' }}>+</span> Post New Job
-                </button>
-                <button onClick={() => { setModalMode('TRAINING'); setShowModal(true); }} className="btn-premium secondary">
-                    <span style={{ fontSize: '1.2rem' }}>+</span> Add Training Program
-                </button>
-                <button onClick={() => setShowReport(true)} className="btn-premium report">
-                    📊 View Analytics Report
-                </button>
+            {/* SECTION 1: Recruitment Insights (HR Profile Summary) */}
+            <div style={{ marginBottom: '3rem' }}>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    📊 Recruitment Insights <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 400 }}>(Your Posting Activity)</span>
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                    <div className="stat-card blue">
+                        <span className="icon">📝</span>
+                        <div className="info">
+                            <span className="label">Jobs Posted</span>
+                            <span className="value">{hrStats.totalJobs}</span>
+                        </div>
+                    </div>
+                    <div className="stat-card purple">
+                        <span className="icon">📥</span>
+                        <div className="info">
+                            <span className="label">Applications</span>
+                            <span className="value">{hrStats.totalApplications}</span>
+                        </div>
+                    </div>
+                    <div className="stat-card orange">
+                        <span className="icon">⭐</span>
+                        <div className="info">
+                            <span className="label">Shortlisted</span>
+                            <span className="value">{hrStats.shortlisted}</span>
+                        </div>
+                    </div>
+                    <div className="stat-card green">
+                        <span className="icon">✅</span>
+                        <div className="info">
+                            <span className="label">Hired</span>
+                            <span className="value">{hrStats.hired}</span>
+                        </div>
+                    </div>
+                    <div className="stat-card red">
+                        <span className="icon">❌</span>
+                        <div className="info">
+                            <span className="label">Rejected</span>
+                            <span className="value">{hrStats.rejected}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr style={{ border: 'none', height: '1px', background: '#e2e8f0', margin: '3rem 0' }} />
+
+            {/* SECTION 2: Job & Training Postings */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.5rem', color: '#1e293b', margin: 0 }}>
+                    🛠️ Postings Management
+                </h3>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={() => { setModalMode('JOB'); setShowModal(true); }} className="btn-premium primary">
+                        Post New Job
+                    </button>
+                    <button onClick={() => { setModalMode('TRAINING'); setShowModal(true); }} className="btn-premium secondary">
+                        Add Training
+                    </button>
+                </div>
             </div>
 
             {/* Tabs */}
             <div style={{ marginBottom: '2rem', borderBottom: '1px solid #cbd5e1', display: 'flex', gap: '2rem' }}>
-                <button onClick={() => setModalMode('JOB')} className={`tab-btn ${modalMode === 'JOB' ? 'active' : ''}`}>Jobs Posted</button>
-                <button onClick={() => setModalMode('TRAINING')} className={`tab-btn ${modalMode === 'TRAINING' ? 'active' : ''}`}>Training Programs</button>
+                <button onClick={() => setModalMode('JOB')} className={`tab-btn ${modalMode === 'JOB' ? 'active' : ''}`}>Jobs Listing</button>
+                <button onClick={() => setModalMode('TRAINING')} className={`tab-btn ${modalMode === 'TRAINING' ? 'active' : ''}`}>Training Listing</button>
             </div>
 
             {/* List */}
@@ -352,6 +412,17 @@ const ManagerDashboard = ({ user }) => {
                 .tab-btn { background: none; border: none; padding: 10px 0; font-size: 1.1rem; color: #94a3b8; cursor: pointer; font-weight: 600; position: relative; }
                 .tab-btn.active { color: #1e293b; }
                 .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px; background: #6366f1; border-radius: 3px; }
+
+                .stat-card { background: white; padding: 1.5rem; border-radius: 16px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; }
+                .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+                .stat-card .icon { fontSize: 1.5rem; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+                .stat-card.blue .icon { background: #eff6ff; }
+                .stat-card.purple .icon { background: #f5f3ff; }
+                .stat-card.orange .icon { background: #fff7ed; }
+                .stat-card.green .icon { background: #f0fdf4; }
+                .stat-card.red .icon { background: #fef2f2; }
+                .stat-card .info .label { display: block; fontSize: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+                .stat-card .info .value { display: block; fontSize: 1.5rem; color: #1e293b; font-weight: 800; }
 
                 .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
                 .premium-card { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; transition: all 0.2s; }

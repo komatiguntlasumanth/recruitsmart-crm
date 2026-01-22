@@ -7,8 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import com.recruitsmart.repository.ApplicationRepository;
+import com.recruitsmart.model.Application;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -21,6 +25,9 @@ public class JobController {
     @Autowired
     private JobRecommendationService recommendationService;
 
+    @Autowired
+    private ApplicationRepository applicationRepository;
+
     @GetMapping
     public List<Job> getAllJobs() {
         return jobRepository.findAll();
@@ -29,6 +36,32 @@ public class JobController {
     @GetMapping("/open")
     public List<Job> getOpenJobs() {
         return jobRepository.findByStatus("OPEN");
+    }
+
+    @GetMapping("/my-jobs")
+    public List<Job> getMyJobs() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return java.util.Collections.emptyList();
+        return jobRepository.findByPostedByEmail(auth.getName());
+    }
+
+    @GetMapping("/hr-stats")
+    public Map<String, Object> getHrStats() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return Map.of();
+
+        String email = auth.getName();
+        List<Job> myJobs = jobRepository.findByPostedByEmail(email);
+        List<Application> myApps = applicationRepository.findByJobPostedByEmail(email);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalJobs", myJobs.size());
+        stats.put("totalApplications", myApps.size());
+        stats.put("shortlisted", myApps.stream().filter(a -> "SHORTLISTED".equals(a.getStatus())).count());
+        stats.put("rejected", myApps.stream().filter(a -> "REJECTED".equals(a.getStatus())).count());
+        stats.put("hired", myApps.stream().filter(a -> "HIRED".equals(a.getStatus())).count());
+
+        return stats;
     }
 
     @PostMapping
