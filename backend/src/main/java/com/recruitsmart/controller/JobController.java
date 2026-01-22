@@ -4,6 +4,8 @@ import com.recruitsmart.model.Job;
 import com.recruitsmart.repository.JobRepository;
 import com.recruitsmart.service.JobRecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +40,12 @@ public class JobController {
         if (job.getPostedDate() == null) {
             job.setPostedDate(java.time.LocalDate.now());
         }
+        
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            job.setPostedByEmail(auth.getName());
+        }
+        
         return jobRepository.save(job);
     }
     
@@ -57,6 +65,8 @@ public class JobController {
     public Job updateJob(@PathVariable Long id, @jakarta.validation.Valid @RequestBody Job jobDetails) {
         Job job = jobRepository.findById(Objects.requireNonNull(id)).orElseThrow(() -> new RuntimeException("Job not found"));
         
+        checkPermission(job);
+        
         job.setTitle(jobDetails.getTitle());
         job.setCompanyName(jobDetails.getCompanyName());
         job.setDescription(jobDetails.getDescription());
@@ -75,6 +85,37 @@ public class JobController {
 
     @DeleteMapping("/{id}")
     public void deleteJob(@PathVariable Long id) {
-        jobRepository.deleteById(Objects.requireNonNull(id));
+        jobRepository.findById(Objects.requireNonNull(id)).ifPresent(job -> {
+            checkPermission(job);
+            jobRepository.delete(job);
+        });
+    }
+    
+    private void checkPermission(Job job) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) throw new RuntimeException("Not authenticated");
+        
+        String userEmail = auth.getName();
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        
+        if (isAdmin) return;
+        
+        if (job.getPostedByEmail() == null) return; // Allow if no owner (legacy)
+        
+        if (userEmail.equals(job.getPostedByEmail())) return;
+        
+        // Domain check
+        String userDomain = getDomain(userEmail);
+        String ownerDomain = getDomain(job.getPostedByEmail());
+        
+        if (userDomain != null && userDomain.equalsIgnoreCase(ownerDomain)) return;
+        
+        throw new RuntimeException("You do not have permission to manage this job. Owners of the same domain can manage it.");
+    }
+    
+    private String getDomain(String email) {
+        if (email == null || !email.contains("@")) return null;
+        return email.substring(email.indexOf("@") + 1);
     }
 }

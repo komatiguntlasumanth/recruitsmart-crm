@@ -844,6 +844,7 @@ const StudentDashboard = ({ user }) => {
                                         {/* Fallback small badge if needs to be inline, but using absolute top-right is cleaner for "card" look */}
                                     </div>
                                     <p style={{ margin: 0, color: 'var(--sd-text-muted)', fontWeight: 500 }}>{job.companyName} | {job.location} | {job.salary}</p>
+                                    {job.applicationEndDate && <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: '#6366f1', fontWeight: 600 }}>🕒 Apply by: {job.applicationEndDate}</p>}
                                     <p style={{ margin: '10px 0 0 0', fontSize: '0.9rem', opacity: 0.8 }}>{job.description ? job.description.substring(0, 120) + '...' : 'No description available.'}</p>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'end', gap: '0.5rem' }}>
@@ -888,7 +889,8 @@ const StudentDashboard = ({ user }) => {
                             <div style={{ padding: '1rem' }}>
                                 <span className="sd-status-badge open" style={{ fontSize: '0.7rem', marginBottom: '0.5rem', display: 'inline-block' }}>{training.level || 'All Levels'}</span>
                                 <h4 style={{ margin: '0 0 0.5rem 0' }}>{training.title}</h4>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--sd-text-muted)', marginBottom: '1rem' }}>By {training.companyName}</p>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--sd-text-muted)', marginBottom: '0.5rem' }}>By {training.companyName}</p>
+                                {training.applicationEndDate && <p style={{ fontSize: '0.85rem', color: '#0ea5e9', fontWeight: 600, marginBottom: '1rem' }}>🕒 Ends: {training.applicationEndDate}</p>}
                                 <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>{training.description ? training.description.substring(0, 80) + '...' : 'Unlock your potential with this course.'}</p>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
                                     <span style={{ fontWeight: 700, color: 'var(--sd-secondary)' }}>{training.salary || 'Free'}</span>
