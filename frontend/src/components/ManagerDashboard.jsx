@@ -10,7 +10,7 @@ const ManagerDashboard = ({ user }) => {
     const [editingJobId, setEditingJobId] = useState(null);
     const [showReport, setShowReport] = useState(false);
     const [allApplications, setAllApplications] = useState([]);
-    const [hrStats, setHrStats] = useState({ totalJobs: 0, totalApplications: 0, shortlisted: 0, rejected: 0, hired: 0 });
+    const [hrStats, setHrStats] = useState({ totalJobs: 0, systemTotalJobs: 0, totalApplications: 0, shortlisted: 0, rejected: 0, hired: 0, recentApplicants: [] });
 
     // Applicant Viewing State
     const [viewingApplicantsForJob, setViewingApplicantsForJob] = useState(null);
@@ -215,6 +215,55 @@ const ManagerDashboard = ({ user }) => {
                             <span className="label">Rejected</span>
                             <span className="value">{hrStats.rejected}</span>
                         </div>
+                    </div>
+                    <div className="stat-card grey">
+                        <span className="icon">🌐</span>
+                        <div className="info">
+                            <span className="label">Total System Jobs</span>
+                            <span className="value">{hrStats.systemTotalJobs}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Who Applied Table */}
+                <div style={{ marginTop: '2.5rem', background: 'white', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
+                    <h4 style={{ marginBottom: '1.5rem', color: '#1e293b', fontSize: '1.1rem' }}>👥 Recent Applicants (Who Applied)</h4>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '2px solid #f1f5f9', textAlign: 'left', fontSize: '0.85rem' }}>
+                                    <th style={{ padding: '12px', color: '#64748b' }}>STUDENT NAME</th>
+                                    <th style={{ padding: '12px', color: '#64748b' }}>JOB APPLIED</th>
+                                    <th style={{ padding: '12px', color: '#64748b' }}>STATUS</th>
+                                    <th style={{ padding: '12px', color: '#64748b' }}>ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {hrStats.recentApplicants && hrStats.recentApplicants.length > 0 ? (
+                                    hrStats.recentApplicants.slice(0, 5).map(app => (
+                                        <tr key={app.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                                            <td style={{ padding: '12px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <div className="applicant-avatar" style={{ width: '30px', height: '30px', fontSize: '0.8rem' }}>{app.student.username.charAt(0).toUpperCase()}</div>
+                                                    <span style={{ fontWeight: 600, color: '#334155' }}>{app.student.username}</span>
+                                                </div>
+                                            </td>
+                                            <td style={{ padding: '12px', color: '#64748b' }}>{app.job.title}</td>
+                                            <td style={{ padding: '12px' }}>
+                                                <span className={`status-badge ${app.status || 'APPLIED'}`} style={{ fontSize: '0.7rem' }}>{app.status || 'APPLIED'}</span>
+                                            </td>
+                                            <td style={{ padding: '12px' }}>
+                                                <button onClick={() => fetchCandidateProfile(app.student.id, app)} style={{ background: 'none', border: 'none', color: '#6366f1', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}>View Profile</button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>No recent applicants found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -421,6 +470,7 @@ const ManagerDashboard = ({ user }) => {
                 .stat-card.orange .icon { background: #fff7ed; }
                 .stat-card.green .icon { background: #f0fdf4; }
                 .stat-card.red .icon { background: #fef2f2; }
+                .stat-card.grey .icon { background: #f8fafc; }
                 .stat-card .info .label { display: block; fontSize: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
                 .stat-card .info .value { display: block; fontSize: 1.5rem; color: #1e293b; font-weight: 800; }
 
