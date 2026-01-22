@@ -18,6 +18,7 @@ def make_request(path, method="GET", payload=None, token=None):
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     
     try:
+        time.sleep(2) # Avoid rate limiting
         with urllib.request.urlopen(req) as response:
             return json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
