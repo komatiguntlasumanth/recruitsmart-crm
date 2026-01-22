@@ -28,11 +28,12 @@ public class AiIndexService {
     @Autowired
     private VectorStoreService vectorStoreService;
 
-    @EventListener(ApplicationReadyEvent.class)
+    // Disabled startup indexing to save memory on 512MB instances
+    // @EventListener(ApplicationReadyEvent.class)
     @Transactional(readOnly = true)
     public void initIndex() {
-        // Index all jobs and students on startup
-        refreshIndex();
+        // refreshIndex(); 
+        System.out.println("AI Indexing on startup skipped (Memory Optimization)");
     }
 
     @Transactional(readOnly = true)
