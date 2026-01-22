@@ -3,7 +3,13 @@ package com.recruitsmart;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.websocket.servlet.WebSocketMessagingAutoConfiguration.class
+})
 public class RecruitSmartApplication {
     public static void main(String[] args) {
         SpringApplication.run(RecruitSmartApplication.class, args);
