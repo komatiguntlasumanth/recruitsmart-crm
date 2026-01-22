@@ -56,7 +56,9 @@ public class JobController {
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalJobs", myJobs.size());
+        stats.put("systemTotalJobs", jobRepository.count());
         stats.put("totalApplications", myApps.size());
+        stats.put("recentApplicants", myApps); // Return full list for "who are there"
         stats.put("shortlisted", myApps.stream().filter(a -> "SHORTLISTED".equals(a.getStatus())).count());
         stats.put("rejected", myApps.stream().filter(a -> "REJECTED".equals(a.getStatus())).count());
         stats.put("hired", myApps.stream().filter(a -> "HIRED".equals(a.getStatus())).count());
