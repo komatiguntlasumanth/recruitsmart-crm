@@ -5,7 +5,7 @@
         "buildCommand": "./mvnw clean package -DskipTests"
     },
     "deploy": {
-        "startCommand": "export MALLOC_ARENA_MAX=2 && java -Xmx128m -Xss256k -XX:-TieredCompilation -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=20m -XX:MaxMetaspaceSize=72m -XX:CompressedClassSpaceSize=24m -XX:+UseSerialGC -noverify -Xrs -Dcom.sun.management.jmxremote=false -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar",
+        "startCommand": "export MALLOC_ARENA_MAX=2 && java -Xmx160m -Xss256k -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=80m -XX:ReservedCodeCacheSize=24m -XX:CompressedClassSpaceSize=24m -XX:MaxDirectMemorySize=10m -XX:+UseSerialGC -XX:CICompilerCount=2 -XX:+ExitOnOutOfMemoryError -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar",
         "healthcheckPath": "/actuator/health",
         "healthcheckTimeout": 300,
         "restartPolicyType": "ON_FAILURE",
