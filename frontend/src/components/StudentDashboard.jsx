@@ -814,8 +814,21 @@ const StudentDashboard = ({ user }) => {
                 <div className="sd-cert-list">
                     {jobsToShow.length > 0 ? jobsToShow.map(job => {
                         const isApplied = myApplications.some(app => app.job.id === job.id);
+                        const isExpired = job.applicationEndDate && new Date(job.applicationEndDate) < new Date().setHours(0, 0, 0, 0);
+
                         return (
-                            <div key={job.id} className="sd-card" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+                            <div key={job.id} className="sd-card" style={{
+                                marginBottom: '1rem',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '1.5rem',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                filter: isExpired ? 'grayscale(1)' : 'none',
+                                opacity: isExpired ? 0.7 : 1,
+                                transition: 'all 0.3s ease'
+                            }}>
                                 {/* Status Badge Logic */}
                                 {job.appStatus && (
                                     <div style={{
@@ -844,17 +857,33 @@ const StudentDashboard = ({ user }) => {
                                         {/* Fallback small badge if needs to be inline, but using absolute top-right is cleaner for "card" look */}
                                     </div>
                                     <p style={{ margin: 0, color: 'var(--sd-text-muted)', fontWeight: 500 }}>{job.companyName} | {job.location} | {job.salary}</p>
-                                    {job.applicationEndDate && <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: '#6366f1', fontWeight: 600 }}>🕒 Apply by: {job.applicationEndDate}</p>}
+                                    {job.applicationEndDate && (
+                                        <p style={{
+                                            margin: '5px 0 0 0',
+                                            fontSize: '0.85rem',
+                                            color: isExpired ? '#64748b' : '#6366f1',
+                                            fontWeight: 600
+                                        }}>
+                                            {isExpired ? '❌ Closed on: ' : '🕒 Apply by: '}{job.applicationEndDate}
+                                        </p>
+                                    )}
                                     <p style={{ margin: '10px 0 0 0', fontSize: '0.9rem', opacity: 0.8 }}>{job.description ? job.description.substring(0, 120) + '...' : 'No description available.'}</p>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'end', gap: '0.5rem' }}>
                                     <button
-                                        className={`sd-nav-item ${isApplied ? '' : 'active'} ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
-                                        style={{ width: 'auto', padding: '0 30px', background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', border: isApplied ? '1px solid #bbf7d0' : 'none' }}
-                                        onClick={() => !isApplied && handleApply(job.id)}
-                                        disabled={isApplied || applyingId === job.id}
+                                        className={`sd-nav-item ${isApplied || isExpired ? '' : 'active'} ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
+                                        style={{
+                                            width: 'auto',
+                                            padding: '0 30px',
+                                            background: isApplied ? '#dcfce7' : (isExpired ? '#e2e8f0' : 'var(--sd-primary)'),
+                                            color: isApplied ? '#16a34a' : (isExpired ? '#64748b' : 'white'),
+                                            border: isApplied ? '1px solid #bbf7d0' : 'none',
+                                            cursor: (isApplied || isExpired) ? 'not-allowed' : 'pointer'
+                                        }}
+                                        onClick={() => !isApplied && !isExpired && handleApply(job.id)}
+                                        disabled={isApplied || isExpired || applyingId === job.id}
                                     >
-                                        {isApplied ? 'Applied' : (applyingId === job.id ? 'Applying...' : 'Apply Now')}
+                                        {isApplied ? 'Applied' : (isExpired ? 'Closed' : (applyingId === job.id ? 'Applying...' : 'Apply Now'))}
                                     </button>
                                     {isApplied && job.appStatus && <span style={{ fontSize: '0.8rem', color: 'var(--sd-text-muted)' }}>Current Status: <strong>{job.appStatus}</strong></span>}
                                 </div>
@@ -881,24 +910,62 @@ const StudentDashboard = ({ user }) => {
                 </div>
 
                 <div className="sd-grid-3">
-                    {trainingJobs.length > 0 ? trainingJobs.map(training => (
-                        <div key={training.id} className="sd-card">
-                            <div style={{ height: '120px', background: 'linear-gradient(135deg, #a5f3fc 0%, #0ea5e9 100%)', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '3rem' }}>
-                                🎓
-                            </div>
-                            <div style={{ padding: '1rem' }}>
-                                <span className="sd-status-badge open" style={{ fontSize: '0.7rem', marginBottom: '0.5rem', display: 'inline-block' }}>{training.level || 'All Levels'}</span>
-                                <h4 style={{ margin: '0 0 0.5rem 0' }}>{training.title}</h4>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--sd-text-muted)', marginBottom: '0.5rem' }}>By {training.companyName}</p>
-                                {training.applicationEndDate && <p style={{ fontSize: '0.85rem', color: '#0ea5e9', fontWeight: 600, marginBottom: '1rem' }}>🕒 Ends: {training.applicationEndDate}</p>}
-                                <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>{training.description ? training.description.substring(0, 80) + '...' : 'Unlock your potential with this course.'}</p>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                                    <span style={{ fontWeight: 700, color: 'var(--sd-secondary)' }}>{training.salary || 'Free'}</span>
-                                    <button className="sd-nav-item active" style={{ width: 'auto', padding: '5px 15px', fontSize: '0.9rem' }} onClick={() => handleApply(training.id)}>Enroll Now</button>
+                    {trainingJobs.length > 0 ? trainingJobs.map(training => {
+                        const isExpired = training.applicationEndDate && new Date(training.applicationEndDate) < new Date().setHours(0, 0, 0, 0);
+                        return (
+                            <div key={training.id} className="sd-card" style={{
+                                filter: isExpired ? 'grayscale(1)' : 'none',
+                                opacity: isExpired ? 0.7 : 1,
+                                transition: 'all 0.3s ease'
+                            }}>
+                                <div style={{ height: '120px', background: isExpired ? '#ccd6dd' : 'linear-gradient(135deg, #a5f3fc 0%, #0ea5e9 100%)', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '3rem' }}>
+                                    {isExpired ? '⌛' : '🎓'}
+                                </div>
+                                <div style={{ padding: '1rem' }}>
+                                    <span className="sd-status-badge open" style={{
+                                        fontSize: '0.7rem',
+                                        marginBottom: '0.5rem',
+                                        display: 'inline-block',
+                                        background: isExpired ? '#94a3b8' : 'var(--sd-accent-light)',
+                                        color: isExpired ? 'white' : 'var(--sd-accent)'
+                                    }}>
+                                        {isExpired ? 'Expired' : (training.level || 'All Levels')}
+                                    </span>
+                                    <h4 style={{ margin: '0 0 0.5rem 0' }}>{training.title}</h4>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--sd-text-muted)', marginBottom: '0.5rem' }}>By {training.companyName}</p>
+                                    {training.applicationEndDate && (
+                                        <p style={{
+                                            fontSize: '0.85rem',
+                                            color: isExpired ? '#64748b' : '#0ea5e9',
+                                            fontWeight: 600,
+                                            marginBottom: '1rem'
+                                        }}>
+                                            {isExpired ? '❌ Ended on: ' : '🕒 Ends: '}{training.applicationEndDate}
+                                        </p>
+                                    )}
+                                    <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>{training.description ? training.description.substring(0, 80) + '...' : 'Unlock your potential with this course.'}</p>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                                        <span style={{ fontWeight: 700, color: isExpired ? '#64748b' : 'var(--sd-secondary)' }}>{training.salary || 'Free'}</span>
+                                        <button
+                                            className={`sd-nav-item ${isExpired ? '' : 'active'}`}
+                                            style={{
+                                                width: 'auto',
+                                                padding: '5px 15px',
+                                                fontSize: '0.9rem',
+                                                background: isExpired ? '#e2e8f0' : 'var(--sd-primary)',
+                                                color: isExpired ? '#64748b' : 'white',
+                                                cursor: isExpired ? 'not-allowed' : 'pointer'
+                                            }}
+                                            onClick={() => !isExpired && handleApply(training.id)}
+                                            disabled={isExpired}
+                                        >
+                                            {isExpired ? 'Closed' : 'Enroll Now'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )) : <p style={{ padding: '2rem', textAlign: 'center', gridColumn: '1/-1', color: 'var(--sd-text-muted)' }}>No training programs available at the moment.</p>}
+                        );
+                    }) : <p style={{ padding: '2rem', textAlign: 'center', gridColumn: '1/-1', color: 'var(--sd-text-muted)' }}>No training programs available at the moment.</p>}
                 </div>
             </div>
         );

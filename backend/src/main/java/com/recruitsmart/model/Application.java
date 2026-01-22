@@ -20,7 +20,7 @@ public class Application {
     @JoinColumn(name = "user_id")
     private User student;
 
-    @Pattern(regexp = "^(APPLIED|REVIEWING|INTERVIEW|REJECTED|HIRED)$", message = "Invalid application status")
+    @Pattern(regexp = "^(APPLIED|REVIEWING|INTERVIEW|SHORTLISTED|REJECTED|HIRED)$", message = "Invalid application status")
     private String status; // APPLIED, REVIEWING, INTERVIEW, REJECTED, HIRED
     
     @PastOrPresent(message = "Application date cannot be in the future")
