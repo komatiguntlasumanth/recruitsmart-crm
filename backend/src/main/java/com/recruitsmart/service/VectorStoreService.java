@@ -1,7 +1,6 @@
 package com.recruitsmart.service;
 
 import org.springframework.stereotype.Service;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,9 +8,21 @@ import java.util.stream.Collectors;
 @Service
 public class VectorStoreService {
 
-    // Store embeddings for Jobs and Students
-    private final Map<Long, List<Double>> jobEmbeddings = new HashMap<>();
-    private final Map<Long, List<Double>> studentEmbeddings = new HashMap<>();
+    private static final int MAX_ENTRIES = 1000;
+
+    // Store embeddings for Jobs and Students with LRU eviction to save memory
+    private final Map<Long, List<Double>> jobEmbeddings = new java.util.LinkedHashMap<Long, List<Double>>(MAX_ENTRIES, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Long, List<Double>> eldest) {
+            return size() > MAX_ENTRIES;
+        }
+    };
+    private final Map<Long, List<Double>> studentEmbeddings = new java.util.LinkedHashMap<Long, List<Double>>(MAX_ENTRIES, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Long, List<Double>> eldest) {
+            return size() > MAX_ENTRIES;
+        }
+    };
 
     public void saveJobEmbedding(Long jobId, List<Double> embedding) {
         jobEmbeddings.put(jobId, embedding);
