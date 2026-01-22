@@ -40,7 +40,7 @@ function App() {
         if (view === 'dashboard') {
             if (user.role === 'ROLE_STUDENT' || user.role === 'ROLE_STUDENT') return <StudentDashboard user={user} />;
             if (user.role === 'ROLE_ADMIN') return <AdminDashboard user={user} />;
-            if (user.role === 'ROLE_HR') return <ManagerDashboard user={user} />;
+            if (user.role === 'ROLE_HR' || user.role === 'ROLE_MANAGER') return <ManagerDashboard user={user} />;
         }
 
         switch (view) {
