@@ -19,6 +19,13 @@ public class LeadController {
     @Autowired
     private MLService mlService;
 
+    @Autowired
+    private com.recruitsmart.service.ConversionService conversionService;
+
+    @PostMapping("/{id}/convert")
+    public com.recruitsmart.model.Customer convertLead(@PathVariable Long id) {
+        return conversionService.convertLeadToCustomer(id);
+    }
 
     @GetMapping
     public List<Lead> getAllLeads() {
