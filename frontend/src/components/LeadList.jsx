@@ -106,7 +106,15 @@ const LeadList = (props) => {
                                     </div>
                                 </td>
                                 <td style={{ padding: '1rem' }}>
-                                    {/* Convert button removed as backend support is retired */}
+                                    {props.userRole === 'ROLE_HR' && (
+                                        <button
+                                            className="btn-primary"
+                                            style={{ fontSize: '0.85rem', padding: '6px 16px' }}
+                                            onClick={() => handleConvert(lead.id)}
+                                        >
+                                            Convert
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
