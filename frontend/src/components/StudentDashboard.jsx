@@ -875,15 +875,16 @@ const StudentDashboard = ({ user }) => {
                                         style={{
                                             width: 'auto',
                                             padding: '0 30px',
-                                            background: isApplied ? '#dcfce7' : (isExpired ? '#e2e8f0' : 'var(--sd-primary)'),
-                                            color: isApplied ? '#16a34a' : (isExpired ? '#64748b' : 'white'),
+                                            background: isApplied ? '#dcfce7' : (isExpired ? '#1f2937' : 'var(--sd-primary)'),
+                                            color: isApplied ? '#16a34a' : (isExpired ? 'white' : 'white'),
                                             border: isApplied ? '1px solid #bbf7d0' : 'none',
-                                            cursor: (isApplied || isExpired) ? 'not-allowed' : 'pointer'
+                                            cursor: (isApplied || isExpired) ? 'not-allowed' : 'pointer',
+                                            fontWeight: (isApplied || isExpired) ? 'bold' : 'normal'
                                         }}
                                         onClick={() => !isApplied && !isExpired && handleApply(job.id)}
                                         disabled={isApplied || isExpired || applyingId === job.id}
                                     >
-                                        {isApplied ? 'Applied' : (isExpired ? 'Closed' : (applyingId === job.id ? 'Applying...' : 'Apply Now'))}
+                                        {isApplied ? 'Applied' : (isExpired ? 'CLOSED' : (applyingId === job.id ? 'Applying...' : 'Apply Now'))}
                                     </button>
                                     {isApplied && job.appStatus && <span style={{ fontSize: '0.8rem', color: 'var(--sd-text-muted)' }}>Current Status: <strong>{job.appStatus}</strong></span>}
                                 </div>
@@ -952,14 +953,15 @@ const StudentDashboard = ({ user }) => {
                                                 width: 'auto',
                                                 padding: '5px 15px',
                                                 fontSize: '0.9rem',
-                                                background: isExpired ? '#e2e8f0' : 'var(--sd-primary)',
-                                                color: isExpired ? '#64748b' : 'white',
-                                                cursor: isExpired ? 'not-allowed' : 'pointer'
+                                                background: isExpired ? '#1f2937' : 'var(--sd-primary)',
+                                                color: isExpired ? 'white' : 'white',
+                                                cursor: isExpired ? 'not-allowed' : 'pointer',
+                                                fontWeight: isExpired ? 'bold' : 'normal'
                                             }}
                                             onClick={() => !isExpired && handleApply(training.id)}
                                             disabled={isExpired}
                                         >
-                                            {isExpired ? 'Closed' : 'Enroll Now'}
+                                            {isExpired ? 'CLOSED' : 'Enroll Now'}
                                         </button>
                                     </div>
                                 </div>
