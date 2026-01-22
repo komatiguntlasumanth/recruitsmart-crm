@@ -2,7 +2,7 @@
 nixPkgs = ["jdk17"]
 
 [phases.build]
-cmds = ["./mvnw clean package -DskipTests"]
+cmds = ["./mvnw package -DskipTests"]
 
 [start]
-cmd = "export MALLOC_ARENA_MAX=2 && java -Xmx160m -Xss256k -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=80m -XX:ReservedCodeCacheSize=24m -XX:CompressedClassSpaceSize=24m -XX:MaxDirectMemorySize=10m -XX:+UseSerialGC -XX:CICompilerCount=2 -XX:+ExitOnOutOfMemoryError -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar"
+cmd = "java -Xmx256m -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar"

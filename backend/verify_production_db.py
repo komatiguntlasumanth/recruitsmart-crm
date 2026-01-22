@@ -6,7 +6,7 @@ def check_health(url):
     print(f"Checking health at: {url} ...")
     try:
         req = urllib.request.Request(url)
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=30) as response:
             if response.getcode() == 200:
                 body = json.loads(response.read().decode('utf-8'))
                 print("✓ Production Backend is UP!")

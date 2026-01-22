@@ -2,13 +2,13 @@
     "$schema": "https://railway.app/railway.schema.json",
     "build": {
         "builder": "NIXPACKS",
-        "buildCommand": "./mvnw clean package -DskipTests"
+        "buildCommand": "./mvnw package -DskipTests"
     },
     "deploy": {
-        "startCommand": "export MALLOC_ARENA_MAX=2 && java -Xmx160m -Xss256k -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=80m -XX:ReservedCodeCacheSize=24m -XX:CompressedClassSpaceSize=24m -XX:MaxDirectMemorySize=10m -XX:+UseSerialGC -XX:CICompilerCount=2 -XX:+ExitOnOutOfMemoryError -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar",
+        "startCommand": "java -Xmx256m -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar",
         "healthcheckPath": "/actuator/health",
         "healthcheckTimeout": 300,
         "restartPolicyType": "ON_FAILURE",
-        "restartPolicyMaxRetries": 10
+        "restartPolicyMaxRetries": 5
     }
 }

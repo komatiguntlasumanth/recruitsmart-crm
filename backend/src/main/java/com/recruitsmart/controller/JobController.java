@@ -120,9 +120,9 @@ public class JobController {
 
     @DeleteMapping("/{id}")
     public void deleteJob(@PathVariable Long id) {
-        jobRepository.findById(Objects.requireNonNull(id)).ifPresent(job -> {
-            checkPermission(job);
-            jobRepository.delete(job);
+        jobRepository.findById(Objects.requireNonNull(id)).ifPresent(entity -> {
+            checkPermission(entity);
+            jobRepository.delete(entity);
         });
     }
     
