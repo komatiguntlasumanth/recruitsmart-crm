@@ -5,6 +5,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ||
         ? 'http://localhost:8080'
         : `http://${window.location.hostname}:8080`);
 
+if (API_BASE_URL.includes('localhost') && window.location.hostname !== 'localhost') {
+    console.warn("API_BASE_URL is pointing to localhost but you are not on localhost. Requests will likely fail.");
+}
+
 // Helper function to get auth headers
 export const getAuthHeaders = () => {
     const token = localStorage.getItem('token');

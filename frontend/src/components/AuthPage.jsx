@@ -48,12 +48,15 @@ const AuthPage = ({ onLogin }) => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password, username })
                 });
-                const data = await response.json();
 
-                // Debug logging
-                console.log('Registration response:', data);
-                console.log('Token value:', data.token);
-                console.log('User enabled:', data.user?.enabled);
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(`Server returned non-JSON response (${response.status}): ${text.substring(0, 100)}`);
+                }
 
                 if (!response.ok) {
                     if (data.errors) {
@@ -63,15 +66,13 @@ const AuthPage = ({ onLogin }) => {
                     throw new Error(data.message || 'Registration failed');
                 }
 
-                // Check if token exists (if not, it means pending approval)
                 if (!data.token || data.token === "") {
                     alert("Your request is sent to Admin. Once the Admin approves, you can access the HR Dashboard.");
                     setMode('login');
-                    localStorage.removeItem('token'); // Ensure no token is stored
+                    localStorage.removeItem('token');
                     return;
                 }
 
-                // Auto-login after successful registration
                 localStorage.setItem('token', data.token);
                 onLogin({ name: data.user.username || data.user.email, email: data.user.email, role: data.user.role, username: data.user.username });
             } else if (mode === 'login') {
@@ -80,7 +81,22 @@ const AuthPage = ({ onLogin }) => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-                const data = await response.json();
+
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    // Provide a much cleaner error for 404/502/etc.
+                    if (response.status === 404) {
+                        throw new Error(`API Endpoint not found (404). Please check if the backend is running at ${API_BASE}`);
+                    } else if (response.status === 502 || response.status === 503) {
+                        throw new Error(`Backend server is currently down or restarting (Status ${response.status}).`);
+                    }
+                    throw new Error(`Server error (${response.status}): ${text.substring(0, 50)}...`);
+                }
+
                 if (!response.ok) throw new Error(data.message || 'Login failed');
                 localStorage.setItem('token', data.token);
                 onLogin({ name: data.user.username || data.user.email, email: data.user.email, role: data.user.role, username: data.user.username });
