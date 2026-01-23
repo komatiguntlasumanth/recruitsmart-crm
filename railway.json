@@ -5,7 +5,7 @@
         "buildCommand": "export MAVEN_OPTS='-Xmx256m -Dmaven.test.skip=true' && cd backend && ./mvnw clean package -DskipTests"
     },
     "deploy": {
-        "startCommand": "java -Xmx192m -Xms128m -Xss512k -XX:TieredStopAtLevel=1 -XX:CICompilerCount=2 -XX:+UseSerialGC -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar backend/target/recruitsmart-crm-0.0.1-SNAPSHOT.jar",
+        "startCommand": "java -Xmx320m -Xms192m -Xss512k -XX:TieredStopAtLevel=1 -XX:CICompilerCount=2 -XX:+UseSerialGC -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar backend/target/recruitsmart-crm-0.0.1-SNAPSHOT.jar",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 300,
         "restartPolicyType": "ON_FAILURE",
