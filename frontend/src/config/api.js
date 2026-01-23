@@ -1,8 +1,9 @@
 // API Configuration
 // Uses environment variable VITE_API_URL for production, falls back to localhost for development
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8080'
-    : 'https://recruitsmart-crm-production.up.railway.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8080'
+        : `http://${window.location.hostname}:8080`);
 
 // Helper function to get auth headers
 export const getAuthHeaders = () => {
