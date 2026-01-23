@@ -12,12 +12,9 @@ const getNormalizedApiUrl = () => {
         return 'http://localhost:8080';
     }
 
-    // Priority 3: Production (Vercel/Railway)
-    // If we're on a subdomain of up.railway.app, the API is likely on the same host but different port OR different subdomain
-    // For now, assume Railway uses standard HTTPS (443) for the API and it's set via VITE_API_URL.
-    // If VITE_API_URL is missing, we try to guess based on protocol
-    const protocol = window.location.protocol;
-    return `${protocol}//${window.location.hostname}:8080`;
+    // Priority 3: Production (Hugging Face / Railway Same-Origin)
+    // If we're in production and no VITE_API_URL is set, assume same-origin (combined deployment)
+    return window.location.origin;
 };
 
 const API_BASE_URL = getNormalizedApiUrl();
