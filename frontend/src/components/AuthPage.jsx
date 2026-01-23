@@ -97,13 +97,23 @@ const AuthPage = ({ onLogin }) => {
                     throw new Error(`Server error (${response.status}): ${text.substring(0, 50)}...`);
                 }
 
-                if (!response.ok) throw new Error(data.message || 'Login failed');
+                if (!response.ok) {
+                    const message = data.message || 'Login failed';
+                    if (response.status === 405) {
+                        throw new Error(`Method Not Allowed (405). This usually means the API URL is wrong. Current API: ${API_BASE}`);
+                    }
+                    throw new Error(message);
+                }
                 localStorage.setItem('token', data.token);
                 onLogin({ name: data.user.username || data.user.email, email: data.user.email, role: data.user.role, username: data.user.username });
             }
         } catch (err) {
             console.error(`Auth Error at ${API_BASE}:`, err);
-            setError(err.message);
+            let errorMessage = err.message;
+            if (err.message.includes("Failed to fetch")) {
+                errorMessage = `Connection Failed. Is the backend running at ${API_BASE_URL}?`;
+            }
+            setError(errorMessage);
             if (err.message.includes("not registered")) {
                 alert(err.message);
                 setMode('register');
@@ -178,7 +188,16 @@ const AuthPage = ({ onLogin }) => {
                         {mode === 'login' ? 'Please enter your details to sign in.' : 'Create your account to get started.'}
                     </p>
 
-                    {error && <div style={{ color: '#ef4444', background: '#fee2e2', padding: '10px', borderRadius: '5px', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>}
+                    {error && (
+                        <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', border: '1px solid #fecaca' }}>
+                            <strong>Error:</strong> {error}
+                            {error.includes('405') && (
+                                <div style={{ marginTop: '8px', fontSize: '0.8rem', opacity: '0.8' }}>
+                                    💡 Tip: Make sure <code>VITE_API_URL</code> is set in Vercel to your Railway URL.
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {message && <div style={{ color: '#10b981', background: '#d1fae5', padding: '10px', borderRadius: '5px', marginBottom: '1rem', fontSize: '0.9rem' }}>{message}</div>}
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
