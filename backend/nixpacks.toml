@@ -1,8 +1,0 @@
-[phases.setup]
-nixPkgs = ["jdk17"]
-
-[phases.build]
-cmds = ["./mvnw clean package -DskipTests"]
-
-[start]
-cmd = "java -Xmx256m -Xms128m -Xss512k -XX:TieredStopAtLevel=1 -XX:+UseSerialGC -XX:CICompilerCount=2 -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar"
