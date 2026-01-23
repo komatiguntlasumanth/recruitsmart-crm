@@ -123,7 +123,7 @@ public class JobController {
         if (id == null) return;
         jobRepository.findById(id).ifPresent(entity -> {
             checkPermission(entity);
-            jobRepository.delete(entity);
+            jobRepository.delete(Objects.requireNonNull(entity));
         });
     }
     
