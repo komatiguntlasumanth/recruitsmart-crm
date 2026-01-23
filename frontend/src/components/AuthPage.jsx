@@ -88,9 +88,11 @@ const AuthPage = ({ onLogin }) => {
                     data = await response.json();
                 } else {
                     const text = await response.text();
-                    // Provide a much cleaner error for 404/502/etc.
+                    // Provide a much cleaner error for 404/405/502/etc.
                     if (response.status === 404) {
-                        throw new Error(`API Endpoint not found (404). Please check if the backend is running at ${API_BASE}`);
+                        throw new Error(`API Endpoint not found (404). Current URL: ${API_BASE}`);
+                    } else if (response.status === 405) {
+                        throw new Error(`Method Not Allowed (405). You are likely hitting the frontend instead of the backend. URL: ${API_BASE}`);
                     } else if (response.status === 502 || response.status === 503) {
                         throw new Error(`Backend server is currently down or restarting (Status ${response.status}).`);
                     }
@@ -99,9 +101,6 @@ const AuthPage = ({ onLogin }) => {
 
                 if (!response.ok) {
                     const message = data.message || 'Login failed';
-                    if (response.status === 405) {
-                        throw new Error(`Method Not Allowed (405). This usually means the API URL is wrong. Current API: ${API_BASE}`);
-                    }
                     throw new Error(message);
                 }
                 localStorage.setItem('token', data.token);
