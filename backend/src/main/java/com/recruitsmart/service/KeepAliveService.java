@@ -18,25 +18,26 @@ public class KeepAliveService {
     @Value("${BACKEND_URL:}")
     private String backendUrl;
 
-    // Ping every 10 minutes (600,000 ms)
-    @Scheduled(fixedRate = 600000)
+    // Ping every 5 minutes (300,000 ms) to keep the service warm
+    @Scheduled(fixedRate = 300000)
     public void keepAlive() {
         if (!enabled) {
+            logger.debug("Keep-alive is disabled.");
             return;
         }
 
         if (backendUrl == null || backendUrl.isEmpty()) {
-            logger.warn("Keep-alive is enabled but BACKEND_URL is not set. Please set BACKEND_URL in environment variables.");
+            logger.warn("Keep-alive is enabled but BACKEND_URL is not set. Please set BACKEND_URL in Railway environment variables.");
             return;
         }
 
         try {
             String url = backendUrl.endsWith("/") ? backendUrl + "health" : backendUrl + "/health";
-            logger.info("Sending keep-alive ping to: {}", url);
+            logger.info("Railway Keep-Alive: Sending ping to {}", url);
             restTemplate.getForObject(url, String.class);
-            logger.info("Keep-alive ping successful.");
+            logger.info("Railway Keep-Alive: Ping successful ✅");
         } catch (Exception e) {
-            logger.error("Keep-alive ping failed: {}", e.getMessage());
+            logger.error("Railway Keep-Alive: Ping failed ❌ - Error: {}", e.getMessage());
         }
     }
 }
