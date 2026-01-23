@@ -121,7 +121,6 @@ const JobBoard = ({ user }) => {
             description: job.description,
             designation: job.designation,
             level: job.level || 'Fresher',
-            level: job.level || 'Fresher',
             applicationLink: job.applicationLink,
             eligibilityCriteria: job.eligibilityCriteria,
             startDate: job.startDate || '',
