@@ -102,6 +102,7 @@ const AuthPage = ({ onLogin }) => {
                 onLogin({ name: data.user.username || data.user.email, email: data.user.email, role: data.user.role, username: data.user.username });
             }
         } catch (err) {
+            console.error(`Auth Error at ${API_BASE}:`, err);
             setError(err.message);
             if (err.message.includes("not registered")) {
                 alert(err.message);
