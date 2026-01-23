@@ -5,4 +5,4 @@ nixPkgs = ["jdk17"]
 cmds = ["./mvnw clean package -DskipTests"]
 
 [start]
-cmd = "java -Xmx192m -Xms96m -Xss256k -XX:TieredStopAtLevel=1 -XX:+UseSerialGC -XX:CICompilerCount=2 -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar"
+cmd = "java -Xmx300m -Xms150m -Xss512k -XX:TieredStopAtLevel=1 -XX:+UseSerialGC -XX:CICompilerCount=2 -Dserver.port=$PORT -Djava.security.egd=file:/dev/./urandom -jar target/recruitsmart-crm-0.0.1-SNAPSHOT.jar"
