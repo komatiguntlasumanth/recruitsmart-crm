@@ -6,6 +6,8 @@ COPY frontend/package*.json ./
 RUN npm install
 # Copy the rest of the frontend source
 COPY frontend/ ./
+# Ensure binaries are executable (fixes Windows upload issues)
+RUN chmod -R +x node_modules/.bin
 # Build frontend (Vite)
 # We set VITE_API_URL to empty so it uses same-origin in production
 RUN VITE_API_URL="" npm run build
