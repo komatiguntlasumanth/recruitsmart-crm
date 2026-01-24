@@ -1,15 +1,14 @@
 # Stage 1: Build the frontend
 FROM node:18-alpine AS frontend-build
 WORKDIR /app/frontend
-# Optimize npm install by copying only package files first
 COPY frontend/package*.json ./
 RUN npm install
-# Copy the rest of the frontend source
-COPY frontend/ ./
-# Ensure binaries are executable (fixes Windows upload issues)
-RUN chmod -R +x node_modules/.bin
-# Build frontend (Vite)
-# We set VITE_API_URL to empty so it uses same-origin in production
+# Copy only necessary frontend files (avoiding node_modules if it exists)
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/index.html ./
+COPY frontend/vite.config.js ./
+# Build frontend
 RUN VITE_API_URL="" npm run build
 
 # Stage 2: Build the backend with the frontend assets
@@ -19,8 +18,9 @@ WORKDIR /app
 RUN mkdir -p backend/src/main/resources/static
 # Copy the built frontend to spring boot's static resources
 COPY --from=frontend-build /app/frontend/dist/ backend/src/main/resources/static/
-# Copy the backend source
-COPY backend/ ./backend
+# Copy only necessary backend files
+COPY backend/pom.xml ./backend/
+COPY backend/src ./backend/src
 WORKDIR /app/backend
 # Build the jar
 RUN mvn clean package -DskipTests
