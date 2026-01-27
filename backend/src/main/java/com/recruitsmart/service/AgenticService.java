@@ -38,6 +38,9 @@ public class AgenticService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private JobRecommendationService jobRecommendationService;
+
     public String processChat(String message, String userEmail, String context) {
         // Step 1: Define Tools
         List<Map<String, Object>> tools = List.of(
@@ -63,6 +66,15 @@ public class AgenticService {
                         ),
                         "required", List.of("summary")
                     )
+                ),
+                Map.of(
+                    "name", "get_recommended_jobs",
+                    "description", "Get a list of recommended jobs for the current user based on their profile.",
+                    "parameters", Map.of(
+                        "type", "OBJECT",
+                        "properties", Map.of(),
+                        "required", List.of()
+                    )
                 )
             ))
         );
@@ -86,6 +98,8 @@ public class AgenticService {
                 result = handleApplyForJob(jobId, userEmail);
             } else if ("update_profile_summary".equals(functionName)) {
                 result = handleUpdateSummary(args.path("summary").asText(), userEmail);
+            } else if ("get_recommended_jobs".equals(functionName)) {
+                result = handleGetRecommendations(userEmail);
             } else {
                 result = "Error: Unknown function requested.";
             }
@@ -132,6 +146,25 @@ public class AgenticService {
             studentProfileRepository.save(profile);
             
             return "SUCCESS: Profile summary has been updated to: " + summary;
+        } catch (Exception e) {
+            return "FAIL: " + e.getMessage();
+        }
+    }
+
+    private String handleGetRecommendations(String email) {
+        try {
+            User user = userRepository.findByEmail(email).orElse(null);
+            if (user == null) return "FAIL: User not found.";
+
+            List<Job> jobs = jobRecommendationService.getRecommendedJobs(user.getId());
+            if (jobs.isEmpty()) return "No specific recommendations found. Please try updating your profile skills.";
+
+            StringBuilder sb = new StringBuilder("Here are some recommended jobs for you:\n");
+            for (Job job : jobs) {
+                sb.append("- ").append(job.getTitle()).append(" at ").append(job.getCompanyName())
+                  .append(" (ID: ").append(job.getId()).append(")\n");
+            }
+            return sb.toString();
         } catch (Exception e) {
             return "FAIL: " + e.getMessage();
         }
