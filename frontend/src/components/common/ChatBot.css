@@ -226,3 +226,62 @@
     border-radius: 20px;
     cursor: pointer;
 }
+
+/* Quick Actions Styles */
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.quick-actions::-webkit-scrollbar {
+    height: 4px;
+}
+
+.quick-actions::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.quick-actions button {
+    background: white;
+    border: 1px solid #6e8efb;
+    color: #6e8efb;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.quick-actions button:hover {
+    background: #6e8efb;
+    color: white;
+}
+
+/* Formatted Message Styles */
+.message-bubble h4,
+.message-bubble h3 {
+    margin: 8px 0 4px 0;
+}
+
+.message-bubble p {
+    margin: 4px 0;
+}
+
+.message-bubble li {
+    margin-bottom: 2px;
+}
+
+.message-bubble strong {
+    color: #2d3e50;
+}
+
+.user .message-bubble strong {
+    color: white;
+}
