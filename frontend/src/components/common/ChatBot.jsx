@@ -8,10 +8,15 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
     const [messages, setMessages] = useState([
         { text: "Hello! I'm your RecruitSmart AI. How can I help you today?", sender: 'ai' }
     ]);
-    // ... existing states ...
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
+
+    const quickActions = [
+        { label: "Find Jobs", query: "What are the latest job openings for me?" },
+        { label: "Check Status", query: "What is the status of my applications?" },
+        { label: "Profile Tips", query: "How can I improve my student profile?" }
+    ];
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -21,10 +26,37 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSend = async () => {
-        if (!input.trim()) return;
+    const formatMessage = (text) => {
+        // Simple markdown-like formatting
+        return text.split('\n').map((line, i) => {
+            // Headers
+            if (line.startsWith('### ')) return <h4 key={i}>{line.replace('### ', '')}</h4>;
+            if (line.startsWith('## ')) return <h3 key={i}>{line.replace('## ', '')}</h3>;
 
-        const userMsg = { text: input, sender: 'user' };
+            // Bullet points
+            if (line.startsWith('- ')) return <li key={i} style={{ marginLeft: '10px' }}>{parseInline(line.replace('- ', ''))}</li>;
+
+            // Regular text with inline parsing
+            return <p key={i}>{parseInline(line)}</p>;
+        });
+    };
+
+    const parseInline = (text) => {
+        // Handle bold **text**
+        const parts = text.split(/(\*\*.*?\*\*)/g);
+        return parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={i}>{part.slice(2, -2)}</strong>;
+            }
+            return part;
+        });
+    };
+
+    const handleSend = async (overrideMessage = null) => {
+        const messageToSend = overrideMessage || input;
+        if (!messageToSend.trim()) return;
+
+        const userMsg = { text: messageToSend, sender: 'user' };
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setLoading(true);
@@ -33,7 +65,7 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
             const response = await authFetch(`${API_BASE_URL}/api/ai/chat`, {
                 method: 'POST',
                 body: JSON.stringify({
-                    message: input,
+                    message: messageToSend,
                     context: context
                 })
             });
@@ -43,22 +75,9 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
             const fullText = data.response;
             setLoading(false);
 
-            // Simulate typing effect
-            let displayedText = "";
-            const words = fullText.split(" ");
+            // Display directly for better performance or keep typing effect
+            setMessages(prev => [...prev, { text: fullText, sender: 'ai' }]);
 
-            setMessages(prev => [...prev, { text: "", sender: 'ai' }]);
-
-            for (let i = 0; i < words.length; i++) {
-                displayedText += (i === 0 ? "" : " ") + words[i];
-                setTimeout(() => {
-                    setMessages(prev => {
-                        const newMsgs = [...prev];
-                        newMsgs[newMsgs.length - 1] = { text: displayedText, sender: 'ai' };
-                        return newMsgs;
-                    });
-                }, i * 50); // Speed of typing
-            }
         } catch (error) {
             console.error("Chat Error:", error);
             setMessages(prev => [...prev, { text: "Sorry, I'm having trouble connecting right now. Please check if the server is running and you are logged in.", sender: 'ai' }]);
@@ -84,7 +103,7 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
                                 {msg.sender === 'ai' && (
                                     <img src={botIcon} alt="bot" className="message-icon" />
                                 )}
-                                <div className="message-bubble">{msg.text}</div>
+                                <div className="message-bubble">{formatMessage(msg.text)}</div>
                             </div>
                         ))}
                         {loading && (
@@ -95,6 +114,15 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
                         )}
                         <div ref={messagesEndRef} />
                     </div>
+
+                    <div className="quick-actions">
+                        {quickActions.map((action, i) => (
+                            <button key={i} onClick={() => handleSend(action.query)}>
+                                {action.label}
+                            </button>
+                        ))}
+                    </div>
+
                     <div className="chatbot-input">
                         <input
                             type="text"
@@ -103,7 +131,7 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                         />
-                        <button onClick={handleSend}>Send</button>
+                        <button onClick={() => handleSend()}>Send</button>
                     </div>
                 </div>
             ) : (

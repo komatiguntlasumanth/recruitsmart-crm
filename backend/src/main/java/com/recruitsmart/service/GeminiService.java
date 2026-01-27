@@ -108,18 +108,25 @@ public class GeminiService {
 
     private String getFallbackResponse(String prompt) {
         if (prompt.contains("help") || prompt.contains("hi") || prompt.contains("hello")) {
-            return "Hello! I'm the RecruitSmart Assistant. I can help you find jobs, rank candidates, or answer questions about the recruitment process. (Note: Real-time Gemini LLM features require an API key in application.properties).";
+            return "### Hello! I'm the RecruitSmart AI Assistant.\n\n" +
+                   "I'm currently running in **demo mode**. I've analyzed your profile and I am ready to help you with:\n" +
+                   "- **Job Recommendations** based on your skills.\n" +
+                   "- **Application Tracking** status updates.\n" +
+                   "- **Profile Analysis** to improve your transparency to HR.\n\n" +
+                   "> [!NOTE]\n" +
+                   "> To unlock full intelligence with live data processing, please provide a valid **Google Gemini API Key** in `application.properties`.";
         }
         if (prompt.contains("job") || prompt.contains("career")) {
-            return "You can browse open positions in the 'Jobs' tab. Our AI matching system will highlight roles that fit your skills best!";
+            return "Based on our current database, we have several active positions in Technology and Management. " +
+                   "You can view them in the **Jobs** tab. Once you add your Gemini API Key, I can tell you exactly which ones match your skills!";
         }
         if (prompt.contains("status") || prompt.contains("apply")) {
-            return "You can track your application status in the 'My Applications' section. Once you apply, our HR team (formerly Managers) will review your profile.";
+            return "You can track your application status in the **My Applications** section. Each application shows if it's 'Pending', 'Reviewed', or 'Shortlisted'.";
         }
         if (prompt.contains("hr") || prompt.contains("manager")) {
-            return "The HR team uses RecruitSmart to streamline hiring. They can see your ML conversion score, which is calculated based on your profile strength!";
+            return "The HR team uses our ML models to see your profile's 'Fit Score'. Make sure your skills and experience are fully updated in your profile!";
         }
-        return "That's an interesting question! I'm currently running in demo mode. To get an intelligent LLM response for: '" + prompt + "', please provide a valid Google Gemini API key in application.properties.";
+        return "I understand you're interested in: '" + prompt + "'.\n\nTo give you a real-time, data-driven answer, I need my 'brain' connected via a **Gemini API Key**. Please update the configuration to proceed!";
     }
 
     private List<Double> mockEmbedding(String text) {
