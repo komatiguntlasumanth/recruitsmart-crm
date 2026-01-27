@@ -31,6 +31,9 @@ WORKDIR /app
 # Copy the jar from the build stage
 COPY --from=backend-build /app/backend/target/*.jar app.jar
 
+# Hugging Face Spaces expects 7860
+EXPOSE 7860
+
 # Set server to use the prod profile and dynamic port
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k"
