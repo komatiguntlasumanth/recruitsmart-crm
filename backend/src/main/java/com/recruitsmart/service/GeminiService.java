@@ -74,35 +74,54 @@ public class GeminiService {
         if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) {
             return getFallbackResponse(prompt.toLowerCase());
         }
+        return callGemini(List.of(Map.of("parts", List.of(Map.of("text", prompt)))), null);
+    }
 
+    public JsonNode generateWithTools(String message, String context, List<Map<String, Object>> tools) {
+        if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) return null;
+
+        String prompt = String.format("Context:\n%s\n\nUser Question: %s", context, message);
+        Map<String, Object> content = Map.of("role", "user", "parts", List.of(Map.of("text", prompt)));
+        
+        return postToGemini(List.of(content), tools);
+    }
+
+    public String generateFinalResponse(String message, String context, String functionName, String toolResult) {
+        if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) return toolResult;
+
+        String prompt = String.format("Context:\n%s\n\nUser asked: %s\n\nTool '%s' returned: %s\n\nPlease explain this result to the user naturally.", 
+            context, message, functionName, toolResult);
+        
+        return generateResponse(prompt);
+    }
+
+    private String callGemini(List<Map<String, Object>> contents, List<Map<String, Object>> tools) {
+        JsonNode response = postToGemini(contents, tools);
+        if (response != null && response.has("candidates")) {
+            JsonNode candidate = response.path("candidates").get(0);
+            return candidate.path("content").path("parts").get(0).path("text").asText();
+        }
+        return "Error: Could not get a response from AI.";
+    }
+
+    private JsonNode postToGemini(List<Map<String, Object>> contents, List<Map<String, Object>> tools) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            Map<String, Object> textPart = new HashMap<>();
-            textPart.put("text", prompt);
-
-            Map<String, Object> content = new HashMap<>();
-            content.put("parts", List.of(textPart));
-
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("contents", List.of(content));
+            requestBody.put("contents", contents);
+            if (tools != null) {
+                requestBody.put("tools", tools);
+            }
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
             String urlWithKey = chatUrl + "?key=" + apiKey;
 
-            JsonNode response = restTemplate.postForObject(urlWithKey, entity, JsonNode.class);
-            if (response == null || response.isMissingNode() || !response.has("candidates")) {
-                return "Error: Empty or invalid response from Gemini API";
-            }
-            
-            JsonNode candidates = response.path("candidates");
-            if (candidates.isArray() && candidates.size() > 0) {
-                return candidates.get(0).path("content").path("parts").get(0).path("text").asText();
-            }
-            return "Error: No candidates returned from Gemini API";
+            return restTemplate.postForObject(urlWithKey, entity, JsonNode.class);
         } catch (Exception e) {
-            return "Error calling Gemini API: " + e.getMessage();
+            System.err.println("Gemini API Error: " + e.getMessage());
+            return null;
         }
     }
 
