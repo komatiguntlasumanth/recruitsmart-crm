@@ -82,7 +82,8 @@ public class AgenticService {
 
             String result;
             if ("apply_for_job".equals(functionName)) {
-                result = handleApplyForJob(args.path("jobId").asLong(), userEmail);
+                Long jobId = args.has("jobId") ? args.path("jobId").asLong() : null;
+                result = handleApplyForJob(jobId, userEmail);
             } else if ("update_profile_summary".equals(functionName)) {
                 result = handleUpdateSummary(args.path("summary").asText(), userEmail);
             } else {
@@ -98,9 +99,10 @@ public class AgenticService {
     }
 
     @Transactional
-    private String handleApplyForJob(Long jobId, String email) {
+    public String handleApplyForJob(Long jobId, String email) {
         try {
             User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+            if (jobId == null) return "FAIL: Missing Job ID.";
             Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
 
             if (applicationRepository.existsByJobIdAndStudentId(jobId, user.getId())) {
@@ -121,7 +123,7 @@ public class AgenticService {
     }
 
     @Transactional
-    private String handleUpdateSummary(String summary, String email) {
+    public String handleUpdateSummary(String summary, String email) {
         try {
             User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
             StudentProfile profile = studentProfileRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Profile not found"));

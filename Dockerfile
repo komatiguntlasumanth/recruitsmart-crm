@@ -31,14 +31,10 @@ WORKDIR /app
 # Copy the jar from the build stage
 COPY --from=backend-build /app/backend/target/*.jar app.jar
 
-# Hugging Face Spaces runs on 7860
-EXPOSE 7860
-
-# Set spring boot to run on 7860 and use the prod profile
-ENV SERVER_PORT=7860
+# Set server to use the prod profile and dynamic port
 ENV SPRING_PROFILES_ACTIVE=prod
-# Increase memory limit as HF Spaces provides 16GB
-ENV JAVA_OPTS="-Xmx8g -Xms4g"
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k"
 
-# Start the application
-ENTRYPOINT ["java", "-Xmx8g", "-jar", "app.jar"]
+# Use shell form for ENTRYPOINT to support environment variable expansion if needed, 
+# or use simpler exec form without hardcoded memory limits to let JVM detect container limits.
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
