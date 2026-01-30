@@ -1,3 +1,26 @@
+# Auto-detect text files and perform LF normalization
+* text=auto
+
+# Explicitly declare text files to avoid binary confusion and disable LFS
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.java text eol=lf
+*.xml text eol=lf
+*.properties text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+# Deny LFS for these just in case
+*.js !filter !diff !merge
+*.jsx !filter !diff !merge
+*.css !filter !diff !merge
+*.html !filter !diff !merge
+*.java !filter !diff !merge
 *.png filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.gif filter=lfs diff=lfs merge=lfs -text
