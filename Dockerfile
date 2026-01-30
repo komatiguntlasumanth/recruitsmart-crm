@@ -14,13 +14,14 @@ RUN VITE_API_URL="" npm run build
 # Stage 2: Build the backend with the frontend assets
 FROM maven:3.8.5-openjdk-17 AS backend-build
 WORKDIR /app
+# Copy only necessary backend files
+COPY backend/pom.xml ./backend/
+COPY backend/src ./backend/src
+
 # Prepare the directory for static assets
 RUN mkdir -p backend/src/main/resources/static
 # Copy the built frontend to spring boot's static resources
 COPY --from=frontend-build /app/frontend/dist/ backend/src/main/resources/static/
-# Copy only necessary backend files
-COPY backend/pom.xml ./backend/
-COPY backend/src ./backend/src
 WORKDIR /app/backend
 # Build the jar
 RUN mvn clean package -DskipTests
