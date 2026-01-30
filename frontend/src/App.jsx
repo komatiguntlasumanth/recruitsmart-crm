@@ -7,6 +7,7 @@ import StudentDashboard from './components/StudentDashboard'
 import AdminDashboard from './components/AdminDashboard'
 import ManagerDashboard from './components/ManagerDashboard'
 import ChatBot from './components/common/ChatBot'
+import logo from './assets/logo.png';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -94,9 +95,10 @@ function App() {
         <div className="container">
             {view !== 'dashboard' && (
                 <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                    <h1 style={{ fontSize: '2rem', background: 'linear-gradient(to right, #6366f1, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                        RecruitSmart
-                    </h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <img src={logo} alt="RecruitSmart" style={{ height: '50px' }} />
+                        <span style={{ fontSize: '1.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #6366f1, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>RecruitSmart</span>
+                    </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         <button onClick={() => setView('dashboard')} style={{ background: 'none', border: 'none', color: view === 'dashboard' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Dashboard</button>
                         <button onClick={() => setView('jobs')} style={{ background: 'none', border: 'none', color: view === 'jobs' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Jobs</button>
