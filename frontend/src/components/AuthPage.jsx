@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import API_BASE_URL from '../config/api';
+import logo from '../assets/logo.png';
 
 const API_BASE = `${API_BASE_URL}/api/auth`;
 
@@ -153,7 +154,10 @@ const AuthPage = ({ onLogin }) => {
                     color: 'white',
                     display: window.innerWidth < 768 ? 'none' : 'flex'
                 }}>
-                    <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>RecruitSmart</h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                        <img src={logo} alt="RecruitSmart" style={{ height: '60px', background: 'white', borderRadius: '50%', padding: '5px' }} />
+                        <h1 style={{ fontSize: '2.5rem', margin: 0 }}>RecruitSmart</h1>
+                    </div>
                     <p style={{ fontSize: '1.1rem', lineHeight: '1.6', opacity: '0.9' }}>
                         Your gateway to the future. Connect with top companies, build your profile, and land your dream job.
                     </p>
