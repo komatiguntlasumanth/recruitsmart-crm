@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +81,17 @@ public class AgenticService {
         // Step 2: Call Gemini with Tools
         JsonNode aiResponse = geminiService.generateWithTools(message, context, tools);
 
-        if (aiResponse == null) return "I'm sorry, I couldn't process that request right now.";
+        if (aiResponse == null) {
+            return "### Hello! I'm the RecruitSmart AI Assistant.\n\n" +
+                   "I'm currently running in **demo mode** because the Gemini API key is not configured. " +
+                   "I can still help you with basic information:\n\n" +
+                   "- **Find Jobs**: Browse available positions in the Jobs tab\n" +
+                   "- **Check Status**: View your application status in My Applications\n" +
+                   "- **Profile Tips**: Keep your profile updated with skills and experience\n\n" +
+                   "> [!NOTE]\n" +
+                   "> To unlock full AI capabilities with personalized recommendations and intelligent assistance, " +
+                   "please configure a valid **Google Gemini API Key** in the application settings.";
+        }
 
         // Step 3: Check for Function Call
         JsonNode candidate = aiResponse.path("candidates").get(0);
