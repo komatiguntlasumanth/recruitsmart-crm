@@ -1,3 +1,12 @@
+---
+title: RecruitSmart CRM
+emoji: 🏢
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
+
 # Documentation: RecruitSmart CRM Application
 
 ## Overview
