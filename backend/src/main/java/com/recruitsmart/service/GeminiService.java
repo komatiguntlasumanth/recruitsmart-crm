@@ -1,17 +1,13 @@
-package com.recruitsmart.service;
+﻿package com.recruitsmart.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-<<<<<<< HEAD
 import com.fasterxml.jackson.databind.ObjectMapper;
-=======
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-<<<<<<< HEAD
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.BufferedReader;
@@ -19,9 +15,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-=======
-
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,17 +33,10 @@ public class GeminiService {
     private String embeddingUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
-<<<<<<< HEAD
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<Double> getEmbedding(String text) {
         if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) {
-=======
-
-    public List<Double> getEmbedding(String text) {
-        if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) {
-            // Return mock embedding if no key is provided
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
             return mockEmbedding(text);
         }
 
@@ -70,19 +56,11 @@ public class GeminiService {
 
             JsonNode response = restTemplate.postForObject(urlWithKey, entity, JsonNode.class);
             if (response == null || response.isMissingNode()) {
-<<<<<<< HEAD
-=======
-                System.err.println("Gemini Embedding Error: Empty response");
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
                 return mockEmbedding(text);
             }
             
             JsonNode embeddingNode = response.path("embedding").path("values");
             if (embeddingNode.isMissingNode()) {
-<<<<<<< HEAD
-=======
-                System.err.println("Gemini Embedding Error: Values not found in response");
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
                 return mockEmbedding(text);
             }
             
@@ -92,15 +70,10 @@ public class GeminiService {
             }
             return embedding;
         } catch (Exception e) {
-<<<<<<< HEAD
-=======
-            System.err.println("Gemini Embedding Error: " + e.getMessage());
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
             return mockEmbedding(text);
         }
     }
 
-<<<<<<< HEAD
     public void chatStream(String message, String context, List<Map<String, Object>> tools, SseEmitter emitter) {
         if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) {
             streamFallback(message.toLowerCase(), emitter);
@@ -158,13 +131,6 @@ public class GeminiService {
                 emitter.completeWithError(e);
             } catch (Exception ex) {}
         }
-=======
-    public String generateResponse(String prompt) {
-        if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) {
-            return getFallbackResponse(prompt.toLowerCase());
-        }
-        return callGemini(List.of(Map.of("parts", List.of(Map.of("text", prompt)))), null);
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
     }
 
     public JsonNode generateWithTools(String message, String context, List<Map<String, Object>> tools) {
@@ -185,16 +151,12 @@ public class GeminiService {
         return generateResponse(prompt);
     }
 
-<<<<<<< HEAD
     public String generateResponse(String prompt) {
         if ("YOUR_GEMINI_API_KEY_HERE".equals(apiKey)) {
             return getFallbackResponse(prompt.toLowerCase());
         }
         return callGemini(List.of(Map.of("parts", List.of(Map.of("text", prompt)))), null);
     }
-
-=======
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
     private String callGemini(List<Map<String, Object>> contents, List<Map<String, Object>> tools) {
         JsonNode response = postToGemini(contents, tools);
         if (response != null && response.has("candidates")) {
@@ -220,15 +182,10 @@ public class GeminiService {
 
             return restTemplate.postForObject(urlWithKey, entity, JsonNode.class);
         } catch (Exception e) {
-<<<<<<< HEAD
-=======
-            System.err.println("Gemini API Error: " + e.getMessage());
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
             return null;
         }
     }
 
-<<<<<<< HEAD
     private void streamFallback(String prompt, SseEmitter emitter) {
         String fullText = getFallbackResponse(prompt);
         try {
@@ -246,12 +203,7 @@ public class GeminiService {
 
     private String getFallbackResponse(String prompt) {
         if (prompt.contains("help") || prompt.contains("hi") || prompt.contains("hello")) {
-            return "### 👋 Hello! I'm the RecruitSmart AI Assistant.\n\n" +
-=======
-    private String getFallbackResponse(String prompt) {
-        if (prompt.contains("help") || prompt.contains("hi") || prompt.contains("hello")) {
-            return "### Hello! I'm the RecruitSmart AI Assistant.\n\n" +
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
+            return "### ðŸ‘‹ Hello! I'm the RecruitSmart AI Assistant.\n\n" +
                    "I'm currently running in **demo mode**. I've analyzed your profile and I am ready to help you with:\n" +
                    "- **Job Recommendations** based on your skills.\n" +
                    "- **Application Tracking** status updates.\n" +
@@ -266,20 +218,10 @@ public class GeminiService {
         if (prompt.contains("status") || prompt.contains("apply")) {
             return "You can track your application status in the **My Applications** section. Each application shows if it's 'Pending', 'Reviewed', or 'Shortlisted'.";
         }
-<<<<<<< HEAD
-=======
-        if (prompt.contains("hr") || prompt.contains("manager")) {
-            return "The HR team uses our ML models to see your profile's 'Fit Score'. Make sure your skills and experience are fully updated in your profile!";
-        }
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
         return "I understand you're interested in: '" + prompt + "'.\n\nTo give you a real-time, data-driven answer, I need my 'brain' connected via a **Gemini API Key**. Please update the configuration to proceed!";
     }
 
     private List<Double> mockEmbedding(String text) {
-<<<<<<< HEAD
-=======
-        // Simple mock: hash-based stable fake embedding for demonstration without key
->>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
         List<Double> mock = new ArrayList<>();
         int hash = text.hashCode();
         for (int i = 0; i < 768; i++) {
