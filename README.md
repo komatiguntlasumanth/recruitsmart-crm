@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: RecruitSmart CRM
 emoji: 🏢
@@ -7,6 +8,8 @@ sdk: docker
 app_port: 7860
 ---
 
+=======
+>>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
 # Documentation: RecruitSmart CRM Application
 
 ## Overview

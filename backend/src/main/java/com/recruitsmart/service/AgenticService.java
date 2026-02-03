@@ -40,6 +40,7 @@ public class AgenticService {
     @Autowired
     private JobRecommendationService jobRecommendationService;
 
+<<<<<<< HEAD
     public void processChatStream(String message, String userEmail, String context, SseEmitter emitter) {
         // Step 1: Define Tools
         List<Map<String, Object>> tools = List.of(
@@ -120,6 +121,8 @@ public class AgenticService {
         }
     }
 
+=======
+>>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
     public String processChat(String message, String userEmail, String context) {
         // Step 1: Define Tools
         List<Map<String, Object>> tools = List.of(
@@ -162,6 +165,7 @@ public class AgenticService {
         JsonNode aiResponse = geminiService.generateWithTools(message, context, tools);
 
         if (aiResponse == null) {
+<<<<<<< HEAD
             String lowerMsg = message.toLowerCase();
             if (lowerMsg.contains("job") || lowerMsg.contains("find")) {
                 return "### 🔍 Searching for Jobs (Demo Mode)\n\n" +
@@ -187,6 +191,17 @@ public class AgenticService {
                    "I understand you're asking about: *\"" + message + "\"*. \n\n" +
                    "While my 'brain' (Gemini API) isn't connected yet, I can tell you that RecruitSmart is designed to streamline your career journey. " +
                    "Try asking me about **'jobs'** or **'application status'**!";
+=======
+            return "### Hello! I'm the RecruitSmart AI Assistant.\n\n" +
+                   "I'm currently running in **demo mode** because the Gemini API key is not configured. " +
+                   "I can still help you with basic information:\n\n" +
+                   "- **Find Jobs**: Browse available positions in the Jobs tab\n" +
+                   "- **Check Status**: View your application status in My Applications\n" +
+                   "- **Profile Tips**: Keep your profile updated with skills and experience\n\n" +
+                   "> [!NOTE]\n" +
+                   "> To unlock full AI capabilities with personalized recommendations and intelligent assistance, " +
+                   "please configure a valid **Google Gemini API Key** in the application settings.";
+>>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
         }
 
         // Step 3: Check for Function Call

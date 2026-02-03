@@ -1,5 +1,9 @@
 # Auto-detect text files and perform LF normalization
 * text=auto
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
 # Explicitly declare text files to avoid binary confusion and disable LFS
 *.js text eol=lf
 *.jsx text eol=lf
@@ -14,15 +18,22 @@
 *.properties text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
 # Deny LFS for these just in case
 *.js !filter !diff !merge
 *.jsx !filter !diff !merge
 *.css !filter !diff !merge
 *.html !filter !diff !merge
 *.java !filter !diff !merge
+<<<<<<< HEAD
 frontend/public/auth_bg_new.png filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.gif filter=lfs diff=lfs merge=lfs -text
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.jar filter=lfs diff=lfs merge=lfs -text
+=======
+>>>>>>> 5a29fd745ddb8aa6da4c8a9e669cd1da2b78d12a
