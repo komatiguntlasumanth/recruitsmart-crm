@@ -1,38 +1,37 @@
 # Stage 1: Build the frontend
 FROM node:18-alpine AS frontend-build
-WORKDIR /app
-COPY frontend/package*.json ./frontend/
-RUN cd frontend && npm install
-COPY frontend/ ./frontend/
-RUN cd frontend && npm run build -- --logLevel info
+WORKDIR /app/frontend
+# Cache dependencies
+COPY frontend/package*.json ./
+RUN npm install
+# Build source
+COPY frontend/ ./
+RUN npm run build
 
-# Stage 2: Build the backend with the frontend assets
-FROM maven:3.8.5-openjdk-17 AS backend-build
-WORKDIR /app
-COPY backend/pom.xml ./backend/
-COPY backend/src ./backend/src
-
-# Prepare the directory for static assets
-RUN mkdir -p backend/src/main/resources/static
-# Copy the built frontend to spring boot's static resources
-COPY --from=frontend-build /app/frontend/dist/ backend/src/main/resources/static/
+# Stage 2: Build the backend
+FROM maven:3.8.5-openjdk-17-slim AS backend-build
 WORKDIR /app/backend
+# Cache maven dependencies
+COPY backend/pom.xml ./
+RUN mvn dependency:go-offline -B
+
+# Copy source and built frontend
+COPY backend/src ./src
+RUN mkdir -p src/main/resources/static
+COPY --from=frontend-build /app/frontend/dist/ src/main/resources/static/
+
 # Build the jar
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -B
 
 # Stage 3: Run the application
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-# Copy the jar from the build stage
 COPY --from=backend-build /app/backend/target/*.jar app.jar
 
 # Hugging Face Spaces expects 7860
 EXPOSE 7860
 
-# Set server to use the prod profile and dynamic port
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k"
 
-# Use shell form for ENTRYPOINT to support environment variable expansion if needed, 
-# or use simpler exec form without hardcoded memory limits to let JVM detect container limits.
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
