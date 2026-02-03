@@ -82,7 +82,7 @@ public class GeminiService {
 
         try {
             String streamUrl = chatUrl.replace("generateContent", "streamGenerateContent") + "?key=" + apiKey;
-            URL url = new URL(streamUrl);
+            URL url = java.net.URI.create(streamUrl).toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");

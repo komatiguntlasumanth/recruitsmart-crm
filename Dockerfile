@@ -1,20 +1,14 @@
 # Stage 1: Build the frontend
 FROM node:18-alpine AS frontend-build
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm install
-# Copy only necessary frontend files (avoiding node_modules if it exists)
-COPY frontend/src ./src
-COPY frontend/public ./public
-COPY frontend/index.html ./
-COPY frontend/vite.config.js ./
-# Build frontend
-RUN VITE_API_URL="" npm run build
+WORKDIR /app
+COPY frontend/package*.json ./frontend/
+RUN cd frontend && npm install
+COPY frontend/ ./frontend/
+RUN cd frontend && npm run build -- --logLevel info
 
 # Stage 2: Build the backend with the frontend assets
 FROM maven:3.8.5-openjdk-17 AS backend-build
 WORKDIR /app
-# Copy only necessary backend files
 COPY backend/pom.xml ./backend/
 COPY backend/src ./backend/src
 
