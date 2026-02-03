@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import API_BASE_URL, { authFetch } from '../../config/api';
 import './ChatBot.css';
 import botIcon from '../../assets/bot-icon.png';
@@ -23,38 +25,14 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const formatMessage = (text) => {
-        // Simple markdown-like formatting
-        return text.split('\n').map((line, i) => {
-            // Headers
-            if (line.startsWith('### ')) return <h4 key={i}>{line.replace('### ', '')}</h4>;
-            if (line.startsWith('## ')) return <h3 key={i}>{line.replace('## ', '')}</h3>;
-
-            // Bullet points
-            if (line.startsWith('- ')) return <li key={i} style={{ marginLeft: '10px' }}>{parseInline(line.replace('- ', ''))}</li>;
-
-            // Regular text with inline parsing
-            return <p key={i}>{parseInline(line)}</p>;
-        });
-    };
-
-    const parseInline = (text) => {
-        // Handle bold **text**
-        const parts = text.split(/(\*\*.*?\*\*)/g);
-        return parts.map((part, i) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-                return <strong key={i}>{part.slice(2, -2)}</strong>;
-            }
-            return part;
-        });
-    };
+        if (isOpen) {
+            scrollToBottom();
+        }
+    }, [messages, loading, isOpen]);
 
     const handleSend = async (overrideMessage = null) => {
         const messageToSend = overrideMessage || input;
-        if (!messageToSend.trim()) return;
+        if (!messageToSend.trim() || loading) return;
 
         const userMsg = { text: messageToSend, sender: 'user' };
         setMessages(prev => [...prev, userMsg]);
@@ -70,46 +48,90 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
                 })
             });
 
-            if (!response.ok) throw new Error('AI response failed');
-            const data = await response.json();
-            const fullText = data.response;
-            setLoading(false);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'AI response failed');
+            }
 
-            // Display directly for better performance or keep typing effect
-            setMessages(prev => [...prev, { text: fullText, sender: 'ai' }]);
+            // Read the stream
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedResponse = "";
+
+            // Add an initial empty AI message to stream into
+            setMessages(prev => [...prev, { text: "", sender: 'ai' }]);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                // SSE chunks usually look like "data: text\n\n"
+                // But spring's SseEmitter might just send raw text in some configs
+                // We'll handle both basic text chunks and "data:" prefixed ones
+                const lines = chunk.split('\n');
+                for (let line of lines) {
+                    if (line.startsWith('data:')) {
+                        line = line.substring(5).trim();
+                    }
+                    if (line) {
+                        accumulatedResponse += line;
+                        setMessages(prev => {
+                            const newMsgs = [...prev];
+                            newMsgs[newMsgs.length - 1] = { text: accumulatedResponse, sender: 'ai' };
+                            return newMsgs;
+                        });
+                    }
+                }
+            }
 
         } catch (error) {
             console.error("Chat Error:", error);
-            setMessages(prev => [...prev, { text: "Sorry, I'm having trouble connecting right now. Please check if the server is running and you are logged in.", sender: 'ai' }]);
+            setMessages(prev => [...prev, {
+                text: `Sorry, I encountered an error: ${error.message}`,
+                sender: 'ai'
+            }]);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className={`chatbot-wrapper ${isOpen ? 'open' : ''}`}>
+        <div className="chatbot-wrapper">
             {isOpen ? (
                 <div className="chatbot-window">
                     <div className="chatbot-header">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <img src={botIcon} alt="bot" className="header-icon" />
-                            <h3>RecruitSmart AI</h3>
-                        </div>
-                        <button onClick={() => setIsOpen(false)}>&times;</button>
+                        <h3>RecruitSmart AI</h3>
+                        <button onClick={() => setIsOpen(false)}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
+
                     <div className="chatbot-messages">
                         {messages.map((msg, i) => (
                             <div key={i} className={`message ${msg.sender}`}>
                                 {msg.sender === 'ai' && (
                                     <img src={botIcon} alt="bot" className="message-icon" />
                                 )}
-                                <div className="message-bubble">{formatMessage(msg.text)}</div>
+                                <div className="message-bubble">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {msg.text}
+                                    </ReactMarkdown>
+                                </div>
                             </div>
                         ))}
-                        {loading && (
+                        {loading && !messages[messages.length - 1]?.text && (
                             <div className="message ai">
                                 <img src={botIcon} alt="bot" className="message-icon" />
-                                <div className="message-bubble loading">...</div>
+                                <div className="message-bubble">
+                                    <div className="loading-dots">
+                                        <div className="dot"></div>
+                                        <div className="dot"></div>
+                                        <div className="dot"></div>
+                                    </div>
+                                </div>
                             </div>
                         )}
                         <div ref={messagesEndRef} />
@@ -117,21 +139,35 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
 
                     <div className="quick-actions">
                         {quickActions.map((action, i) => (
-                            <button key={i} onClick={() => handleSend(action.query)}>
+                            <button
+                                key={i}
+                                onClick={() => handleSend(action.query)}
+                                disabled={loading}
+                            >
                                 {action.label}
                             </button>
                         ))}
                     </div>
 
-                    <div className="chatbot-input">
-                        <input
-                            type="text"
-                            placeholder="Type a message..."
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                        />
-                        <button onClick={() => handleSend()}>Send</button>
+                    <div className="chatbot-input-container">
+                        <div className="chatbot-input">
+                            <input
+                                type="text"
+                                placeholder="Ask RecruitSmart..."
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                disabled={loading}
+                            />
+                            <button
+                                onClick={() => handleSend()}
+                                disabled={loading || !input.trim()}
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             ) : (

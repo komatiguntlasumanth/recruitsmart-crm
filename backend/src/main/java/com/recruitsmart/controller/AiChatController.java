@@ -6,8 +6,9 @@ import com.recruitsmart.repository.StudentProfileRepository;
 import com.recruitsmart.repository.UserRepository;
 import com.recruitsmart.service.AgenticService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.Principal;
 import java.util.List;
@@ -34,16 +35,16 @@ public class AiChatController {
     @Autowired
     private AgenticService agenticService;
 
-    @PostMapping("/chat")
-    public ResponseEntity<Map<String, String>> chat(@RequestBody Map<String, String> request, Principal principal) {
+    @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter chat(@RequestBody Map<String, String> request, Principal principal) {
         String message = request.get("message");
         String email = (principal != null) ? principal.getName() : "anonymous";
         
         StringBuilder contextBuilder = new StringBuilder();
-        contextBuilder.append("System: You are the RecruitSmart Agentic Assistant. ");
-        contextBuilder.append("You have the power to help users APPLY for jobs and UPDATE their profiles. ");
-        contextBuilder.append("When a user expresses interest in a job, use the Job ID provided below to call the 'apply_for_job' tool. ");
-        contextBuilder.append("Always format your responses using Markdown.\n\n");
+        contextBuilder.append("System: You are the RecruitSmart AI, a helpful career assistant inspired by Google's Gemini. ");
+        contextBuilder.append("Your goal is to help users find jobs, track applications, and improve their profiles. ");
+        contextBuilder.append("Be friendly, professional, and concise. Always use Markdown for formatting. ");
+        contextBuilder.append("If you need to perform an action like applying for a job, use the specific tool available.\n\n");
         
         // Add Job Content with IDs
         List<com.recruitsmart.model.Job> activeJobs = jobRepository.findAll();
@@ -59,7 +60,7 @@ public class AiChatController {
 
         if (principal != null) {
             userRepository.findByEmail(email).ifPresent(user -> {
-                contextBuilder.append("### User Info:\n");
+                contextBuilder.append("### User Profile:\n");
                 contextBuilder.append("- Name: ").append(user.getUsername()).append("\n");
                 
                 studentProfileRepository.findByUser(user).ifPresent(profile -> {
@@ -81,8 +82,9 @@ public class AiChatController {
             });
         }
 
-        String response = agenticService.processChat(message, email, contextBuilder.toString());
+        SseEmitter emitter = new SseEmitter(60000L); // 1 minute timeout
+        agenticService.processChatStream(message, email, contextBuilder.toString(), emitter);
         
-        return ResponseEntity.ok(Map.of("response", response));
+        return emitter;
     }
 }
