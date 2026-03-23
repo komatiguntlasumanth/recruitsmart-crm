@@ -75,6 +75,12 @@ const AuthPage = ({ onLogin }) => {
                 }
 
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify({ 
+                    name: data.user.username || data.user.email, 
+                    email: data.user.email, 
+                    role: data.user.role, 
+                    username: data.user.username 
+                }));
                 onLogin({ name: data.user.username || data.user.email, email: data.user.email, role: data.user.role, username: data.user.username });
             } else if (mode === 'login') {
                 const response = await fetch(`${API_BASE}/login`, {
@@ -105,6 +111,12 @@ const AuthPage = ({ onLogin }) => {
                     throw new Error(message);
                 }
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify({ 
+                    name: data.user.username || data.user.email, 
+                    email: data.user.email, 
+                    role: data.user.role, 
+                    username: data.user.username 
+                }));
                 onLogin({ name: data.user.username || data.user.email, email: data.user.email, role: data.user.role, username: data.user.username });
             }
         } catch (err) {

@@ -121,14 +121,4 @@ public class AuthController {
         String token = jwtUtil.generateToken(user.getEmail());
         return org.springframework.http.ResponseEntity.ok(Map.of("token", token, "user", user));
     }
-
-    @GetMapping("/me")
-    public org.springframework.http.ResponseEntity<?> getCurrentUser(java.security.Principal principal) {
-        if (principal == null) {
-            return org.springframework.http.ResponseEntity.status(401).body(Map.of("message", "Not authenticated"));
-        }
-        User user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return org.springframework.http.ResponseEntity.ok(user);
-    }
 }

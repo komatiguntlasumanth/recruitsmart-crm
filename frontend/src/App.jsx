@@ -8,49 +8,37 @@ import AdminDashboard from './components/AdminDashboard'
 import ManagerDashboard from './components/ManagerDashboard'
 import ChatBot from './components/common/ChatBot'
 import logo from './assets/logo.png';
-import { API_URL } from './config/api';
 
 function App() {
     const [user, setUser] = useState(null);
-    const [view, setView] = useState(localStorage.getItem('currentView') || 'dashboard');
+    const [view, setView] = useState('dashboard');
     const [authMode, setAuthMode] = useState('login');
-    const [isLoading, setIsLoading] = useState(true);
 
+    // Restore session on mount
     useEffect(() => {
-        const restoreSession = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setIsLoading(false);
-                return;
-            }
+        const savedToken = localStorage.getItem('token');
+        const savedUser = localStorage.getItem('user');
+        const savedView = localStorage.getItem('view');
 
+        if (savedToken && savedUser) {
             try {
-                const response = await fetch(`${API_URL}/api/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const userData = await response.json();
-                    setUser(userData);
-                } else {
-                    localStorage.removeItem('token');
-                }
-            } catch (error) {
-                console.error("Session restoration failed:", error);
-            } finally {
-                setIsLoading(false);
+                const userData = JSON.parse(savedUser);
+                setUser(userData);
+                if (savedView) setView(savedView);
+            } catch (e) {
+                console.error("Failed to restore session", e);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
             }
-        };
-
-        restoreSession();
+        }
     }, []);
 
-    const handleSetView = (newView) => {
-        setView(newView);
-        localStorage.setItem('currentView', newView);
-    };
+    // Persist view state
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem('view', view);
+        }
+    }, [view, user]);
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -59,13 +47,6 @@ function App() {
         return "Hey Good Evening";
     };
 
-    if (isLoading) {
-        return (
-            <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <div className="loader">Loading...</div>
-            </div>
-        );
-    }
 
     if (!user) {
         return (
@@ -73,10 +54,7 @@ function App() {
                 <AuthPage
                     mode={authMode}
                     onSwitch={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                    onLogin={(userData) => {
-                        setUser(userData);
-                        // Token is already saved in AuthPage.jsx or via the login response
-                    }}
+                    onLogin={(userData) => setUser(userData)}
                 />
             </div>
         );
@@ -102,7 +80,7 @@ function App() {
                         <div className="glass-card" style={{ padding: '3rem', textAlign: 'center' }}>
                             <h2 style={{ color: '#ef4444' }}>Access Denied</h2>
                             <p style={{ color: 'var(--text-muted)' }}>Only HR can access the Pipeline view. Your current role is: {user.role}</p>
-                            <button className="btn-primary" style={{ marginTop: '1.5rem' }} onClick={() => handleSetView('dashboard')}>Return to Dashboard</button>
+                            <button className="btn-primary" style={{ marginTop: '1.5rem' }} onClick={() => setView('dashboard')}>Return to Dashboard</button>
                         </div>
                     );
                 }
@@ -115,17 +93,17 @@ function App() {
                             Logged in as <span style={{ color: 'var(--primary)', fontWeight: '600' }}>{user.role}</span>
                         </p>
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                            <button className="btn-primary" onClick={() => handleSetView('leads')}>View Leads</button>
-                            <button className="btn-secondary" onClick={() => handleSetView('jobs')}>Browse Jobs</button>
+                            <button className="btn-primary" onClick={() => setView('leads')}>View Leads</button>
+                            <button className="btn-secondary" onClick={() => setView('jobs')}>Browse Jobs</button>
                         </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                        <div className="glass-card" style={{ padding: '2rem', cursor: 'pointer' }} onClick={() => handleSetView('jobs')}>
+                        <div className="glass-card" style={{ padding: '2rem', cursor: 'pointer' }} onClick={() => setView('jobs')}>
                             <h3 style={{ marginBottom: '1rem' }}>Job Board</h3>
                             <p style={{ color: 'var(--text-muted)' }}>Explore open positions and apply directly.</p>
                         </div>
-                        <div className="glass-card" style={{ padding: '2rem', cursor: 'pointer' }} onClick={() => handleSetView('pipeline')}>
+                        <div className="glass-card" style={{ padding: '2rem', cursor: 'pointer' }} onClick={() => setView('pipeline')}>
                             <h3 style={{ marginBottom: '1rem' }}>Lead Pipeline</h3>
                             <p style={{ color: 'var(--text-muted)' }}>{user.role === 'ROLE_HR' ? 'Visualize and manage your leads through different stages.' : 'Restricted to HR.'}</p>
                         </div>
@@ -148,19 +126,20 @@ function App() {
                         <span style={{ fontSize: '1.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #6366f1, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>RecruitSmart</span>
                     </div>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <button onClick={() => handleSetView('dashboard')} style={{ background: 'none', border: 'none', color: view === 'dashboard' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Dashboard</button>
-                        <button onClick={() => handleSetView('jobs')} style={{ background: 'none', border: 'none', color: view === 'jobs' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Jobs</button>
+                        <button onClick={() => setView('dashboard')} style={{ background: 'none', border: 'none', color: view === 'dashboard' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Dashboard</button>
+                        <button onClick={() => setView('jobs')} style={{ background: 'none', border: 'none', color: view === 'jobs' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Jobs</button>
                         {user.role === 'ROLE_STUDENT' && (
-                            <button onClick={() => handleSetView('applications')} style={{ background: 'none', border: 'none', color: view === 'applications' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>My Applications</button>
+                            <button onClick={() => setView('applications')} style={{ background: 'none', border: 'none', color: view === 'applications' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>My Applications</button>
                         )}
-                        <button onClick={() => handleSetView('leads')} style={{ background: 'none', border: 'none', color: view === 'leads' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Leads</button>
+                        <button onClick={() => setView('leads')} style={{ background: 'none', border: 'none', color: view === 'leads' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Leads</button>
 
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginLeft: '1rem', padding: '4px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px' }}>
                             {getGreeting()}, {displayName}
                         </span>
                         <button onClick={() => {
                             localStorage.removeItem('token');
-                            localStorage.removeItem('currentView');
+                            localStorage.removeItem('user');
+                            localStorage.removeItem('view');
                             setUser(null);
                         }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem' }}>Logout</button>
                     </div>
