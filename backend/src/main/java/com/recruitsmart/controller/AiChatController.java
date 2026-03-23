@@ -4,6 +4,7 @@ import com.recruitsmart.repository.JobRepository;
 import com.recruitsmart.repository.ApplicationRepository;
 import com.recruitsmart.repository.StudentProfileRepository;
 import com.recruitsmart.repository.UserRepository;
+import com.recruitsmart.model.Job;
 import com.recruitsmart.service.AgenticService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -47,7 +48,7 @@ public class AiChatController {
         contextBuilder.append("If you need to perform an action like applying for a job, use the specific tool available.\n\n");
         
         // Add Job Content with IDs
-        List<com.recruitsmart.model.Job> activeJobs = jobRepository.findAll();
+        List<Job> activeJobs = jobRepository.findAll();
         if (activeJobs != null && !activeJobs.isEmpty()) {
             contextBuilder.append("### Available Jobs (Real-time):\n");
             activeJobs.stream().limit(10).forEach(job -> {

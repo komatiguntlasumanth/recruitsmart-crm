@@ -1,4 +1,4 @@
-﻿package com.recruitsmart.service;
+package com.recruitsmart.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -108,7 +108,6 @@ public class GeminiService {
                 while ((line = reader.readLine()) != null) {
                     if (line.isEmpty()) continue;
                     
-                    // The response is a stream of JSON objects
                     // Gemini stream format is slightly different (often a list of objects or individual objects)
                     buffer.append(line);
                     try {

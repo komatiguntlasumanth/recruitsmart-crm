@@ -1,0 +1,23 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.recruitsmart:recruitsmart-crm >------------------
+[INFO] Building RecruitSmart CRM 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.0:clean (default-clean) @ recruitsmart-crm ---
+[INFO] Deleting C:\Projects\crmapplication\backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ recruitsmart-crm ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ recruitsmart-crm ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 41 source files with javac [debug parameters release 17] to target\classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.166 s
+[INFO] Finished at: 2026-02-17T19:22:47+05:30
+[INFO] ------------------------------------------------------------------------

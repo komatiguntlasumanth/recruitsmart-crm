@@ -164,17 +164,17 @@ public class AgenticService {
         if (aiResponse == null) {
             String lowerMsg = message.toLowerCase();
             if (lowerMsg.contains("job") || lowerMsg.contains("find")) {
-                return "### 🔍 Searching for Jobs (Demo Mode)\n\n" +
+                return "### ðŸ” Searching for Jobs (Demo Mode)\n\n" +
                        "I'm currently in Demo Mode because no API key is set, but I can see you're interested in jobs! \n\n" +
                        "Based on the system status, there are **" + jobRepository.count() + "** active openings. " +
                        "You can view them all in the **Jobs** tab. Once a Gemini API key is configured, I can personally recommend the best fits for your skills.";
             } else if (lowerMsg.contains("status") || lowerMsg.contains("application")) {
-                return "### 📊 Application Status (Demo Mode)\n\n" +
+                return "### ðŸ“Š Application Status (Demo Mode)\n\n" +
                        "I see you're checking on your applications. \n\n" +
                        "In this demo mode, I can confirm that your current applications are being tracked in the **My Applications** section. " +
                        "There, you'll find the real-time status (e.g., 'Applied', 'Reviewed') for each role.";
             } else if (lowerMsg.contains("help") || lowerMsg.contains("hi") || lowerMsg.contains("hello")) {
-                return "### 👋 Hello! I'm the RecruitSmart AI\n\n" +
+                return "### ðŸ‘‹ Hello! I'm the RecruitSmart AI\n\n" +
                        "I'm currently running in **demo mode**. I've analyzed your profile and I am ready to help you with:\n\n" +
                        "- **Exploring Jobs**: I can find the latest openings for you.\n" +
                        "- **Tracking Applications**: I can help you monitor your progress.\n" +
@@ -183,7 +183,7 @@ public class AgenticService {
                        "> To unlock full intelligence and automatic job applications, please provide a **Gemini API Key** in `application.properties`.";
             }
             
-            return "### 🤖 RecruitSmart AI (Demo Mode)\n\n" +
+            return "### ðŸ¤– RecruitSmart AI (Demo Mode)\n\n" +
                    "I understand you're asking about: *\"" + message + "\"*. \n\n" +
                    "While my 'brain' (Gemini API) isn't connected yet, I can tell you that RecruitSmart is designed to streamline your career journey. " +
                    "Try asking me about **'jobs'** or **'application status'**!";

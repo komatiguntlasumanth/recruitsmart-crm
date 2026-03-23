@@ -1,0 +1,100 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------< com.recruitsmart:recruitsmart-crm >------------------
+[INFO] Building RecruitSmart CRM 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.1:run (default-cli) > test-compile @ recruitsmart-crm >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ recruitsmart-crm ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ recruitsmart-crm ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ recruitsmart-crm ---
+[INFO] skip non existing resourceDirectory C:\Projects\crmapplication\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ recruitsmart-crm ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.4.1:run (default-cli) < test-compile @ recruitsmart-crm <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.1:run (default-cli) @ recruitsmart-crm ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.1)
+
+2026-02-17T19:37:41.901+05:30  INFO 9964 --- [           main] c.recruitsmart.RecruitSmartApplication   : Starting RecruitSmartApplication using Java 24.0.2 with PID 9964 (C:\Projects\crmapplication\backend\target\classes started by komat in C:\Projects\crmapplication\backend)
+2026-02-17T19:37:41.906+05:30  INFO 9964 --- [           main] c.recruitsmart.RecruitSmartApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-02-17T19:37:43.741+05:30  INFO 9964 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-17T19:37:43.878+05:30  INFO 9964 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 122 ms. Found 5 JPA repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/komat/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.34/tomcat-embed-core-10.1.34.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-02-17T19:37:45.272+05:30  INFO 9964 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-02-17T19:37:45.302+05:30  INFO 9964 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-17T19:37:45.303+05:30  INFO 9964 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2026-02-17T19:37:45.426+05:30  INFO 9964 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-02-17T19:37:45.427+05:30  INFO 9964 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3400 ms
+2026-02-17T19:37:45.995+05:30  INFO 9964 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-17T19:37:46.123+05:30  INFO 9964 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.4.Final
+2026-02-17T19:37:46.211+05:30  INFO 9964 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-02-17T19:37:46.709+05:30  INFO 9964 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-17T19:37:46.768+05:30  INFO 9964 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-02-17T19:37:47.084+05:30  INFO 9964 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:recruitsmartdb user=SA
+2026-02-17T19:37:47.087+05:30  INFO 9964 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-02-17T19:37:47.211+05:30  INFO 9964 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-02-17T19:37:49.311+05:30  INFO 9964 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: create table application (id bigint generated by default as identity, applied_date date, status varchar(255), job_id bigint not null, user_id bigint not null, primary key (id))
+Hibernate: create table crm_leads (id bigint generated by default as identity, company varchar(255), created_at timestamp(6), email varchar(255) not null, ml_score float(53), name varchar(255) not null, phone varchar(255) not null, source varchar(255), status varchar(255), updated_at timestamp(6), primary key (id))
+Hibernate: create table job (id bigint generated by default as identity, application_end_date date, application_link varchar(255), company_name varchar(200) not null, description varchar(1000) not null, designation varchar(255), eligibility_criteria varchar(2000), job_type varchar(255), level varchar(255), location varchar(255) not null, posted_by_email varchar(255), posted_date date, salary varchar(255), start_date date, status varchar(255), title varchar(200) not null, primary key (id))
+Hibernate: create table student_profiles (id bigint generated by default as identity, alternate_email varchar(255), alternate_mobile varchar(255), current_location varchar(255), designation varchar(255), dob varchar(255), github_link varchar(255), level varchar(255), linkedin_link varchar(255), mobile_number varchar(255), permanent_address varchar(255), portfolio_url varchar(255), profile_picture_url LONGTEXT, profile_summary clob, resume_url LONGTEXT, work_status varchar(255), years_of_experience varchar(255), user_id bigint, primary key (id))
+Hibernate: create table student_profile_achievements (student_profile_id bigint not null, description varchar(255), title varchar(255))
+Hibernate: create table student_profile_certificates (student_profile_id bigint not null, description varchar(255), link varchar(255), title varchar(255))
+Hibernate: create table student_profile_education (student_profile_id bigint not null, course varchar(255), result varchar(255), school_name varchar(255), year_of_passing varchar(255))
+Hibernate: create table student_profile_experiences (student_profile_id bigint not null, company_name varchar(255), description varchar(255), designation varchar(255), duration varchar(255))
+Hibernate: create table student_profile_internships (student_profile_id bigint not null, company_name varchar(255), description varchar(255), designation varchar(255), duration varchar(255))
+Hibernate: create table student_profile_projects (student_profile_id bigint not null, description varchar(255), link varchar(255), title varchar(255))
+Hibernate: create table student_profile_skills (student_profile_id bigint not null, name varchar(255), type varchar(255))
+Hibernate: create table users (id bigint generated by default as identity, created_at timestamp(6), email varchar(255) not null, enabled boolean not null, last_login timestamp(6), password varchar(255) not null, role varchar(255), username varchar(50) not null, primary key (id))
+Hibernate: alter table if exists student_profiles drop constraint if exists UKhlcwb2egnj8mj3e0mouse1lgy
+Hibernate: alter table if exists student_profiles add constraint UKhlcwb2egnj8mj3e0mouse1lgy unique (user_id)
+Hibernate: alter table if exists application add constraint FKls6sryk64ga8o5t4bym8qu3vm foreign key (job_id) references job
+Hibernate: alter table if exists application add constraint FKawte0mbtubellxed1dvpoxhdj foreign key (user_id) references users
+Hibernate: alter table if exists student_profiles add constraint FK32koy3tgqtaujxhfsn0b9pel2 foreign key (user_id) references users
+Hibernate: alter table if exists student_profile_achievements add constraint FKlu5rmv52m3kn92q33mf73gl5q foreign key (student_profile_id) references student_profiles
+Hibernate: alter table if exists student_profile_certificates add constraint FKeanwr4fohap40ll0kktd8rj8f foreign key (student_profile_id) references student_profiles
+Hibernate: alter table if exists student_profile_education add constraint FKoclqgxnbt3mf43boh8brjroo3 foreign key (student_profile_id) references student_profiles
+Hibernate: alter table if exists student_profile_experiences add constraint FKm8nltxfitsg0o9c8664dc6eq5 foreign key (student_profile_id) references student_profiles
+Hibernate: alter table if exists student_profile_internships add constraint FKhweqairuiv1m38shnb7mqsjw1 foreign key (student_profile_id) references student_profiles
+Hibernate: alter table if exists student_profile_projects add constraint FKml0rx610yp92xfri828prtej4 foreign key (student_profile_id) references student_profiles
+Hibernate: alter table if exists student_profile_skills add constraint FKq2rxw7db5ba9c3dgks3kv1uwy foreign key (student_profile_id) references student_profiles
+2026-02-17T19:37:49.476+05:30  INFO 9964 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-17T19:37:50.282+05:30  INFO 9964 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-02-17T19:37:51.618+05:30  WARN 9964 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-02-17T19:37:51.694+05:30  INFO 9964 --- [           main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-02-17T19:37:51.694+05:30  WARN 9964 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-02-17T19:37:52.521+05:30  INFO 9964 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+2026-02-17T19:37:53.277+05:30  INFO 9964 --- [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:recruitsmartdb'
+2026-02-17T19:37:53.496+05:30  INFO 9964 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-02-17T19:37:53.536+05:30  INFO 9964 --- [           main] c.recruitsmart.RecruitSmartApplication   : Started RecruitSmartApplication in 12.398 seconds (process running for 13.083)

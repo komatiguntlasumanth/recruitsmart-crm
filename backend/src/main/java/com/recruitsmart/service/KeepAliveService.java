@@ -35,9 +35,9 @@ public class KeepAliveService {
             String url = backendUrl.endsWith("/") ? backendUrl + "health" : backendUrl + "/health";
             logger.info("Railway Keep-Alive: Sending ping to {}", url);
             restTemplate.getForObject(url, String.class);
-            logger.info("Railway Keep-Alive: Ping successful ✅");
+            logger.info("Railway Keep-Alive: Ping successful âœ…");
         } catch (Exception e) {
-            logger.error("Railway Keep-Alive: Ping failed ❌ - Error: {}", e.getMessage());
+            logger.error("Railway Keep-Alive: Ping failed âŒ - Error: {}", e.getMessage());
         }
     }
 }
