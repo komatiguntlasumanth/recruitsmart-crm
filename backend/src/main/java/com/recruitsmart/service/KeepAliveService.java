@@ -22,12 +22,11 @@ public class KeepAliveService {
     @Scheduled(fixedRate = 300000)
     public void keepAlive() {
         if (!enabled) {
-            logger.debug("Keep-alive is disabled.");
             return;
         }
 
         if (backendUrl == null || backendUrl.isEmpty()) {
-            logger.warn("Keep-alive is enabled but BACKEND_URL is not set. Please set BACKEND_URL in Railway environment variables.");
+            logger.warn("Keep-alive is enabled but BACKEND_URL is not set. Please set BACKEND_URL in environment variables.");
             return;
         }
 
