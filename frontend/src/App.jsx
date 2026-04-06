@@ -15,22 +15,10 @@ function App() {
     const [authMode, setAuthMode] = useState('login');
 
     // Restore session on mount
+    // Session restoration disabled as requested to ensure login page is always first.
     useEffect(() => {
-        const savedToken = localStorage.getItem('token');
-        const savedUser = localStorage.getItem('user');
-        const savedView = localStorage.getItem('view');
-
-        if (savedToken && savedUser) {
-            try {
-                const userData = JSON.parse(savedUser);
-                setUser(userData);
-                if (savedView) setView(savedView);
-            } catch (e) {
-                console.error("Failed to restore session", e);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-            }
-        }
+        // We now only clear the view to ensure we always start on the 'dashboard' of whatever role
+        localStorage.removeItem('view');
     }, []);
 
     // Persist view state
@@ -39,6 +27,32 @@ function App() {
             localStorage.setItem('view', view);
         }
     }, [view, user]);
+
+    // URL Guard: Reset invalid paths (like /login) to root to prevent 403 errors on static hosts
+    useEffect(() => {
+        if (window.location.pathname !== '/' && window.location.pathname !== '/index.html' && !window.location.pathname.startsWith('/capacitor:')) {
+            window.history.replaceState({}, '', '/');
+        }
+    }, []);
+
+    const handleLogout = () => {
+        const isWeb = window.location.protocol.startsWith('http');
+        
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Soft reset state first (Immediate UI swap)
+        setUser(null);
+        setView('dashboard');
+        
+        // On Web, force a hard navigation to root after a short delay
+        // to ensure the React state update is processed first
+        if (isWeb) {
+            setTimeout(() => {
+                window.location.href = window.location.origin;
+            }, 100);
+        }
+    };
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -65,9 +79,9 @@ function App() {
     const renderView = () => {
         // Direct routing based on role for Dashboard view
         if (view === 'dashboard') {
-            if (user.role === 'ROLE_STUDENT' || user.role === 'ROLE_STUDENT') return <StudentDashboard user={user} />;
-            if (user.role === 'ROLE_ADMIN') return <AdminDashboard user={user} />;
-            if (user.role === 'ROLE_HR' || user.role === 'ROLE_MANAGER') return <ManagerDashboard user={user} />;
+            if (user.role === 'ROLE_STUDENT') return <StudentDashboard user={user} onLogout={handleLogout} />;
+            if (user.role === 'ROLE_ADMIN') return <AdminDashboard user={user} onLogout={handleLogout} />;
+            if (user.role === 'ROLE_HR' || user.role === 'ROLE_MANAGER') return <ManagerDashboard user={user} onLogout={handleLogout} />;
         }
 
         switch (view) {
@@ -119,8 +133,21 @@ function App() {
 
     return (
         <div className="container">
-            {view !== 'dashboard' && (
-                <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+            {user && (
+                <nav style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginBottom: '2rem',
+                    padding: '1rem 2rem',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1000,
+                    borderBottom: '1px solid rgba(0,0,0,0.05)',
+                    borderRadius: '0 0 16px 16px'
+                }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <img src={logo} alt="RecruitSmart" style={{ height: '50px' }} />
                         <span style={{ fontSize: '1.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #6366f1, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>RecruitSmart</span>
@@ -136,12 +163,7 @@ function App() {
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginLeft: '1rem', padding: '4px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px' }}>
                             {getGreeting()}, {displayName}
                         </span>
-                        <button onClick={() => {
-                            localStorage.removeItem('token');
-                            localStorage.removeItem('user');
-                            localStorage.removeItem('view');
-                            setUser(null);
-                        }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem' }}>Logout</button>
+                        <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem' }}>Logout</button>
                     </div>
                 </nav>
             )}

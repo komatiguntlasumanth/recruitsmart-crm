@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 
-const ManagerDashboard = ({ user }) => {
+const ManagerDashboard = ({ user, onLogout }) => {
     const [activeTab, setActiveTab] = useState('jobs');
     const [jobs, setJobs] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -171,9 +171,13 @@ const ManagerDashboard = ({ user }) => {
 
     return (
         <div className="fadeIn" style={{ padding: '2rem', minHeight: '100vh', background: 'linear-gradient(135deg, #fff5f5 0%, #e0f2fe 100%)' }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '2rem', color: '#1e293b', fontWeight: 800, letterSpacing: '-1px' }}>
-                HR Dashboard <span style={{ fontSize: '1rem', fontWeight: 400, color: '#64748b', marginLeft: '1rem' }}>Manage Recruitment & Training</span>
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h2 style={{ fontSize: '2.5rem', margin: 0, color: '#1e293b', fontWeight: 800, letterSpacing: '-1px' }}>
+                    HR Dashboard <span style={{ fontSize: '1rem', fontWeight: 400, color: '#64748b', marginLeft: '1rem' }}>Manage Recruitment & Training</span>
+                </h2>
+                <button onClick={onLogout} style={{ padding: '10px 20px', borderRadius: '8px', background: '#ef4444', color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>🚪 Logout</button>
+            </div>
+ Simon
 
             {/* SECTION 1: Recruitment Insights (HR Profile Summary) */}
             <div style={{ marginBottom: '3rem' }}>
@@ -228,8 +232,8 @@ const ManagerDashboard = ({ user }) => {
                 {/* Who Applied Table */}
                 <div style={{ marginTop: '2.5rem', background: 'white', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
                     <h4 style={{ marginBottom: '1.5rem', color: '#1e293b', fontSize: '1.1rem' }}>👥 Recent Applicants (Who Applied)</h4>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                             <thead>
                                 <tr style={{ borderBottom: '2px solid #f1f5f9', textAlign: 'left', fontSize: '0.85rem' }}>
                                     <th style={{ padding: '12px', color: '#64748b' }}>STUDENT NAME</th>
@@ -521,6 +525,24 @@ const ManagerDashboard = ({ user }) => {
                 .modal-footer { padding: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; gap: 1rem; justify-content: flex-end; }
                 
                 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+                @media (max-width: 1024px) {
+                    .grid-layout { grid-template-columns: 1fr; }
+                    .modal-content.large { width: 95%; height: 90vh; }
+                    .profile-header-section { flex-direction: column; text-align: center; }
+                }
+
+                @media (max-width: 768px) {
+                    h2 { font-size: 1.8rem !important; }
+                    .stat-card { padding: 1rem; }
+                    .stat-card .info .value { font-size: 1.2rem; }
+                    .premium-card { padding: 1rem; }
+                    .card-header { flex-direction: column; gap: 8px; }
+                    .action-row { flex-direction: column; gap: 12px; align-items: stretch; }
+                    .action-btn { width: 100%; text-align: center; }
+                    .modal-footer { flex-direction: column; }
+                    .modal-footer button { width: 100%; }
+                }
             `}</style>
             {showReport && renderReport()}
         </div>

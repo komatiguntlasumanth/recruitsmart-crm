@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 import './StudentDashboard.css';
 
-const StudentDashboard = ({ user }) => {
+const StudentDashboard = ({ user, onLogout }) => {
     const [section, setSection] = useState('home');
     const [profile, setProfile] = useState({
         dob: '', mobileNumber: '', alternateEmail: '', alternateMobile: '',
@@ -10,10 +10,14 @@ const StudentDashboard = ({ user }) => {
         designation: '', level: 'Fresher', workStatus: 'Student', yearsOfExperience: '',
         githubLink: '', linkedinLink: '', portfolioUrl: '',
         profileSummary: '', education: [], experiences: [], skills: [], projects: [], achievements: [],
-        internships: [], certificates: []
+        internships: [], certificates: [], documents: []
     });
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState(''); // 'Saving...', 'Saved', 'Error'
+    const [initialLoadDone, setInitialLoadDone] = useState(false);
+    const lastSavedProfileRef = React.useRef(null);
 
     const [myApplications, setMyApplications] = useState([]);
     const [recommendedJobs, setRecommendedJobs] = useState([]);
@@ -23,9 +27,7 @@ const StudentDashboard = ({ user }) => {
     const [sidebarExpanded, setSidebarExpanded] = useState({ jobs: false, training: false });
     const [profileStep, setProfileStep] = useState(0);
     const [applyingId, setApplyingId] = useState(null);
-    const [documents, setDocuments] = useState([
-        { id: 1, name: 'Resume_Ver1.pdf', type: 'PDF', size: '1.2 MB', date: '2025-01-10' },
-    ]);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
 
     // Predefined Skills List
     const SKILL_SUGGESTIONS = [
@@ -59,8 +61,25 @@ const StudentDashboard = ({ user }) => {
     useEffect(() => {
         if (profile.id) {
             fetchRecommendedJobs();
+            // Once profile is loaded, mark initial load as done after a short delay
+            // to avoid immediate autosave of the fetched data.
+            setTimeout(() => setInitialLoadDone(true), 1000);
         }
     }, [profile.id]);
+
+    // Autosave Effect
+    useEffect(() => {
+        if (!initialLoadDone) return;
+        
+        // Deep compare or simple stringify check to avoid redundant saves
+        if (JSON.stringify(profile) === lastSavedProfileRef.current) return;
+
+        const timer = setTimeout(() => {
+            handleSaveProfile();
+        }, 2000); // Save after 2 seconds of inactivity
+
+        return () => clearTimeout(timer);
+    }, [profile, initialLoadDone]);
 
     const fetchRecommendedJobs = async () => {
         // Fallback or Initial Load without AI
@@ -140,8 +159,10 @@ const StudentDashboard = ({ user }) => {
                     projects: data.projects || [],
                     achievements: data.achievements || [],
                     internships: data.internships || [],
-                    certificates: data.certificates || []
+                    certificates: data.certificates || [],
+                    documents: data.documents || []
                 });
+                lastSavedProfileRef.current = JSON.stringify(data);
             }
         } catch (err) { console.error(err); }
     };
@@ -149,26 +170,36 @@ const StudentDashboard = ({ user }) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const handleSaveProfile = async () => {
-        // Optimistic UI Update: Immediately show success
-        setIsEditing(false);
-        setMsg('✅ Profile updated!');
-        setTimeout(() => setMsg(''), 4000);
+        if (!initialLoadDone) return;
+        
+        setIsSaving(true);
+        setSaveStatus('Saving...');
 
         try {
-            // Background save
             const res = await authFetch(`${API_BASE_URL}/api/student/profile`, {
                 method: 'POST',
                 body: JSON.stringify(profile)
             });
             if (res.ok) {
                 const data = await res.json();
-                setProfile(data); // Sync with server response
+                lastSavedProfileRef.current = JSON.stringify(data);
+                // Only update profile if it's the first time (to get the ID) 
+                // or if data from server is somehow different
+                if (!profile.id) {
+                    setProfile(data); 
+                }
+                setIsSaving(false);
+                setSaveStatus('Saved');
+                setTimeout(() => setSaveStatus(''), 2000);
             } else {
+                setSaveStatus('Error saving');
                 setMsg('❌ Failed to sync profile with server.');
-                // Optional: revert logic here if needed, but for now we warn
             }
         } catch (err) {
+            setSaveStatus('Error');
             setMsg('❌ Error saving profile.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -209,16 +240,19 @@ const StudentDashboard = ({ user }) => {
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const newDoc = {
-                id: Date.now(),
-                name: file.name,
-                type: file.type.includes('pdf') ? 'PDF' : 'Image',
-                size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-                date: new Date().toISOString().split('T')[0]
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const newDoc = {
+                    name: file.name,
+                    type: file.type.includes('pdf') ? 'PDF' : 'Image',
+                    size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+                    date: new Date().toISOString().split('T')[0],
+                    content: reader.result // Store base64 content
+                };
+                setProfile({ ...profile, documents: [newDoc, ...profile.documents] });
+                setMsg('✅ File uploaded and saving...');
             };
-            setDocuments([newDoc, ...documents]);
-            setMsg('✅ File uploaded successfully!');
-            setTimeout(() => setMsg(''), 3000);
+            reader.readAsDataURL(file);
         }
     };
 
@@ -236,10 +270,11 @@ const StudentDashboard = ({ user }) => {
         }
     };
 
-    const handleDeleteDoc = (id) => {
-        setDocuments(documents.filter(doc => doc.id !== id));
-        setMsg('🗑️ Document removed.');
-        setTimeout(() => setMsg(''), 3000);
+    const handleDeleteDoc = (index) => {
+        const newDocs = [...profile.documents];
+        newDocs.splice(index, 1);
+        setProfile({ ...profile, documents: newDocs });
+        setMsg('🗑️ Document removed and saving...');
     };
 
     const updateItem = (field, index, key, value) => {
@@ -496,9 +531,22 @@ const StudentDashboard = ({ user }) => {
         <div className="fadeIn">
             <div className="sd-section-header">
                 <h2 className="sd-section-title">Edit Your Professional Profile</h2>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="sd-icon-btn" onClick={() => setIsEditing(false)}>✕ Cancel</button>
-                    <button className="sd-nav-item active" style={{ width: 'auto', padding: '0 20px' }} onClick={handleSaveProfile}>💾 Save Profile</button>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    {saveStatus && (
+                        <span style={{ 
+                            fontSize: '0.85rem', 
+                            color: saveStatus === 'Error' ? '#ef4444' : '#16a34a',
+                            fontWeight: 600,
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            background: saveStatus === 'Saving...' ? '#f1f5f9' : (saveStatus === 'Error' ? '#fef2f2' : '#f0fdf4')
+                        }}>
+                            {saveStatus === 'Saving...' && '🔄 '}
+                            {saveStatus === 'Saved' && '✅ '}
+                            {saveStatus}
+                        </span>
+                    )}
+                    <button className="sd-icon-btn" onClick={() => setIsEditing(false)}>✕ Close</button>
                 </div>
             </div>
             <div className="sd-content-scrollable" style={{ paddingBottom: '2rem' }}>
@@ -1063,9 +1111,9 @@ const StudentDashboard = ({ user }) => {
             </div>
 
             <div className="sd-doc-grid">
-                {documents.map(doc => (
-                    <div key={doc.id} className="sd-doc-card">
-                        <button className="sd-doc-delete" onClick={() => handleDeleteDoc(doc.id)}>×</button>
+                {profile.documents && profile.documents.map((doc, index) => (
+                    <div key={index} className="sd-doc-card">
+                        <button className="sd-doc-delete" onClick={() => handleDeleteDoc(index)}>×</button>
                         <div className="sd-doc-icon">{doc.type === 'PDF' ? '📄' : '🖼️'}</div>
                         <h4 style={{ margin: '0 0 5px 0', wordBreak: 'break-all' }}>{doc.name}</h4>
                         <p style={{ fontSize: '0.8rem', color: 'var(--sd-text-muted)', margin: 0 }}>{doc.size} • Uploaded on {doc.date}</p>
@@ -1086,19 +1134,23 @@ const StudentDashboard = ({ user }) => {
 
     return (
         <div className="sd-container">
-            <div className="sd-sidebar">
-                <div className="sd-logo-container">✨ RecruitSmart</div>
+            {showMobileMenu && <div className="sd-mobile-overlay" onClick={() => setShowMobileMenu(false)}></div>}
+            <div className={`sd-sidebar ${showMobileMenu ? 'mobile-open' : ''}`}>
+                <div className="sd-logo-container">
+                    ✨ RecruitSmart
+                    <button className="sd-icon-btn" style={{ marginLeft: 'auto', border: 'none', background: 'transparent' }} onClick={() => setShowMobileMenu(false)} title="Close Menu">✕</button>
+                </div>
                 <nav className="sd-nav">
-                    <button className={`sd-nav-item ${section === 'home' && !isEditing ? 'active' : ''}`} onClick={() => { setSection('home'); setIsEditing(false); }}>🏠 Home</button>
-                    <button className={`sd-nav-item ${section === 'profile' && !isEditing ? 'active' : ''}`} onClick={() => { setSection('profile'); setIsEditing(false); }}>👤 My Profile</button>
+                    <button className={`sd-nav-item ${section === 'home' && !isEditing ? 'active' : ''}`} onClick={() => { setSection('home'); setIsEditing(false); setShowMobileMenu(false); }}>🏠 Home</button>
+                    <button className={`sd-nav-item ${section === 'profile' && !isEditing ? 'active' : ''}`} onClick={() => { setSection('profile'); setIsEditing(false); setShowMobileMenu(false); }}>👤 My Profile</button>
                     <div>
                         <button className={`sd-nav-item ${sidebarExpanded.jobs ? 'expanded' : ''}`} onClick={() => setSidebarExpanded({ ...sidebarExpanded, jobs: !sidebarExpanded.jobs })}>
                             💼 Jobs <span className="sd-nav-expand">▼</span>
                         </button>
                         {sidebarExpanded.jobs && (
                             <div className="sd-nav-sub">
-                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'jobs' && jobTab === 'SEARCH' ? 'active' : ''}`} onClick={() => { setSection('jobs'); setJobTab('SEARCH'); setIsEditing(false); }}>Job Search</button>
-                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'jobs' && jobTab === 'APPLIED' ? 'active' : ''}`} onClick={() => { setSection('jobs'); setJobTab('APPLIED'); setIsEditing(false); }}>Applied Jobs</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'jobs' && jobTab === 'SEARCH' ? 'active' : ''}`} onClick={() => { setSection('jobs'); setJobTab('SEARCH'); setIsEditing(false); setShowMobileMenu(false); }}>Job Search</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'jobs' && jobTab === 'APPLIED' ? 'active' : ''}`} onClick={() => { setSection('jobs'); setJobTab('APPLIED'); setIsEditing(false); setShowMobileMenu(false); }}>Applied Jobs</button>
                             </div>
                         )}
                     </div>
@@ -1108,19 +1160,19 @@ const StudentDashboard = ({ user }) => {
                         </button>
                         {sidebarExpanded.training && (
                             <div className="sd-nav-sub">
-                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'marketplace' ? 'active' : ''}`} onClick={() => { setSection('marketplace'); setIsEditing(false); }}>Market Place</button>
-                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'mycourses' ? 'active' : ''}`} onClick={() => { setSection('mycourses'); setIsEditing(false); }}>My Courses</button>
-                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'community' ? 'active' : ''}`} onClick={() => { setSection('community'); setIsEditing(false); }}>Community</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'marketplace' ? 'active' : ''}`} onClick={() => { setSection('marketplace'); setIsEditing(false); setShowMobileMenu(false); }}>Market Place</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'mycourses' ? 'active' : ''}`} onClick={() => { setSection('mycourses'); setIsEditing(false); setShowMobileMenu(false); }}>My Courses</button>
+                                <button className={`sd-nav-item sd-nav-item-sub ${section === 'community' ? 'active' : ''}`} onClick={() => { setSection('community'); setIsEditing(false); setShowMobileMenu(false); }}>Community</button>
                             </div>
                         )}
                     </div>
-                    <button className={`sd-nav-item ${section === 'documents' ? 'active' : ''}`} onClick={() => { setSection('documents'); setIsEditing(false); }}>📁 Documents</button>
-                    <button className="sd-nav-item" style={{ marginTop: 'auto', color: '#ff4444' }} onClick={() => window.location.href = '/login'}>🚪 Logout</button>
+                    <button className={`sd-nav-item ${section === 'documents' ? 'active' : ''}`} onClick={() => { setSection('documents'); setIsEditing(false); setShowMobileMenu(false); }}>📁 Documents</button>
                 </nav>
             </div>
 
             <main className="sd-main">
                 <header className="sd-header">
+                    <div className="sd-mobile-toggle" onClick={() => setShowMobileMenu(true)}>☰</div>
                     <div className="sd-breadcrumb">Pages / {isEditing ? 'Edit Profile' : section.charAt(0).toUpperCase() + section.slice(1)}</div>
                     <div className="sd-header-actions">
                         <div style={{ position: 'relative' }}>

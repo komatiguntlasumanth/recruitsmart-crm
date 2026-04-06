@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 
-const AdminDashboard = ({ user }) => {
+const AdminDashboard = ({ user, onLogout }) => {
     const [stats, setStats] = useState({ registeredUsers: 0, activeUsers: 0, loggedInUsers: 0 });
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]); // For displaying based on selection
@@ -9,6 +9,7 @@ const AdminDashboard = ({ user }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [aiQuery, setAiQuery] = useState('');
     const [searchResult, setSearchResult] = useState(null);
+    const [fetchError, setFetchError] = useState(null);
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -24,20 +25,23 @@ const AdminDashboard = ({ user }) => {
     }, []);
 
     const fetchData = async () => {
+        setFetchError(null);
         try {
             const statsRes = await authFetch(`${API_BASE_URL}/api/admin/stats`);
             if (statsRes.ok) setStats(await statsRes.json());
+            else setFetchError(`Stats Error: ${statsRes.status}`);
 
             const usersRes = await authFetch(`${API_BASE_URL}/api/admin/users`);
             if (usersRes.ok) {
                 const data = await usersRes.json();
-                console.log('All users fetched:', data);
-                console.log('HR pending approvals:', data.filter(u => !u.enabled && u.role === 'ROLE_HR'));
                 setUsers(data);
                 setFilteredUsers(data);
+            } else {
+                setFetchError(`Users Error: ${usersRes.status}`);
             }
         } catch (error) {
             console.error("Error fetching admin data", error);
+            setFetchError("❌ Connection Failed. Make sure VITE_API_URL is set to your Railway URL.");
         }
     };
 
@@ -90,12 +94,30 @@ const AdminDashboard = ({ user }) => {
     };
 
     return (
-        <div style={{ padding: '2rem', minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
-            <p style={{ color: '#666', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{getGreeting()}, {displayName}</p>
-            <h2 style={{ fontSize: '2rem', marginBottom: '2rem', color: '#b91c1c' }}>Admin Dashboard</h2>
+        <div className="admin-dashboard-container" style={{ padding: '2rem', minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+            <p className="admin-dashboard-greeting" style={{ color: '#666', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{getGreeting()}, {displayName}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h2 className="admin-dashboard-title" style={{ fontSize: '2rem', margin: 0, color: '#b91c1c' }}>Admin Dashboard</h2>
+                <button onClick={onLogout} style={{ padding: '10px 20px', borderRadius: '8px', background: '#ef4444', color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>🚪 Logout</button>
+            </div>
+
+            {fetchError && (
+                <div style={{ 
+                    padding: '1.5rem', 
+                    background: '#fef2f2', 
+                    border: '1px solid #fee2e2', 
+                    borderRadius: '12px', 
+                    color: '#ef4444', 
+                    marginBottom: '2rem',
+                    textAlign: 'center'
+                }}>
+                    <strong>{fetchError}</strong><br/>
+                    <small>Attempting to call: {API_BASE_URL}</small>
+                </div>
+            )}
 
             {/* Stats Cards - Clickable */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
                 <div onClick={() => handleStatClick('ALL')} className="glass-card" style={{ padding: '2rem', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', color: 'white', cursor: 'pointer', transform: viewMode === 'ALL' ? 'scale(1.02)' : 'none', border: viewMode === 'ALL' ? '3px solid #c7d2fe' : 'none' }}>
                     <h3>Registered Users</h3>
                     <p style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>{stats.registeredUsers}</p>
@@ -144,8 +166,8 @@ const AdminDashboard = ({ user }) => {
             </div>
 
             <h3 style={{ marginBottom: '1rem' }}>{viewMode === 'ALL' ? 'All Users' : viewMode === 'APPROVALS' ? 'Pending HR Approvals' : viewMode === 'ACTIVE' ? 'Active Users' : 'Logged In Users'}</h3>
-            <div className="glass-card" style={{ overflow: 'hidden', background: 'white' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="glass-card" style={{ overflowX: 'auto', background: 'white' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
                     <thead style={{ background: '#f1f5f9', borderBottom: '2px solid #e2e8f0' }}>
                         <tr>
                             <th style={{ padding: '1rem' }}>#</th>
@@ -213,6 +235,17 @@ const AdminDashboard = ({ user }) => {
                     </div>
                 </div>
             )}
+            <style>{`
+                @media (max-width: 768px) {
+                    .admin-dashboard-container { padding: 1rem !important; }
+                    .admin-dashboard-title { font-size: 1.5rem !important; margin-bottom: 1.5rem !important; }
+                    .admin-dashboard-greeting { font-size: 0.9rem !important; }
+                    .glass-card { padding: 1.25rem !important; margin-bottom: 1.5rem !important; }
+                    .glass-card h3 { font-size: 1rem !important; }
+                    .glass-card p { font-size: 1.8rem !important; }
+                    input, button { font-size: 0.9rem !important; }
+                }
+            `}</style>
         </div>
     );
 };
