@@ -119,10 +119,13 @@ public class JobController {
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public void deleteJob(@PathVariable Long id) {
         if (id == null) return;
         jobRepository.findById(id).ifPresent(entity -> {
             checkPermission(entity);
+            // Delete associated applications first to avoided FK constraint errors
+            applicationRepository.deleteByJobId(id);
             jobRepository.delete(Objects.requireNonNull(entity));
         });
     }

@@ -546,6 +546,14 @@ const StudentDashboard = ({ user, onLogout }) => {
                             {saveStatus}
                         </span>
                     )}
+                    <button 
+                        className="sd-icon-btn" 
+                        style={{ background: 'var(--sd-primary)', color: 'white', width: 'auto', padding: '5px 20px' }} 
+                        onClick={handleSaveProfile}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? '⏳ Saving...' : '💾 Save Profile'}
+                    </button>
                     <button className="sd-icon-btn" onClick={() => setIsEditing(false)}>✕ Close</button>
                 </div>
             </div>

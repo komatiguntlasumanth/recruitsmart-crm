@@ -84,6 +84,7 @@ public class StudentProfileController {
         updateCollection(existingInfo.getAchievements(), profile.getAchievements());
         updateCollection(existingInfo.getCertificates(), profile.getCertificates());
         updateCollection(existingInfo.getInternships(), profile.getInternships());
+        updateCollection(existingInfo.getDocuments(), profile.getDocuments());
 
         StudentProfile savedProfile = profileRepository.save(existingInfo);
         

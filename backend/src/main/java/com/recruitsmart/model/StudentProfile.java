@@ -75,6 +75,9 @@ public class StudentProfile {
     
     @ElementCollection
     private List<Project> certificates = new ArrayList<>(); // Reusing Project model for Certificates (title, description, link)
+    
+    @ElementCollection
+    private List<Document> documents = new ArrayList<>();
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -130,4 +133,7 @@ public class StudentProfile {
     
     public String getResumeUrl() { return resumeUrl; }
     public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
+
+    public List<Document> getDocuments() { return documents; }
+    public void setDocuments(List<Document> documents) { this.documents = documents; }
 }

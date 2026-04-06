@@ -135,6 +135,7 @@ const ManagerDashboard = ({ user, onLogout }) => {
                     startDate: '', applicationEndDate: ''
                 });
                 fetchJobs();
+                fetchHrStats(); // Refresh stats after adding/editing
             } else {
                 const data = await res.json().catch(() => ({}));
                 alert(`Failed: ${data.message || 'Unknown error'}`);
@@ -161,7 +162,8 @@ const ManagerDashboard = ({ user, onLogout }) => {
             try {
                 await authFetch(`${API_BASE_URL}/api/jobs/${id}`, { method: 'DELETE' });
                 fetchJobs();
-            } catch (err) { console.error(err); }
+                fetchHrStats(); // Refresh stats after deletion
+            } catch (err) { alert("Could not delete. It may have active applications."); console.error(err); }
         }
     };
 

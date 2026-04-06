@@ -10,4 +10,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     List<Application> findByJobId(Long jobId);
     List<Application> findByJobPostedByEmail(String email);
     boolean existsByJobIdAndStudentId(Long jobId, Long studentId);
+    
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByJobId(Long jobId);
 }
