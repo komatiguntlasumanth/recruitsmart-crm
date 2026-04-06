@@ -14,7 +14,6 @@ const AuthPage = ({ onLogin }) => {
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [slowBootMessage, setSlowBootMessage] = useState('');
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
@@ -23,17 +22,9 @@ const AuthPage = ({ onLogin }) => {
         setError('');
         setMessage('');
         setLoading(true);
-        setSlowBootMessage('');
-
-        // HuggingFace instances sleep after inactivity. It takes 1-2 minutes to wake them up.
-        const slowBootTimeout = setTimeout(() => {
-            setSlowBootMessage('It looks like the free cloud server is waking up from sleep... this can take 1-2 minutes. Please be patient!');
-        }, 5000);
-
         // Client-side validations
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            clearTimeout(slowBootTimeout);
             setError('Please enter a valid email address.');
             setLoading(false);
             return;
@@ -42,13 +33,11 @@ const AuthPage = ({ onLogin }) => {
         try {
             if (mode === 'register') {
                 if (!passwordRegex.test(password)) {
-                    clearTimeout(slowBootTimeout);
                     setError('Password must be at least 6 characters and include 1 uppercase, 1 lowercase, 1 number, and 1 special character.');
                     setLoading(false);
                     return;
                 }
                 if (username.length < 3) {
-                    clearTimeout(slowBootTimeout);
                     setError('Username must be at least 3 characters.');
                     setLoading(false);
                     return;
@@ -60,7 +49,6 @@ const AuthPage = ({ onLogin }) => {
                     body: JSON.stringify({ email, password, username })
                 });
 
-                clearTimeout(slowBootTimeout);
 
                 let data;
                 const contentType = response.headers.get("content-type");
@@ -101,7 +89,6 @@ const AuthPage = ({ onLogin }) => {
                     body: JSON.stringify({ email, password })
                 });
 
-                clearTimeout(slowBootTimeout);
 
                 let data;
                 const contentType = response.headers.get("content-type");
@@ -133,7 +120,6 @@ const AuthPage = ({ onLogin }) => {
                 onLogin({ name: data.user.username || data.user.email, email: data.user.email, role: data.user.role, username: data.user.username });
             }
         } catch (err) {
-            clearTimeout(slowBootTimeout);
             console.error(`Auth Error at ${API_BASE}:`, err);
             let errorMessage = err.message;
             if (err.message.includes("Failed to fetch")) {
@@ -145,7 +131,6 @@ const AuthPage = ({ onLogin }) => {
                 setMode('register');
             }
         } finally {
-            clearTimeout(slowBootTimeout);
             setLoading(false);
         }
     };
@@ -224,13 +209,7 @@ const AuthPage = ({ onLogin }) => {
                         </div>
                     )}
                     {message && <div style={{ color: '#10b981', background: '#d1fae5', padding: '10px', borderRadius: '5px', marginBottom: '1rem', fontSize: '0.9rem' }}>{message}</div>}
-                    {slowBootMessage && (
-                        <div style={{ color: '#0ea5e9', background: '#e0f2fe', padding: '12px', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', border: '1px solid #bae6fd', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '20px', height: '20px', border: '3px solid #0ea5e9', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                            <span><strong>Info:</strong> {slowBootMessage}</span>
-                        </div>
-                    )}
+
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                         <div>
