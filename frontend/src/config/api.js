@@ -13,7 +13,7 @@ const getNormalizedApiUrl = () => {
 
     // Priority 2: Use production fallback
     if (import.meta.env.PROD || isMobile) {
-        return 'https://komatiguntlasumanth-recruitsmart-crm.hf.space';
+        return 'https://recruitsmart-crm-2l0j.onrender.com';
     }
 
     // Priority 3: Localhost development (Only when running 'npm run dev' on PC)
