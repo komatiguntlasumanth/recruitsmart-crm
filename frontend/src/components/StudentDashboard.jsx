@@ -558,7 +558,6 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                             {saveStatus}
                         </span>
                     )}
-                    <button className="sd-icon-btn" onClick={() => setIsEditing(false)}>✕ Close</button>
                 </div>
             </div>
             <div className="sd-content-scrollable" style={{ paddingBottom: '2rem' }}>
