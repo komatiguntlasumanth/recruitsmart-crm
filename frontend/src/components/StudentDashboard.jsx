@@ -200,20 +200,16 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                 setSaveStatus('Saved');
                 setTimeout(() => setSaveStatus(''), 2000);
             } else {
-                setSaveStatus('Error saving');
                 let rawText = await res.text();
                 let errorData = {};
                 try { errorData = JSON.parse(rawText); } catch(e) {}
                 
-                const exactError = errorData.message || (errorData.errors ? Object.values(errorData.errors).join(', ') : `Status: ${res.status} | Msg: ${rawText.substring(0, 100)}`);
-                const errorMsg = exactError || 'Failed to sync profile with server.';
-                setMsg(`❌ ${errorMsg}`);
-                alert(`Save Failed: ${errorMsg}`);
+                const exactError = errorData.message || (errorData.errors ? Object.values(errorData.errors).join(', ') : `HTTP ${res.status} - ${rawText.substring(0, 100)}`);
+                
+                setSaveStatus(`❌ Error: ${exactError}`);
             }
         } catch (err) {
-            setSaveStatus('Error');
-            setMsg('❌ Connection error. Please try again.');
-            alert(`Connection Error: ${err.message}`);
+            setSaveStatus(`❌ Error: ${err.message}`);
         } finally {
             setIsSaving(false);
         }
