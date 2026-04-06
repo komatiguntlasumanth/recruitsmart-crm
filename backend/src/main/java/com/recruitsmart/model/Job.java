@@ -50,6 +50,9 @@ public class Job {
     private LocalDate applicationEndDate;
     private String postedByEmail;
 
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Application> applications = new java.util.ArrayList<>();
+
     // PRO TIP: Always add a no-arg constructor for JPA
     public Job() {}
 

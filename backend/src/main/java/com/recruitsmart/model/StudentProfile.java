@@ -22,7 +22,7 @@ public class StudentProfile {
     
     private String mobileNumber;
     
-    @Email(message = "Invalid alternate email format")
+    @Pattern(regexp = "^$|^[A-Za-z0-9+_.-]+@(.+)$", message = "Invalid alternate email format")
     private String alternateEmail;
     
     private String alternateMobile;
