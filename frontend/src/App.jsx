@@ -31,6 +31,16 @@ function App() {
         if (window.location.pathname !== '/' && window.location.pathname !== '/index.html' && !window.location.pathname.startsWith('/capacitor:')) {
             window.history.replaceState({}, '', '/');
         }
+
+        // Listen for forced logouts from api.js
+        const handleStorageChange = () => {
+            if (!localStorage.getItem('token')) {
+                setUser(null);
+                setView('dashboard');
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const handleLogout = () => {
