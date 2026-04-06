@@ -56,27 +56,35 @@ public class StudentProfile {
     private String resumeUrl;
 
     @ElementCollection
+    @CollectionTable(name = "student_profile_education", joinColumns = @JoinColumn(name = "student_profile_id"))
     private List<Education> education = new ArrayList<>();
 
     @ElementCollection
+    @CollectionTable(name = "student_profile_experience", joinColumns = @JoinColumn(name = "student_profile_id"))
     private List<Experience> experiences = new ArrayList<>();
 
     @ElementCollection
+    @CollectionTable(name = "student_profile_project", joinColumns = @JoinColumn(name = "student_profile_id"))
     private List<Project> projects = new ArrayList<>();
 
     @ElementCollection
+    @CollectionTable(name = "student_profile_skill", joinColumns = @JoinColumn(name = "student_profile_id"))
     private List<Skill> skills = new ArrayList<>();
 
     @ElementCollection
+    @CollectionTable(name = "student_profile_achievement", joinColumns = @JoinColumn(name = "student_profile_id"))
     private List<Achievement> achievements = new ArrayList<>();
     
     @ElementCollection
+    @CollectionTable(name = "student_profile_internship", joinColumns = @JoinColumn(name = "student_profile_id"))
     private List<Experience> internships = new ArrayList<>(); // Reusing Experience model for internships
     
     @ElementCollection
-    private List<Project> certificates = new ArrayList<>(); // Reusing Project model for Certificates (title, description, link)
+    @CollectionTable(name = "student_profile_certificate", joinColumns = @JoinColumn(name = "student_profile_id"))
+    private List<Project> certificates = new ArrayList<>(); // Reusing Project model for Certificates
     
     @ElementCollection
+    @CollectionTable(name = "student_profile_document", joinColumns = @JoinColumn(name = "student_profile_id"))
     private List<Document> documents = new ArrayList<>();
 
     // Getters and Setters
