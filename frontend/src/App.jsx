@@ -10,16 +10,14 @@ import ChatBot from './components/common/ChatBot'
 import logo from './assets/logo.png';
 
 function App() {
-    const [user, setUser] = useState(null);
-    const [view, setView] = useState('dashboard');
+    const [user, setUser] = useState(() => {
+        try {
+            const savedUser = localStorage.getItem('user');
+            return savedUser ? JSON.parse(savedUser) : null;
+        } catch (e) { return null; }
+    });
+    const [view, setView] = useState(() => localStorage.getItem('view') || 'dashboard');
     const [authMode, setAuthMode] = useState('login');
-
-    // Restore session on mount
-    // Session restoration disabled as requested to ensure login page is always first.
-    useEffect(() => {
-        // We now only clear the view to ensure we always start on the 'dashboard' of whatever role
-        localStorage.removeItem('view');
-    }, []);
 
     // Persist view state
     useEffect(() => {
@@ -87,7 +85,7 @@ function App() {
         switch (view) {
             case 'leads': return <LeadList userRole={user.role} />;
             case 'jobs': return <JobBoard user={user} />;
-            case 'applications': return <StudentDashboard user={user} />;
+            case 'applications': return <StudentDashboard user={user} initialSection="jobs" initialJobTab="APPLIED" onLogout={handleLogout} />;
             case 'pipeline':
                 if (user.role !== 'ROLE_HR') {
                     return (

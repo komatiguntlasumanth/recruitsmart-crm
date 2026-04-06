@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 import './StudentDashboard.css';
 
-const StudentDashboard = ({ user, onLogout }) => {
-    const [section, setSection] = useState('home');
+const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobTab = 'SEARCH' }) => {
+    const [section, setSection] = useState(initialSection);
     const [profile, setProfile] = useState({
         dob: '', mobileNumber: '', alternateEmail: '', alternateMobile: '',
         currentLocation: '', permanentAddress: '',
@@ -22,12 +22,18 @@ const StudentDashboard = ({ user, onLogout }) => {
     const [myApplications, setMyApplications] = useState([]);
     const [recommendedJobs, setRecommendedJobs] = useState([]);
     const [allJobs, setAllJobs] = useState([]);
-    const [jobTab, setJobTab] = useState('SEARCH');
+    const [jobTab, setJobTab] = useState(initialJobTab);
     const [searchTerm, setSearchTerm] = useState('');
     const [sidebarExpanded, setSidebarExpanded] = useState({ jobs: false, training: false });
     const [profileStep, setProfileStep] = useState(0);
     const [applyingId, setApplyingId] = useState(null);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+    // Synchronize props with state
+    useEffect(() => {
+        if (initialSection) setSection(initialSection);
+        if (initialJobTab) setJobTab(initialJobTab);
+    }, [initialSection, initialJobTab]);
 
     // Predefined Skills List
     const SKILL_SUGGESTIONS = [
@@ -55,16 +61,17 @@ const StudentDashboard = ({ user, onLogout }) => {
     useEffect(() => {
         fetchProfile();
         fetchApplicationCount();
-        // fetchRecommendedJobs is now triggered when profile.id is available
+        fetchAllJobs();
     }, []);
 
     useEffect(() => {
         if (profile.id) {
             fetchRecommendedJobs();
-            // Once profile is loaded, mark initial load as done after a short delay
-            // to avoid immediate autosave of the fetched data.
-            setTimeout(() => setInitialLoadDone(true), 1000);
         }
+        // Once profile is loaded (even if no ID yet), mark initial load as done after a short delay
+        // to avoid immediate autosave of the fetched data.
+        const timer = setTimeout(() => setInitialLoadDone(true), 1500);
+        return () => clearTimeout(timer);
     }, [profile.id]);
 
     // Autosave Effect
@@ -81,58 +88,59 @@ const StudentDashboard = ({ user, onLogout }) => {
         return () => clearTimeout(timer);
     }, [profile, initialLoadDone]);
 
-    const fetchRecommendedJobs = async () => {
-        // Fallback or Initial Load without AI
+    const fetchAllJobs = async () => {
         try {
-            const allRes = await authFetch(`${API_BASE_URL}/api/jobs`); // Always fetch all jobs for search/market
-            if (allRes.ok) {
-                const allData = await allRes.json();
-                setAllJobs(allData);
-
-                // Default local fallback if no profile or error
-                if (!profile.id) {
-                    setRecommendedJobs(allData.slice(0, 5)); // Just show some jobs
-                    return;
-                }
+            const res = await authFetch(`${API_BASE_URL}/api/jobs`);
+            if (res.ok) {
+                const data = await res.json();
+                setAllJobs(data);
             }
+        } catch (err) { console.error("Error fetching all jobs", err); }
+    };
 
-            // Try AI Recommendation
-            try {
+    const fetchRecommendedJobs = async () => {
+        const completion = calculateProfileCompletion();
+        if (completion < 50) {
+            setRecommendedJobs([]);
+            return;
+        }
+
+        // Try AI Recommendation first
+        try {
+            if (profile.id) {
                 const aiRes = await authFetch(`${API_BASE_URL}/api/ai/recommend-jobs/${profile.id}`);
                 if (aiRes.ok) {
                     const aiData = await aiRes.json();
                     if (aiData.length > 0) {
                         setRecommendedJobs(aiData);
-                        return; // Successfully got AI jobs
+                        return;
                     }
                 }
-            } catch (ignore) { console.warn("AI Recommendation unavailable, using fallback."); }
-
-            // Local Logic Fallback (if AI failed or returned empty)
-            // Re-use logic: Designation > Skills
-            if (allJobs.length > 0) {
-                let recommended = [];
-                if (profile.designation) {
-                    const designKeywords = profile.designation.toLowerCase().split(' ').filter(w => w.length > 2);
-                    recommended = allJobs.filter(job => {
-                        const text = (job.title + ' ' + (job.description || '')).toLowerCase();
-                        return designKeywords.some(k => text.includes(k));
-                    });
-                }
-                if (recommended.length < 3 && profile.skills && profile.skills.length > 0) {
-                    const studentSkills = profile.skills.map(s => s.name.toLowerCase());
-                    const skillMatched = allJobs.filter(job => {
-                        const text = (job.title + ' ' + (job.description || '') + ' ' + (job.eligibilityCriteria || '')).toLowerCase();
-                        return studentSkills.some(skill => text.includes(skill));
-                    });
-                    const existingIds = new Set(recommended.map(j => j.id));
-                    const newJobs = skillMatched.filter(j => !existingIds.has(j.id));
-                    recommended = [...recommended, ...newJobs].slice(0, 10);
-                }
-                setRecommendedJobs(recommended.length > 0 ? recommended : allJobs.slice(0, 5));
             }
+        } catch (ignore) { }
 
-        } catch (err) { console.error(err); }
+        // Local Logic Fallback
+        if (allJobs.length > 0) {
+            let recommended = [];
+            if (profile.designation) {
+                const designKeywords = profile.designation.toLowerCase().split(' ').filter(w => w.length > 2);
+                recommended = allJobs.filter(job => {
+                    const text = (job.title + ' ' + (job.description || '')).toLowerCase();
+                    return designKeywords.some(k => text.includes(k));
+                });
+            }
+            if (recommended.length < 3 && profile.skills && profile.skills.length > 0) {
+                const studentSkills = profile.skills.map(s => s.name.toLowerCase());
+                const skillMatched = allJobs.filter(job => {
+                    const text = (job.title + ' ' + (job.description || '') + ' ' + (job.eligibilityCriteria || '') + ' ' + (job.designation || '')).toLowerCase();
+                    return studentSkills.some(skill => text.includes(skill));
+                });
+                const existingIds = new Set(recommended.map(j => j.id));
+                const newJobs = skillMatched.filter(j => !existingIds.has(j.id));
+                recommended = [...recommended, ...newJobs].slice(0, 10);
+            }
+            setRecommendedJobs(recommended.length > 0 ? recommended : allJobs.slice(0, 5));
+        }
     };
 
     const fetchApplicationCount = async () => {
@@ -761,27 +769,39 @@ const StudentDashboard = ({ user, onLogout }) => {
                         <button className="sd-view-all" onClick={() => { setSection('jobs'); setJobTab('SEARCH'); }}>View All Jobs →</button>
                     </div>
                     <div className="sd-cert-list">
-                        {recommendedJobs.length > 0 ? recommendedJobs.slice(0, 10).map((job, idx) => {
-                            const isApplied = myApplications.some(app => app.job.id === job.id);
+                        {calculateProfileCompletion() >= 50 ? (
+                            recommendedJobs.length > 0 ? recommendedJobs.slice(0, 10).map((job, idx) => {
+                                const isApplied = myApplications.some(app => app.job.id === job.id);
 
-                            return (
-                                <div key={job.id} className="sd-cert-item" style={{ position: 'relative' }}>
-                                    <div className="sd-cert-icon" style={{ background: '#f0fdf4', color: '#16a34a' }}>💼</div>
-                                    <div className="sd-cert-content">
-                                        <h4 style={{ margin: 0 }}>{job.title}</h4>
-                                        <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)' }}>{job.companyName} • {job.location}</p>
+                                return (
+                                    <div key={job.id} className="sd-cert-item" style={{ position: 'relative' }}>
+                                        <div className="sd-cert-icon" style={{ background: '#f0fdf4', color: '#16a34a' }}>💼</div>
+                                        <div className="sd-cert-content">
+                                            <h4 style={{ margin: 0 }}>{job.title}</h4>
+                                            <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)' }}>{job.companyName} • {job.location}</p>
+                                        </div>
+                                        <button
+                                            className={`sd-icon-btn ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
+                                            style={{ background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', padding: '5px 15px', width: 'auto', borderRadius: '8px' }}
+                                            onClick={() => handleApply(job.id)}
+                                            disabled={isApplied || applyingId === job.id}
+                                        >
+                                            {isApplied ? 'Applied' : (applyingId === job.id ? '...' : 'Apply')}
+                                        </button>
                                     </div>
-                                    <button
-                                        className={`sd-icon-btn ${applyingId === job.id ? 'sd-btn-loading' : ''}`}
-                                        style={{ background: isApplied ? '#dcfce7' : 'var(--sd-primary)', color: isApplied ? '#16a34a' : 'white', padding: '5px 15px', width: 'auto', borderRadius: '8px' }}
-                                        onClick={() => handleApply(job.id)}
-                                        disabled={isApplied || applyingId === job.id}
-                                    >
-                                        {isApplied ? 'Applied' : (applyingId === job.id ? '...' : 'Apply')}
-                                    </button>
+                                );
+                            }) : <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--sd-text-muted)' }}>We're still finding the best matches for you. Try updating your skills!</p>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '2rem', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                                <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1rem' }}>
+                                    Unlock personalized job recommendations by completing at least 50% of your profile.
+                                </p>
+                                <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', maxWidth: '200px', margin: '0 auto 1rem', overflow: 'hidden' }}>
+                                    <div style={{ width: `${calculateProfileCompletion()}%`, height: '100%', background: 'var(--sd-primary)' }}></div>
                                 </div>
-                            );
-                        }) : <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--sd-text-muted)' }}>Complete your profile designation to get personalized recommendations!</p>}
+                                <button className="sd-view-all" onClick={() => setSection('profile')}>Complete My Profile →</button>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="sd-home-right">
