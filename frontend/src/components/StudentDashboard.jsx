@@ -83,7 +83,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
 
         const timer = setTimeout(() => {
             handleSaveProfile();
-        }, 2000); // Save after 2 seconds of inactivity
+        }, 3000); // Save after 3 seconds of inactivity
 
         return () => clearTimeout(timer);
     }, [profile, initialLoadDone]);
@@ -564,7 +564,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                         onClick={handleSaveProfile}
                         disabled={isSaving}
                     >
-                        {isSaving ? '⏳ Saving...' : '💾 Save Profile'}
+                        💾 Save Profile
                     </button>
                     <button className="sd-icon-btn" onClick={() => setIsEditing(false)}>✕ Close</button>
                 </div>

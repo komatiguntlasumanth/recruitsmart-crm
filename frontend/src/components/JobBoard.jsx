@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 
-const JobBoard = ({ user }) => {
+const JobBoard = ({ user, onModalToggle }) => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -30,6 +30,12 @@ const JobBoard = ({ user }) => {
             console.error(err);
         }
     };
+
+    useEffect(() => {
+        if (onModalToggle) {
+            onModalToggle(showModal || !!selectedJob || !!viewApplicantsJobId);
+        }
+    }, [showModal, selectedJob, viewApplicantsJobId, onModalToggle]);
 
     const fetchJobs = async () => {
         const response = await authFetch(`${API_BASE_URL}/api/jobs`); // Changed to fetch ALL jobs
@@ -245,7 +251,7 @@ const JobBoard = ({ user }) => {
 
             {/* Job Details Modal */}
             {selectedJob && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div className="glass-card" style={{ padding: '2rem', width: '600px', background: '#ffffff', color: '#1e293b' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                             <h2 style={{ margin: 0 }}>{selectedJob.title}</h2>
@@ -300,7 +306,7 @@ const JobBoard = ({ user }) => {
 
             {/* Post Job Modal */}
             {showModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div className="glass-card" style={{ padding: '2rem', width: '500px', background: '#1e293b', color: 'white' }}>
                         <h3>{editingJobId ? 'Edit Job' : 'Post a New Job'}</h3>
                         <form onSubmit={handlePostJob} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
@@ -361,7 +367,7 @@ const JobBoard = ({ user }) => {
 
             {/* View Applicants Modal */}
             {viewApplicantsJobId && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div className="glass-card" style={{ padding: '2rem', width: '90%', maxWidth: '800px', background: '#ffffff', color: '#333', maxHeight: '80vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                             <h3>Applicants</h3>

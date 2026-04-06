@@ -27,11 +27,12 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=backend-build /app/backend/target/*.jar app.jar
 
-# Hugging Face Spaces requires port 7860
-EXPOSE 7860
+# Use the PORT environment variable (Render/Koyeb default to 10000 if not set)
+ENV PORT=${PORT:-10000}
+EXPOSE $PORT
 
 ENV SPRING_PROFILES_ACTIVE=prod
-# Memory-optimized JVM settings for HF free-tier (512MB-1GB)
-ENV JAVA_OPTS="-Xmx256m -Xms128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
+# Optimized JVM settings for cloud free-tiers
+ENV JAVA_OPTS="-Xmx384m -Xms128m -XX:+UseSerialGC -Djava.security.egd=file:/dev/./urandom"
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.port=$PORT -jar app.jar"]

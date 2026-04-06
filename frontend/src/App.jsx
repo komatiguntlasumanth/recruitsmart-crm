@@ -18,6 +18,7 @@ function App() {
     });
     const [view, setView] = useState(() => localStorage.getItem('view') || 'dashboard');
     const [authMode, setAuthMode] = useState('login');
+    const [isHeaderHidden, setIsHeaderHidden] = useState(false);
 
     // Persist view state
     useEffect(() => {
@@ -84,17 +85,21 @@ function App() {
 
     const displayName = (user.username || user.name || "").split('@')[0];
 
+    const renderDashboard = () => {
+        if (user.role === 'ROLE_STUDENT') return <StudentDashboard user={user} onLogout={handleLogout} />;
+        if (user.role === 'ROLE_ADMIN') return <AdminDashboard user={user} onLogout={handleLogout} onModalToggle={setIsHeaderHidden} />;
+        if (user.role === 'ROLE_HR' || user.role === 'ROLE_MANAGER') return <ManagerDashboard user={user} onLogout={handleLogout} onModalToggle={setIsHeaderHidden} />;
+        return null;
+    };
+
     const renderView = () => {
-        // Direct routing based on role for Dashboard view
         if (view === 'dashboard') {
-            if (user.role === 'ROLE_STUDENT') return <StudentDashboard user={user} onLogout={handleLogout} />;
-            if (user.role === 'ROLE_ADMIN') return <AdminDashboard user={user} onLogout={handleLogout} />;
-            if (user.role === 'ROLE_HR' || user.role === 'ROLE_MANAGER') return <ManagerDashboard user={user} onLogout={handleLogout} />;
+            return renderDashboard();
         }
 
         switch (view) {
             case 'leads': return <LeadList userRole={user.role} />;
-            case 'jobs': return <JobBoard user={user} />;
+            case 'jobs': return <JobBoard user={user} onModalToggle={setIsHeaderHidden} />;
             case 'applications': return <StudentDashboard user={user} initialSection="jobs" initialJobTab="APPLIED" onLogout={handleLogout} />;
             case 'pipeline':
                 if (user.role !== 'ROLE_HR') {
@@ -141,7 +146,7 @@ function App() {
 
     return (
         <div className="container">
-            {user && (
+            {user && !isHeaderHidden && (
                 <nav style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
@@ -181,6 +186,7 @@ function App() {
             </main>
             <ChatBot
                 context={`You are the RecruitSmart AI Assistant. Helping user ${displayName} (${user.role}).`}
+                onToggleHeader={setIsHeaderHidden}
             />
         </div>
     )

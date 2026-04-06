@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 
-const ManagerDashboard = ({ user, onLogout }) => {
+const ManagerDashboard = ({ user, onLogout, onModalToggle }) => {
     const [activeTab, setActiveTab] = useState('jobs');
     const [jobs, setJobs] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -98,7 +98,8 @@ const ManagerDashboard = ({ user, onLogout }) => {
     const fetchCandidateProfile = async (userId, application = null) => {
         setLoading(true);
         try {
-            const res = await authFetch(`${API_BASE_URL}/api/student/profile/user/${userId}`);
+            // Using the same endpoint as JobBoard.jsx
+            const res = await authFetch(`${API_BASE_URL}/api/student/profile/${userId}`);
             if (res.ok) {
                 const data = await res.json();
                 setCandidateProfile(data);
@@ -110,6 +111,12 @@ const ManagerDashboard = ({ user, onLogout }) => {
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
     };
+
+    useEffect(() => {
+        if (onModalToggle) {
+            onModalToggle(showModal || !!viewingApplicantsForJob || !!selectedCandidate || showReport);
+        }
+    }, [showModal, viewingApplicantsForJob, selectedCandidate, showReport, onModalToggle]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -341,7 +348,7 @@ const ManagerDashboard = ({ user, onLogout }) => {
 
             {/* View Applicants Modal */}
             {viewingApplicantsForJob && (
-                <div className="modal-overlay">
+                <div className="modal-overlay" style={{ zIndex: 9999 }}>
                     <div className="modal-content large">
                         <div className="modal-header">
                             <h3>Applicants for {jobs.find(j => j.id === viewingApplicantsForJob)?.title}</h3>
@@ -368,7 +375,7 @@ const ManagerDashboard = ({ user, onLogout }) => {
 
             {/* Candidate Details Modal */}
             {selectedCandidate && candidateProfile && (
-                <div className="modal-overlay" style={{ zIndex: 1100 }}>
+                <div className="modal-overlay" style={{ zIndex: 9999 }}>
                     <div className="modal-content large">
                         <div className="modal-header">
                             <h3>Candidate Profile</h3>
@@ -424,7 +431,7 @@ const ManagerDashboard = ({ user, onLogout }) => {
 
             {/* Add/Edit Job Modal (Simplified for brevity, similar to existing) */}
             {showModal && (
-                <div className="modal-overlay">
+                <div className="modal-overlay" style={{ zIndex: 9999 }}>
                     <div className="modal-content">
                         <h3>{editingJobId ? 'Edit' : 'Post'} {modalMode === 'JOB' ? 'Job' : 'Training'}</h3>
                         <form onSubmit={handleSubmit}>
@@ -501,7 +508,7 @@ const ManagerDashboard = ({ user, onLogout }) => {
                 .icon-btn.edit { background: #f1f5f9; color: #475569; }
                 .icon-btn.delete { background: #fef2f2; color: #ef4444; }
 
-                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out; }
+                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; animation: fadeIn 0.2s ease-out; }
                 .modal-content { background: white; padding: 2rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
                 .modal-content.large { max-width: 800px; height: 80vh; display: flex; flex-direction: column; padding: 0; }
                 
@@ -589,7 +596,7 @@ const ManagerDashboard = ({ user, onLogout }) => {
         const interviewCount = allApplications.filter(a => a.status === 'INTERVIEW').length;
 
         return (
-            <div className="modal-overlay" style={{ zIndex: 2000 }}>
+            <div className="modal-overlay" style={{ zIndex: 9999 }}>
                 <div className="modal-content large" style={{ maxWidth: '1000px', height: '90vh' }}>
                     <div className="modal-header">
                         <h3>RecruitSmart Analytics</h3>

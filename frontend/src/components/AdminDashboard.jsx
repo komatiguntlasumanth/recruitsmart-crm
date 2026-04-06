@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 
-const AdminDashboard = ({ user, onLogout }) => {
+const AdminDashboard = ({ user, onLogout, onModalToggle }) => {
     const [stats, setStats] = useState({ registeredUsers: 0, activeUsers: 0, loggedInUsers: 0 });
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]); // For displaying based on selection
@@ -23,6 +23,12 @@ const AdminDashboard = ({ user, onLogout }) => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (onModalToggle) {
+            onModalToggle(!!selectedUser);
+        }
+    }, [selectedUser, onModalToggle]);
 
     const fetchData = async () => {
         setFetchError(null);
@@ -210,7 +216,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             </div>
 
             {selectedUser && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100 }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
                     <div className="glass-card" style={{ padding: '2rem', width: '90%', maxWidth: '500px', background: 'white' }}>
                         <h3 style={{ marginBottom: '1rem', color: '#1e293b' }}>User Profile (View Only)</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

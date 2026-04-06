@@ -57,12 +57,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (JwtException | IllegalArgumentException e) {
-            System.out.println("JWT Filter Error: " + e.getMessage());
-            // Token invalid or expired
+            System.err.println("JWT Filter Error: " + e.getMessage());
         }
         
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            // System.out.println("Request rejected by JWT Filter or no valid token: " + request.getRequestURI());
+            System.err.println("REJECTED: No valid authentication found in JWT Filter for URI: " + request.getRequestURI());
+            if (!request.getRequestURI().startsWith("/auth/")) {
+                // Let it fail at the security chain naturally, but at least we log it
+            }
+        } else {
+            System.out.println("AUTHENTICATED: " + SecurityContextHolder.getContext().getAuthentication().getName() + " for " + request.getMethod() + " " + request.getRequestURI());
         }
         filterChain.doFilter(request, response);
     }

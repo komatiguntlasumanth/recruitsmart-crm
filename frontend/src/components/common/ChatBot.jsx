@@ -5,7 +5,7 @@ import API_BASE_URL, { authFetch } from '../../config/api';
 import './ChatBot.css';
 import botIcon from '../../assets/bot-icon.png';
 
-const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
+const ChatBot = ({ context = "You are the RecruitSmart AI Assistant.", onToggleHeader }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { text: "Hello! I'm your RecruitSmart AI. How can I help you today?", sender: 'ai' }
@@ -27,6 +27,9 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant." }) => {
     useEffect(() => {
         if (isOpen) {
             scrollToBottom();
+        }
+        if (onToggleHeader) {
+            onToggleHeader(isOpen);
         }
     }, [messages, loading, isOpen]);
 
