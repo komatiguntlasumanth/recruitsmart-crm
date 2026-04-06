@@ -206,14 +206,28 @@ const AuthPage = ({ onLogin }) => {
                     {error && (
                         <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', border: '1px solid #fecaca' }}>
                             <strong>Error:</strong> {error}
-                            {error.includes('405') && (
-                                <div style={{ marginTop: '8px', fontSize: '0.8rem', opacity: '0.8' }}>
-                                    💡 Tip: Make sure <code>VITE_API_URL</code> is set in Vercel to your Railway URL.
-                                </div>
-                            )}
                         </div>
                     )}
                     {message && <div style={{ color: '#10b981', background: '#d1fae5', padding: '10px', borderRadius: '5px', marginBottom: '1rem', fontSize: '0.9rem' }}>{message}</div>}
+
+                    {/* Domain Information Banner */}
+                    <div style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        marginBottom: '1.5rem',
+                        fontSize: '0.85rem',
+                        color: '#475569'
+                    }}>
+                        <strong style={{ display: 'block', color: '#1e293b', marginBottom: '4px' }}>🛡️ Portal Access Guide</strong>
+                        Your role is automatically detected by your email domain:
+                        <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px' }}>
+                            <li><b>@hr.com</b> - HR Recruiter</li>
+                            <li><b>@manager.com</b> - System Manager</li>
+                            <li><b>@gmail.com / others</b> - Student Candidate</li>
+                        </ul>
+                    </div>
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                         <div>
