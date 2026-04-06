@@ -12,6 +12,8 @@ const JobBoard = ({ user, onModalToggle }) => {
     const [profile, setProfile] = useState(null);
     const [selectedJob, setSelectedJob] = useState(null); // For detailed view
     const [appliedJobLink, setAppliedJobLink] = useState(null); // Link to show after applying
+    const [applicants, setApplicants] = useState([]);
+    const [viewApplicantsJobId, setViewApplicantsJobId] = useState(null);
 
     useEffect(() => {
         fetchJobs();
@@ -148,8 +150,7 @@ const JobBoard = ({ user, onModalToggle }) => {
         }
     };
 
-    const [applicants, setApplicants] = useState([]);
-    const [viewApplicantsJobId, setViewApplicantsJobId] = useState(null);
+
 
     const handleViewApplicants = async (jobId) => {
         try {

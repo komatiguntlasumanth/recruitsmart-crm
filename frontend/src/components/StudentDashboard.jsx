@@ -869,6 +869,8 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
             );
         }
 
+        const isProfileBelowThreshold = jobTab === 'RECOMMENDED' && calculateProfileCompletion() < 50;
+
         return (
             <div className="fadeIn">
                 <div className="sd-section-header">
@@ -892,7 +894,19 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                 </div>
 
                 <div className="sd-cert-list">
-                    {jobsToShow.length > 0 ? jobsToShow.map(job => {
+                    {isProfileBelowThreshold ? (
+                        <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1', margin: '1rem 0' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+                            <h3 style={{ marginBottom: '0.5rem' }}>Personalized Matching Locked</h3>
+                            <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.5rem', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
+                                Complete at least 50% of your profile to unlock our AI-powered job recommendation system.
+                            </p>
+                            <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', maxWidth: '200px', margin: '0 auto 1.5rem', overflow: 'hidden' }}>
+                                <div style={{ width: `${calculateProfileCompletion()}%`, height: '100%', background: 'var(--sd-primary)' }}></div>
+                            </div>
+                            <button className="sd-icon-btn" style={{ background: 'var(--sd-primary)', color: 'white', width: 'auto', padding: '8px 25px' }} onClick={() => setSection('profile')}>Complete Profile →</button>
+                        </div>
+                    ) : jobsToShow.length > 0 ? jobsToShow.map(job => {
                         const isApplied = myApplications.some(app => app.job.id === job.id);
                         const isExpired = job.applicationEndDate && new Date(job.applicationEndDate) < new Date().setHours(0, 0, 0, 0);
 
