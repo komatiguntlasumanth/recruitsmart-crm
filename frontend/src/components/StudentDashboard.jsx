@@ -742,13 +742,6 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                                 <input type="text" placeholder="Certificate Name" className="sd-card" style={{ padding: '8px', width: '100%', marginBottom: '0.5rem' }} value={cert.title} onChange={e => updateItem('certificates', i, 'title', e.target.value)} />
                                 <textarea placeholder="Issued by / Description" className="sd-card" style={{ padding: '8px', width: '100%', height: '60px', resize: 'vertical' }} value={cert.description} onChange={e => updateItem('certificates', i, 'description', e.target.value)} />
                             </div>
-                            <button className="sd-icon-btn delete" style={{ gridColumn: '1', justifySelf: 'start' }} onClick={() => deleteItem('certificates', i)}>🗑️</button>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
 
     const renderHome = () => (
         <div className="fadeIn">
