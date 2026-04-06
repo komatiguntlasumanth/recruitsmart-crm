@@ -1,10 +1,12 @@
 package com.recruitsmart.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Achievement {
     private String title;
+    @Column(length = 2000)
     private String description; // e.g., Certificate details
 
     // Getters and Setters

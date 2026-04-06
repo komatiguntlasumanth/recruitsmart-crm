@@ -1,10 +1,12 @@
 package com.recruitsmart.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Project {
     private String title;
+    @Column(length = 2000)
     private String description;
     private String link;
 

@@ -1,10 +1,13 @@
 package com.recruitsmart.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Education {
+    @Column(length = 500)
     private String schoolName;
+    @Column(length = 500)
     private String course; // e.g., 10th, 12th, B.Tech
     private String yearOfPassing;
     private String result; // CGPA or Marks

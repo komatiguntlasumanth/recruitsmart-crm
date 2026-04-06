@@ -1,5 +1,6 @@
 package com.recruitsmart.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
@@ -7,6 +8,7 @@ public class Experience {
     private String companyName;
     private String designation;
     private String duration; // e.g., "2 years" or date range
+    @Column(length = 2000)
     private String description;
 
     // Getters and Setters
