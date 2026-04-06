@@ -95,13 +95,12 @@ const AuthPage = ({ onLogin }) => {
                     data = await response.json();
                 } else {
                     const text = await response.text();
-                    // Provide a much cleaner error for 404/405/502/etc.
                     if (response.status === 404) {
                         throw new Error(`API Endpoint not found (404). Current URL: ${API_BASE}`);
                     } else if (response.status === 405) {
                         throw new Error(`Method Not Allowed (405). You are likely hitting the frontend instead of the backend. URL: ${API_BASE}`);
-                    } else if (response.status === 502 || response.status === 503) {
-                        throw new Error(`Backend server is currently down or restarting (Status ${response.status}).`);
+                    } else if (response.status === 502 || response.status === 503 || response.status === 403) {
+                        throw new Error(`Backend server is currently down, restarting, or rejecting connection (Status ${response.status}).`);
                     }
                     throw new Error(`Server error (${response.status}): ${text.substring(0, 50)}...`);
                 }

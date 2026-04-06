@@ -28,7 +28,7 @@ if (window.location.hostname !== 'localhost' && API_BASE_URL.includes(window.loc
         ⚠️ CRITICAL CONFIGURATION ISSUE:
         The Frontend is calling itself for API requests (URL: ${API_BASE_URL}).
         This typically happens if the 'VITE_API_URL' environment variable is NOT set in your hosting platform (HuggingFace/Vercel).
-        Data will fail to load in the dashboards. Please set VITE_API_URL to your Railway backend URL.
+        Data will fail to load in the dashboards. Please set VITE_API_URL to your HuggingFace backend URL.
     `);
 }
 
