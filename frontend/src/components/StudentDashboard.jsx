@@ -201,9 +201,12 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                 setTimeout(() => setSaveStatus(''), 2000);
             } else {
                 setSaveStatus('Error saving');
+                let rawText = await res.text();
                 let errorData = {};
-                try { errorData = await res.json(); } catch(e) {}
-                const errorMsg = errorData.message || (errorData.errors ? Object.values(errorData.errors).join(', ') : 'Failed to sync profile with server.');
+                try { errorData = JSON.parse(rawText); } catch(e) {}
+                
+                const exactError = errorData.message || (errorData.errors ? Object.values(errorData.errors).join(', ') : `Status: ${res.status} | Msg: ${rawText.substring(0, 100)}`);
+                const errorMsg = exactError || 'Failed to sync profile with server.';
                 setMsg(`❌ ${errorMsg}`);
                 alert(`Save Failed: ${errorMsg}`);
             }
