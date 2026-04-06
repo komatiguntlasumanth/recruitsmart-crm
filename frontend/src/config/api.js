@@ -61,10 +61,28 @@ export const authFetch = async (url, options = {}) => {
         ...options.headers
     };
 
-    return fetch(url, {
+    const response = await fetch(url, {
         ...options,
         headers
     });
+    
+    // Auto-logout mechanism for dead/expired tokens (401 or 403)
+    if ((response.status === 401 || response.status === 403) && !url.includes('/auth/login')) {
+        console.warn("Authentication failed (token dead or expired). Forcing logout.");
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new Event('storage')); // Trigger a re-render if listening
+        
+        // Return a mock response so the UI knows to surface it
+        return {
+            ok: false,
+            status: response.status,
+            json: async () => ({ message: "Session expired. Please log out and log back in." }),
+            text: async () => "Session expired. Please log out and log back in."
+        };
+    }
+
+    return response;
 };
 
 export default API_BASE_URL;
