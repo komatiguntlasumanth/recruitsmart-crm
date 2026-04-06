@@ -9,7 +9,11 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    // Use a persistent secret key instead of random. This prevents tokens from 
+    // becoming invalid every time the application restarts.
+    private static final String SECRETString = "recruitsmartcrmverysecureandextralongjwtsecretkey999";
+    private static final Key key = Keys.hmacShaKeyFor(SECRETString.getBytes());
+    
     private static final long EXPIRATION_TIME = 864_000_000; // 10 days
 
     public String generateToken(String username) {
