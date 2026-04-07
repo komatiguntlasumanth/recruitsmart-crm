@@ -41,7 +41,7 @@ public class AgenticService {
     @Autowired
     private JobRecommendationService jobRecommendationService;
 
-    public void processChatStream(String message, String userEmail, String context, SseEmitter emitter) {
+    public void processChatStream(String message, String userEmail, String context, List<Map<String, Object>> history, SseEmitter emitter) {
         // Step 1: Define Tools
         List<Map<String, Object>> tools = List.of(
             Map.of("function_declarations", List.of(

@@ -106,20 +106,37 @@ public class GeminiService {
                 String line;
                 StringBuilder buffer = new StringBuilder();
                 while ((line = reader.readLine()) != null) {
-                    if (line.isEmpty()) continue;
+                    String trimmed = line.trim();
+                    if (trimmed.isEmpty()) continue;
                     
-                    // Gemini stream format is slightly different (often a list of objects or individual objects)
-                    buffer.append(line);
+                    // Handle Google's JSON array stream format
+                    // Strip the leading "[" or "," and trailing "]" if they are on separate lines
+                    if (trimmed.startsWith("[")) trimmed = trimmed.substring(1).trim();
+                    if (trimmed.startsWith(",")) trimmed = trimmed.substring(1).trim();
+                    if (trimmed.endsWith("]")) trimmed = trimmed.substring(0, trimmed.length() - 1).trim();
+                    
+                    if (trimmed.isEmpty()) continue;
+                    
+                    buffer.append(trimmed);
+                    
                     try {
                         JsonNode node = objectMapper.readTree(buffer.toString());
-                        // If we successfully read a JSON node, it's a candidate chunk
-                        String text = node.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
-                        if (!text.isEmpty()) {
-                            emitter.send(text);
+                        // If we successfully read a JSON node, it's a valid candidate chunk
+                        JsonNode candidates = node.path("candidates");
+                        if (candidates.isArray() && candidates.size() > 0) {
+                            JsonNode content = candidates.get(0).path("content");
+                            JsonNode parts = content.path("parts");
+                            if (parts.isArray() && parts.size() > 0) {
+                                String text = parts.get(0).path("text").asText();
+                                if (!text.isEmpty()) {
+                                    // Send the text as-is to preserve spacing
+                                    emitter.send(text);
+                                }
+                            }
                         }
-                        buffer.setLength(0); // Clear buffer for next chunk
+                        buffer.setLength(0); // Clear buffer for next valid chunk
                     } catch (Exception e) {
-                        // Incomplete JSON, continue reading
+                        // Incomplete JSON or non-object line, wait for more data
                     }
                 }
             }

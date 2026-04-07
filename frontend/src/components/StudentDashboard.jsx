@@ -74,19 +74,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
         return () => clearTimeout(timer);
     }, [profile.id]);
 
-    // Autosave Effect
-    useEffect(() => {
-        if (!initialLoadDone) return;
-        
-        // Deep compare or simple stringify check to avoid redundant saves
-        if (JSON.stringify(profile) === lastSavedProfileRef.current) return;
-
-        const timer = setTimeout(() => {
-            handleSaveProfile();
-        }, 3000); // Save after 3 seconds of inactivity
-
-        return () => clearTimeout(timer);
-    }, [profile, initialLoadDone]);
+    // Autosave removed as per user request to use a manual save button
 
     const fetchAllJobs = async () => {
         try {
@@ -544,20 +532,28 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
             <div className="sd-section-header">
                 <h2 className="sd-section-title">Edit Your Professional Profile</h2>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    {saveStatus && (
+                    {saveStatus && !saveStatus.includes('Error') && (
                         <span style={{ 
                             fontSize: '0.85rem', 
-                            color: saveStatus === 'Error' ? '#ef4444' : '#16a34a',
+                            color: '#16a34a',
                             fontWeight: 600,
                             padding: '4px 12px',
                             borderRadius: '20px',
-                            background: saveStatus === 'Saving...' ? '#f1f5f9' : (saveStatus === 'Error' ? '#fef2f2' : '#f0fdf4')
+                            background: saveStatus === 'Saving...' ? '#f1f5f9' : '#f0fdf4'
                         }}>
                             {saveStatus === 'Saving...' && '🔄 '}
                             {saveStatus === 'Saved' && '✅ '}
                             {saveStatus}
                         </span>
                     )}
+                    <button 
+                        className={`sd-btn-primary ${isSaving ? 'sd-btn-loading' : ''}`} 
+                        style={{ padding: '8px 20px', fontSize: '0.9rem' }}
+                        onClick={handleSaveProfile}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? 'Saving...' : 'Sync & Save'}
+                    </button>
                 </div>
             </div>
             <div className="sd-content-scrollable" style={{ paddingBottom: '2rem' }}>
@@ -742,6 +738,38 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                                 <input type="text" placeholder="Certificate Name" className="sd-card" style={{ padding: '8px', width: '100%', marginBottom: '0.5rem' }} value={cert.title} onChange={e => updateItem('certificates', i, 'title', e.target.value)} />
                                 <textarea placeholder="Issued by / Description" className="sd-card" style={{ padding: '8px', width: '100%', height: '60px', resize: 'vertical' }} value={cert.description} onChange={e => updateItem('certificates', i, 'description', e.target.value)} />
                             </div>
+                            <button className="sd-icon-btn delete" style={{ gridColumn: '1', justifySelf: 'start' }} onClick={() => deleteItem('certificates', i)}>🗑️</button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            
+            <div style={{ 
+                marginTop: '1.5rem', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                padding: '1.5rem',
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                border: '1px solid var(--sd-border)',
+                boxShadow: '0 -10px 25px rgba(0,0,0,0.05)',
+                position: 'sticky',
+                bottom: '1rem',
+                zIndex: 100,
+                margin: '0 1rem 1rem 1rem'
+            }}>
+                <button 
+                    className={`sd-btn-primary ${isSaving ? 'sd-btn-loading' : ''}`}
+                    style={{ minWidth: '250px', padding: '15px 40px', fontSize: '1.1rem' }}
+                    onClick={handleSaveProfile}
+                    disabled={isSaving}
+                >
+                    {isSaving ? '🚀 Syncing Your Profile...' : '✨ Sync & Save Changes'}
+                </button>
+            </div>
+        </div>
+    );
 
     const renderHome = () => (
         <div className="fadeIn">
@@ -754,7 +782,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
 
                     <div className="sd-section-header">
                         <h3 className="sd-section-title">Recommended for You</h3>
-                        <button className="sd-view-all" onClick={() => { setSection('jobs'); setJobTab('SEARCH'); }}>View All Jobs →</button>
+                        <button className="sd-btn-secondary" style={{ padding: '8px 20px', fontSize: '0.9rem' }} onClick={() => { setSection('jobs'); setJobTab('SEARCH'); }}>View All Jobs →</button>
                     </div>
                     <div className="sd-cert-list">
                         {calculateProfileCompletion() >= 50 ? (
@@ -787,7 +815,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                                 <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', maxWidth: '200px', margin: '0 auto 1rem', overflow: 'hidden' }}>
                                     <div style={{ width: `${calculateProfileCompletion()}%`, height: '100%', background: 'var(--sd-primary)' }}></div>
                                 </div>
-                                <button className="sd-view-all" onClick={() => setSection('profile')}>Complete My Profile →</button>
+                                <button className="sd-btn-primary" onClick={() => setSection('profile')}>Complete My Profile →</button>
                             </div>
                         )}
                     </div>
@@ -802,7 +830,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                             <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{calculateProfileCompletion()}%</span>
                         </div>
                         <p style={{ fontSize: '0.85rem', color: 'var(--sd-text-muted)', marginTop: '1rem' }}>Excellent! Complete your Experience section to reach 100%.</p>
-                        <button className="sd-view-all" style={{ marginTop: '1rem', width: '100%', textAlign: 'center', border: '1px solid #eee' }} onClick={() => setSection('profile')}>Complete Profile</button>
+                        <button className="sd-btn-primary" style={{ marginTop: '1rem', width: '100%' }} onClick={() => setSection('profile')}>Complete Profile</button>
                     </div>
                     <div className="sd-card">
                         <h4 style={{ marginBottom: '1.5rem' }}>Application Insights</h4>

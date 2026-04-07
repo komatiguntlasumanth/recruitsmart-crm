@@ -37,8 +37,9 @@ public class AiChatController {
     private AgenticService agenticService;
 
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter chat(@RequestBody Map<String, String> request, Principal principal) {
-        String message = request.get("message");
+    public SseEmitter chat(@RequestBody Map<String, Object> request, Principal principal) {
+        String message = (String) request.get("message");
+        List<Map<String, Object>> history = (List<Map<String, Object>>) request.get("history");
         String email = (principal != null) ? principal.getName() : "anonymous";
         
         StringBuilder contextBuilder = new StringBuilder();
@@ -84,8 +85,7 @@ public class AiChatController {
         }
 
         SseEmitter emitter = new SseEmitter(60000L); // 1 minute timeout
-        agenticService.processChatStream(message, email, contextBuilder.toString(), emitter);
-        
+        agenticService.processChatStream(message, email, contextBuilder.toString(), history, emitter);
         return emitter;
     }
 }
