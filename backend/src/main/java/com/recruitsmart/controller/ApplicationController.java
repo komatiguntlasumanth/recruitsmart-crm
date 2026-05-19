@@ -31,6 +31,9 @@ public class ApplicationController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private com.recruitsmart.service.NotificationService notificationService;
+
     @PostMapping("/apply/{jobId}")
     public Application applyForJob(@PathVariable Long jobId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -51,9 +54,10 @@ public class ApplicationController {
         // Send email notification
         try {
             emailService.sendApplicationSuccessEmail(student.getEmail(), job.getTitle(), job.getCompanyName());
+            notificationService.createNotification(student, "You successfully applied for " + job.getTitle() + " at " + job.getCompanyName(), "APPLICATION");
         } catch(Exception e) {
             // Log but don't fail the application
-            System.err.println("Failed to send application email: " + e.getMessage());
+            System.err.println("Failed to send application notification: " + e.getMessage());
         }
         
         return saved;
@@ -94,8 +98,9 @@ public class ApplicationController {
                 } else if (newStatus.equalsIgnoreCase("REJECTED")) {
                     emailService.sendRejectedEmail(app.getStudent().getEmail(), app.getJob().getTitle(), app.getJob().getCompanyName());
                 }
+                notificationService.createNotification(app.getStudent(), "Your application for " + app.getJob().getTitle() + " status updated to: " + newStatus, "APPLICATION");
             } catch (Exception e) {
-                System.err.println("Failed to send status update email: " + e.getMessage());
+                System.err.println("Failed to send status update notification: " + e.getMessage());
             }
         }
         return saved;
@@ -124,8 +129,9 @@ public class ApplicationController {
                 } else if (status.equalsIgnoreCase("REJECTED")) {
                     emailService.sendRejectedEmail(app.getStudent().getEmail(), app.getJob().getTitle(), app.getJob().getCompanyName());
                 }
+                notificationService.createNotification(app.getStudent(), "Bulk Update: Your application for " + app.getJob().getTitle() + " status updated to: " + status, "APPLICATION");
             } catch (Exception e) {
-                System.err.println("Failed to send bulk status update email: " + e.getMessage());
+                System.err.println("Failed to send bulk status update notification: " + e.getMessage());
             }
         });
         return applicationRepository.saveAll(apps);

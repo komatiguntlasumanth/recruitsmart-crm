@@ -3,6 +3,7 @@ package com.recruitsmart.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Job {
@@ -47,7 +48,7 @@ public class Job {
     private String level; // "Fresher", "Experienced", "Management" (Status in UI)
 
     private LocalDate startDate;
-    private LocalDate applicationEndDate;
+    private LocalDateTime applicationEndDate;
     private String postedByEmail;
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -102,8 +103,8 @@ public class Job {
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-    public LocalDate getApplicationEndDate() { return applicationEndDate; }
-    public void setApplicationEndDate(LocalDate applicationEndDate) { this.applicationEndDate = applicationEndDate; }
+    public LocalDateTime getApplicationEndDate() { return applicationEndDate; }
+    public void setApplicationEndDate(LocalDateTime applicationEndDate) { this.applicationEndDate = applicationEndDate; }
 
     public String getPostedByEmail() { return postedByEmail; }
     public void setPostedByEmail(String postedByEmail) { this.postedByEmail = postedByEmail; }

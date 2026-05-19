@@ -102,6 +102,18 @@ public class GeminiService {
                 os.write(jsonPayload.getBytes(StandardCharsets.UTF_8));
             }
 
+            int status = conn.getResponseCode();
+            if (status >= 400) {
+                try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder errorMsg = new StringBuilder();
+                    String line;
+                    while ((line = errorReader.readLine()) != null) {
+                        errorMsg.append(line);
+                    }
+                    throw new RuntimeException("HTTP " + status + ": " + errorMsg.toString());
+                }
+            }
+
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 StringBuilder buffer = new StringBuilder();

@@ -1,0 +1,1 @@
+fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBQSqWsfbZvTezhw391QTRUZd_FNedyD7s', {method: 'POST', body: JSON.stringify({contents:[{parts:[{text:'Hello'}]}]}), headers: {'Content-Type': 'application/json'}}).then(r=>r.json()).then(console.log).catch(console.error);

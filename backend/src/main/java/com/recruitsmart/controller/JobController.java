@@ -28,6 +28,9 @@ public class JobController {
     @Autowired
     private ApplicationRepository applicationRepository;
 
+    @Autowired
+    private com.recruitsmart.service.NotificationService notificationService;
+
     @GetMapping
     public List<Job> getAllJobs() {
         return jobRepository.findAll();
@@ -81,7 +84,16 @@ public class JobController {
             job.setPostedByEmail(auth.getName());
         }
         
-        return jobRepository.save(job);
+        Job saved = jobRepository.save(job);
+        
+        // Trigger Job Posting Notification
+        try {
+            notificationService.createNotificationToAllStudents("New " + saved.getJobType() + " Posted: " + saved.getTitle() + " at " + saved.getCompanyName(), "JOB");
+        } catch (Exception e) {
+            System.err.println("Failed to trigger job notification: " + e.getMessage());
+        }
+        
+        return saved;
     }
     
     

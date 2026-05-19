@@ -38,11 +38,26 @@ public class StudentProfileController {
     }
 
     @GetMapping("/user/{userId}")
-    public StudentProfile getProfileByUserId(@PathVariable long userId) {
+    public StudentProfile getProfileByUserId(@PathVariable Long userId) {
+        // Security Check: Only HR or ADMIN should access other users' profiles
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthorized = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_HR") || a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_MANAGER"));
+        
+        if (!isAuthorized) {
+            throw new RuntimeException("Access Denied: Only HR or Admin can view student details.");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
         return profileRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
+                .orElseGet(() -> {
+                    // Return a basic profile object if not yet created so HR can see username/email
+                    StudentProfile newProfile = new StudentProfile();
+                    newProfile.setUser(user);
+                    return newProfile;
+                });
     }
 
     @PostMapping

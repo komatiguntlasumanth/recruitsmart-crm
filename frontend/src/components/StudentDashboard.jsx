@@ -2,6 +2,39 @@ import React, { useState, useEffect } from 'react';
 import API_BASE_URL, { authFetch } from '../config/api';
 import './StudentDashboard.css';
 
+const CountdownTimer = ({ targetDate }) => {
+    const [timeLeft, setTimeLeft] = React.useState('');
+
+    React.useEffect(() => {
+        const calculateTime = () => {
+            const now = new Date().getTime();
+            const target = new Date(targetDate).getTime();
+            const diff = target - now;
+
+            if (diff <= 0) {
+                setTimeLeft('EXPIRED');
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            let timeStr = '';
+            if (days > 0) timeStr += `${days}d `;
+            timeStr += `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+            setTimeLeft(timeStr);
+        };
+
+        calculateTime();
+        const interval = setInterval(calculateTime, 1000);
+        return () => clearInterval(interval);
+    }, [targetDate]);
+
+    return <span>{timeLeft}</span>;
+};
+
 const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobTab = 'SEARCH' }) => {
     const [section, setSection] = useState(initialSection);
     const [profile, setProfile] = useState({
@@ -28,6 +61,8 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
     const [profileStep, setProfileStep] = useState(0);
     const [applyingId, setApplyingId] = useState(null);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
 
     // Synchronize props with state
     useEffect(() => {
@@ -57,12 +92,68 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
     };
 
     const displayName = (user.username || user.email || "").split('@')[0];
+    const lastNotificationCountRef = React.useRef(0);
 
     useEffect(() => {
         fetchProfile();
         fetchApplicationCount();
         fetchAllJobs();
+        fetchNotifications(true);
+        
+        const pollInterval = setInterval(() => fetchNotifications(false), 30000);
+        return () => clearInterval(pollInterval);
     }, []);
+
+    const fetchNotifications = async (isInitial = false) => {
+        try {
+            const res = await authFetch(`${API_BASE_URL}/api/notifications`);
+            if (res.ok) {
+                const data = await res.json();
+                const unreadCount = data.filter(n => !n.read).length;
+                
+                if (!isInitial && unreadCount > lastNotificationCountRef.current) {
+                    setMsg('🔔 New Notification Received!');
+                    setTimeout(() => setMsg(''), 3000);
+                }
+                
+                lastNotificationCountRef.current = unreadCount;
+                setNotifications(data);
+            }
+        } catch (err) { console.error("Error fetching notifications", err); }
+    };
+
+    const markNotificationAsRead = async (id) => {
+        try {
+            const res = await authFetch(`${API_BASE_URL}/api/notifications/${id}/read`, { method: 'PUT' });
+            if (res.ok) {
+                setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+            }
+        } catch (err) { console.error("Error marking notification as read", err); }
+    };
+
+    const markAllNotificationsAsRead = async () => {
+        try {
+            const res = await authFetch(`${API_BASE_URL}/api/notifications/read-all`, { method: 'PUT' });
+            if (res.ok) {
+                setNotifications(notifications.map(n => ({ ...n, read: true })));
+            }
+        } catch (err) { console.error("Error marking all notifications as read", err); }
+    };
+
+    const formatDateTime = (dateStr) => {
+        if (!dateStr) return 'N/A';
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        } catch (e) { return dateStr; }
+    };
 
     useEffect(() => {
         if (profile.id) {
@@ -187,6 +278,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                 setIsSaving(false);
                 setSaveStatus('Saved');
                 setTimeout(() => setSaveStatus(''), 2000);
+                setIsEditing(false);
             } else {
                 let rawText = await res.text();
                 let errorData = {};
@@ -324,20 +416,27 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
         let totalFields = 0;
         let filledFields = 0;
 
-        // Basic fields (14 fields)
+        // Basic fields (6 core fields)
         const basicFields = ['designation', 'mobileNumber', 'currentLocation', 'dob',
-            'alternateEmail', 'githubLink', 'linkedinLink', 'portfolioUrl',
-            'profileSummary', 'permanentAddress', 'profilePictureUrl', 'level',
-            'alternateMobile', 'workStatus'];
+            'profileSummary', 'level'];
 
         basicFields.forEach(field => {
             totalFields++;
             if (profile[field] && profile[field].toString().trim().length > 0) filledFields++;
         });
 
-        // Array fields - count if has at least one entry (7 fields)
+        // Optional fields (only count if filled)
+        const optionalFields = ['alternateEmail', 'githubLink', 'linkedinLink', 'portfolioUrl'];
+        optionalFields.forEach(field => {
+            if (profile[field] && profile[field].toString().trim().length > 0) {
+                totalFields++;
+                filledFields++;
+            }
+        });
+
+        // Array fields - count if has at least one entry (6 fields)
         const arrayFields = ['education', 'experiences', 'skills', 'projects',
-            'achievements', 'certificates', 'internships'];
+            'achievements', 'certificates'];
 
         arrayFields.forEach(field => {
             totalFields++;
@@ -391,7 +490,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                     </div>
                     <div className="sd-profile-info">
                         <h2>{displayName}</h2>
-                        <p>{profile.designation || 'Professional Title'} | {profile.yearsOfExperience || 'Experience Level'}</p>
+                        <p>{profile.designation || 'Professional Title'} | {profile.level || 'Experience Level'}</p>
                         <div className="sd-contact-grid">
                             <div className="sd-contact-item"><span>📧</span> {user.email}</div>
                             <div className="sd-contact-item"><span>📞</span> {profile.mobileNumber || 'Add Mobile'}</div>
@@ -497,9 +596,9 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                                 <h3 style={{ marginBottom: '1rem' }}>Resume Builder</h3>
                                 <p style={{ color: 'var(--sd-text-muted)', marginBottom: '2rem' }}>Generate professional resumes in various formats.</p>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                    <button className="sd-card" style={{ padding: '1rem 2rem', border: '1px solid var(--sd-primary)', color: 'var(--sd-primary)' }}>📄 Graphical Resume</button>
-                                    <button className="sd-card" style={{ padding: '1rem 2rem', border: '1px solid var(--sd-primary)', color: 'var(--sd-primary)' }}>🏢 ATS Resume</button>
-                                    <button className="sd-card" style={{ padding: '1rem 2rem', border: '1px solid var(--sd-primary)', color: 'var(--sd-primary)' }}>📹 Video Snapshot</button>
+                                    <button className="sd-card" style={{ padding: '1rem 2rem', border: '1px solid var(--sd-primary)', color: 'var(--sd-primary)' }} onClick={(e) => alert(e.target.innerText)}>📄 Graphical Resume</button>
+                                    <button className="sd-card" style={{ padding: '1rem 2rem', border: '1px solid var(--sd-primary)', color: 'var(--sd-primary)' }} onClick={(e) => alert(e.target.innerText)}>🏢 ATS Resume</button>
+                                    <button className="sd-card" style={{ padding: '1rem 2rem', border: '1px solid var(--sd-primary)', color: 'var(--sd-primary)' }} onClick={(e) => alert(e.target.innerText)}>📹 Video Snapshot</button>
                                 </div>
                             </div>
                         )}
@@ -546,20 +645,12 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                             {saveStatus}
                         </span>
                     )}
-                    <button 
-                        className={`sd-btn-primary ${isSaving ? 'sd-btn-loading' : ''}`} 
-                        style={{ padding: '8px 20px', fontSize: '0.9rem' }}
-                        onClick={handleSaveProfile}
-                        disabled={isSaving}
-                    >
-                        {isSaving ? 'Saving...' : 'Sync & Save'}
-                    </button>
                 </div>
             </div>
             <div className="sd-content-scrollable" style={{ paddingBottom: '2rem' }}>
                 <div className="sd-card">
                     <h4 style={{ marginBottom: '1.5rem' }}>Basic Details</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="sd-grid-2">
                         <div className="form-group">
                             <label>Designation</label>
                             <input type="text" placeholder="e.g. Fullstack Developer" className="sd-card" style={{ padding: '12px', width: '100%' }} value={profile.designation} onChange={e => setProfile({ ...profile, designation: e.target.value })} />
@@ -613,7 +704,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                         <button className="sd-icon-btn" style={{ background: 'var(--sd-primary)', color: 'white' }} onClick={() => addItem('education', { schoolName: '', course: '', yearOfPassing: '', result: '' })}>+</button>
                     </div>
                     {profile.education.map((edu, i) => (
-                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 40px', gap: '0.5rem', marginBottom: '1rem', alignItems: 'end' }}>
+                        <div key={i} className="sd-grid-5" style={{ marginBottom: '1rem' }}>
                             <div><label style={{ fontSize: '0.75rem' }}>School/College</label><input type="text" className="sd-card" style={{ padding: '8px', width: '100%' }} value={edu.schoolName} onChange={e => updateItem('education', i, 'schoolName', e.target.value)} /></div>
                             <div><label style={{ fontSize: '0.75rem' }}>Course</label><input type="text" className="sd-card" style={{ padding: '8px', width: '100%' }} value={edu.course} onChange={e => updateItem('education', i, 'course', e.target.value)} /></div>
                             <div><label style={{ fontSize: '0.75rem' }}>Year</label><input type="text" className="sd-card" style={{ padding: '8px', width: '100%' }} value={edu.yearOfPassing} onChange={e => updateItem('education', i, 'yearOfPassing', e.target.value)} /></div>
@@ -630,7 +721,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                     </div>
                     {profile.experiences.map((exp, i) => (
                         <div key={i} style={{ marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 40px', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                            <div className="sd-grid-4" style={{ marginBottom: '0.5rem' }}>
                                 <input type="text" placeholder="Company" className="sd-card" style={{ padding: '8px' }} value={exp.companyName} onChange={e => updateItem('experiences', i, 'companyName', e.target.value)} />
                                 <input type="text" placeholder="Designation" className="sd-card" style={{ padding: '8px' }} value={exp.designation} onChange={e => updateItem('experiences', i, 'designation', e.target.value)} />
                                 <input type="text" placeholder="Duration" className="sd-card" style={{ padding: '8px' }} value={exp.duration} onChange={e => updateItem('experiences', i, 'duration', e.target.value)} />
@@ -701,7 +792,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                     </div>
                     {profile.projects.map((proj, i) => (
                         <div key={i} style={{ marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 40px', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
                                 <input type="text" placeholder="Project Title" className="sd-card" style={{ padding: '8px' }} value={proj.title} onChange={e => updateItem('projects', i, 'title', e.target.value)} />
                                 <input type="text" placeholder="Project Link" className="sd-card" style={{ padding: '8px' }} value={proj.link} onChange={e => updateItem('projects', i, 'link', e.target.value)} />
                                 <button className="sd-icon-btn delete" onClick={() => deleteItem('projects', i)}>🗑️</button>
@@ -717,7 +808,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                         <button className="sd-icon-btn" style={{ background: 'var(--sd-primary)', color: 'white' }} onClick={() => addItem('achievements', { title: '', description: '' })}>+</button>
                     </div>
                     {profile.achievements.map((ach, i) => (
-                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 40px', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'start' }}>
+                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'start' }}>
                             <div>
                                 <input type="text" placeholder="Achievement Title" className="sd-card" style={{ padding: '8px', width: '100%', marginBottom: '0.5rem' }} value={ach.title} onChange={e => updateItem('achievements', i, 'title', e.target.value)} />
                                 <textarea placeholder="Description" className="sd-card" style={{ padding: '8px', width: '100%', height: '60px', resize: 'vertical' }} value={ach.description} onChange={e => updateItem('achievements', i, 'description', e.target.value)} />
@@ -765,7 +856,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                     onClick={handleSaveProfile}
                     disabled={isSaving}
                 >
-                    {isSaving ? '🚀 Syncing Your Profile...' : '✨ Sync & Save Changes'}
+                    {isSaving ? 'Saving...' : 'Save'}
                 </button>
             </div>
         </div>
@@ -970,7 +1061,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                                             color: isExpired ? '#64748b' : '#6366f1',
                                             fontWeight: 600
                                         }}>
-                                            {isExpired ? '❌ Closed on: ' : '🕒 Apply by: '}{job.applicationEndDate}
+                                            {isExpired ? '❌ Closed' : '🕒 Ends in: '}<CountdownTimer targetDate={job.applicationEndDate} />
                                         </p>
                                     )}
                                     <p style={{ margin: '10px 0 0 0', fontSize: '0.9rem', opacity: 0.8 }}>{job.description ? job.description.substring(0, 120) + '...' : 'No description available.'}</p>
@@ -1047,7 +1138,7 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                                             fontWeight: 600,
                                             marginBottom: '1rem'
                                         }}>
-                                            {isExpired ? '❌ Ended on: ' : '🕒 Ends: '}{training.applicationEndDate}
+                                            {isExpired ? '❌ Ended' : '🕒 Ends in: '}<CountdownTimer targetDate={training.applicationEndDate} />
                                         </p>
                                     )}
                                     <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>{training.description ? training.description.substring(0, 80) + '...' : 'Unlock your potential with this course.'}</p>
@@ -1226,6 +1317,9 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                     </div>
                     <button className={`sd-nav-item ${section === 'documents' ? 'active' : ''}`} onClick={() => { setSection('documents'); setIsEditing(false); setShowMobileMenu(false); }}>📁 Documents</button>
                 </nav>
+                <div style={{ marginTop: 'auto', padding: '1rem', borderTop: '1px solid var(--sd-border)' }}>
+                    <button className="sd-nav-item" style={{ color: '#ef4444' }} onClick={onLogout}>🚪 Logout</button>
+                </div>
             </div>
 
             <main className="sd-main">
@@ -1236,8 +1330,44 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
                         <div style={{ position: 'relative' }}>
                             <input type="text" placeholder="Search..." className="sd-card" style={{ padding: '8px 15px', width: '250px', background: '#fff' }} />
                         </div>
-                        <button className="sd-notification-btn">🔔 <span className="sd-badge">3</span></button>
-                        <div className="sd-icon-btn" style={{ borderRadius: '50%', background: 'var(--sd-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{displayName.charAt(0).toUpperCase()}</div>
+                        <div style={{ position: 'relative' }}>
+                            <button className="sd-notification-btn" onClick={() => setShowNotificationsDropdown(!showNotificationsDropdown)}>
+                                🔔 {notifications.filter(n => !n.read).length > 0 && <span className="sd-badge">{notifications.filter(n => !n.read).length}</span>}
+                            </button>
+                            
+                            {showNotificationsDropdown && (
+                                <div className="sd-notifications-dropdown sd-card">
+                                    <div style={{ padding: '15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h4 style={{ margin: 0 }}>Notifications</h4>
+                                        <button onClick={markAllNotificationsAsRead} style={{ fontSize: '0.75rem', color: 'var(--sd-primary)', border: 'none', background: 'none', cursor: 'pointer' }}>Mark all as read</button>
+                                    </div>
+                                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                        {notifications.length > 0 ? notifications.map(n => (
+                                            <div key={n.id} className={`sd-notification-item ${!n.read ? 'unread' : ''}`} onClick={() => markNotificationAsRead(n.id)}>
+                                                <div className="sd-notification-icon">
+                                                    {n.type === 'LOGIN' ? '🔐' : n.type === 'APPLICATION' ? '📋' : '💼'}
+                                                </div>
+                                                <div className="sd-notification-content">
+                                                    <p style={{ margin: 0, fontSize: '0.85rem' }}>{n.message}</p>
+                                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{new Date(n.createdAt).toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                        )) : (
+                                            <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>No notifications</div>
+                                        )}
+                                    </div>
+                                    <div style={{ padding: '10px', textAlign: 'center', borderTop: '1px solid #eee' }}>
+                                        <button onClick={() => setShowNotificationsDropdown(false)} style={{ fontSize: '0.85rem', color: '#64748b', border: 'none', background: 'none', cursor: 'pointer' }}>Close</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="sd-icon-btn" 
+                             style={{ borderRadius: '50%', background: 'var(--sd-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                             onClick={() => { setSection('profile'); setIsEditing(false); }}
+                        >
+                            {displayName.charAt(0).toUpperCase()}
+                        </div>
                     </div>
                 </header>
 
@@ -1257,4 +1387,89 @@ const StudentDashboard = ({ user, onLogout, initialSection = 'home', initialJobT
     );
 };
 
+
 export default StudentDashboard;
+
+/* Notification CSS Styles */
+const sdStyles = `
+.sd-notifications-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    background: white;
+    z-index: 1000;
+    margin-top: 10px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.sd-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--sd-accent);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 2px solid white;
+    animation: pulseBadge 2s infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+}
+
+@keyframes pulseBadge {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(185, 28, 28, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+}
+
+.sd-notification-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #f8fafc;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sd-notification-item:hover {
+    background: #f8fafc;
+}
+
+.sd-notification-item.unread {
+    background: #f0f9ff;
+}
+
+.sd-notification-item.unread:hover {
+    background: #e0f2fe;
+}
+
+.sd-notification-icon {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.sd-notification-content {
+    flex: 1;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+`;
+
+if (typeof document !== 'undefined') {
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = sdStyles;
+    document.head.appendChild(styleSheet);
+}

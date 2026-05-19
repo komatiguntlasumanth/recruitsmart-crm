@@ -87,6 +87,22 @@ public class AgenticService {
         JsonNode aiResponse = geminiService.generateWithTools(message, context, tools);
         
         if (aiResponse == null) {
+            String lowerMsg = message.toLowerCase();
+            if (lowerMsg.contains("recommend") || lowerMsg.contains("job") || lowerMsg.contains("find") || lowerMsg.contains("career")) {
+                String recommendations = handleGetRecommendations(userEmail);
+                try {
+                    // Simulate streaming
+                    String[] words = recommendations.split(" ");
+                    for (String word : words) {
+                        emitter.send(word + " ");
+                        Thread.sleep(50);
+                    }
+                    emitter.complete();
+                } catch (Exception e) {
+                    emitter.completeWithError(e);
+                }
+                return;
+            }
             // Fallback to demo mode streaming
             geminiService.chatStream(message, context, null, emitter);
             return;
@@ -163,11 +179,8 @@ public class AgenticService {
 
         if (aiResponse == null) {
             String lowerMsg = message.toLowerCase();
-            if (lowerMsg.contains("job") || lowerMsg.contains("find")) {
-                return "### ðŸ” Searching for Jobs (Demo Mode)\n\n" +
-                       "I'm currently in Demo Mode because no API key is set, but I can see you're interested in jobs! \n\n" +
-                       "Based on the system status, there are **" + jobRepository.count() + "** active openings. " +
-                       "You can view them all in the **Jobs** tab. Once a Gemini API key is configured, I can personally recommend the best fits for your skills.";
+            if (lowerMsg.contains("job") || lowerMsg.contains("find") || lowerMsg.contains("recommend") || lowerMsg.contains("career")) {
+                return handleGetRecommendations(userEmail);
             } else if (lowerMsg.contains("status") || lowerMsg.contains("application")) {
                 return "### ðŸ“Š Application Status (Demo Mode)\n\n" +
                        "I see you're checking on your applications. \n\n" +

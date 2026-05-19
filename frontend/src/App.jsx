@@ -7,7 +7,6 @@ import StudentDashboard from './components/StudentDashboard'
 import AdminDashboard from './components/AdminDashboard'
 import ManagerDashboard from './components/ManagerDashboard'
 import ChatBot from './components/common/ChatBot'
-import logo from './assets/logo.png';
 
 function App() {
     const [user, setUser] = useState(() => {
@@ -19,6 +18,9 @@ function App() {
     const [view, setView] = useState(() => localStorage.getItem('view') || 'dashboard');
     const [authMode, setAuthMode] = useState('login');
     const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+    
+    // Mobile specific state
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Persist view state
     useEffect(() => {
@@ -27,7 +29,7 @@ function App() {
         }
     }, [view, user]);
 
-    // URL Guard: Reset invalid paths (like /login) to root to prevent 403 errors on static hosts
+    // URL Guard: Reset invalid paths to root to prevent 403 errors on static hosts
     useEffect(() => {
         if (window.location.pathname !== '/' && window.location.pathname !== '/index.html' && !window.location.pathname.startsWith('/capacitor:')) {
             window.history.replaceState({}, '', '/');
@@ -50,26 +52,15 @@ function App() {
         localStorage.clear();
         sessionStorage.clear();
         
-        // Soft reset state first (Immediate UI swap)
         setUser(null);
         setView('dashboard');
         
-        // On Web, force a hard navigation to root after a short delay
-        // to ensure the React state update is processed first
         if (isWeb) {
             setTimeout(() => {
                 window.location.href = window.location.origin;
             }, 100);
         }
     };
-
-    const getGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return "Hey Good Morning";
-        if (hour < 18) return "Hey Good Afternoon";
-        return "Hey Good Evening";
-    };
-
 
     if (!user) {
         return (
@@ -85,8 +76,10 @@ function App() {
 
     const displayName = (user.username || user.name || "").split('@')[0];
 
+    const getInitials = () => displayName ? displayName.charAt(0).toUpperCase() : 'S';
+
     const renderDashboard = () => {
-        if (user.role === 'ROLE_STUDENT') return <StudentDashboard user={user} onLogout={handleLogout} />;
+        if (user.role === 'ROLE_STUDENT') return <StudentDashboard user={user} onLogout={handleLogout} initialSection="home" />;
         if (user.role === 'ROLE_ADMIN') return <AdminDashboard user={user} onLogout={handleLogout} onModalToggle={setIsHeaderHidden} />;
         if (user.role === 'ROLE_HR' || user.role === 'ROLE_MANAGER') return <ManagerDashboard user={user} onLogout={handleLogout} onModalToggle={setIsHeaderHidden} />;
         return null;
@@ -97,6 +90,10 @@ function App() {
             return renderDashboard();
         }
 
+        if (view === 'profile' && user.role === 'ROLE_STUDENT') {
+            return <StudentDashboard user={user} onLogout={handleLogout} initialSection="profile" />;
+        }
+
         switch (view) {
             case 'leads': return <LeadList userRole={user.role} />;
             case 'jobs': return <JobBoard user={user} onModalToggle={setIsHeaderHidden} />;
@@ -104,7 +101,7 @@ function App() {
             case 'pipeline':
                 if (user.role !== 'ROLE_HR') {
                     return (
-                        <div className="glass-card" style={{ padding: '3rem', textAlign: 'center' }}>
+                        <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', marginTop: '2rem' }}>
                             <h2 style={{ color: '#ef4444' }}>Access Denied</h2>
                             <p style={{ color: 'var(--text-muted)' }}>Only HR can access the Pipeline view. Your current role is: {user.role}</p>
                             <button className="btn-primary" style={{ marginTop: '1.5rem' }} onClick={() => setView('dashboard')}>Return to Dashboard</button>
@@ -112,76 +109,166 @@ function App() {
                     );
                 }
                 return <PipelineBoard />;
-            default: return (
-                <>
-                    <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Smarter Recruitment Starts Here</h2>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
-                            Logged in as <span style={{ color: 'var(--primary)', fontWeight: '600' }}>{user.role}</span>
-                        </p>
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                            <button className="btn-primary" onClick={() => setView('leads')}>View Leads</button>
-                            <button className="btn-secondary" onClick={() => setView('jobs')}>Browse Jobs</button>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                        <div className="glass-card" style={{ padding: '2rem', cursor: 'pointer' }} onClick={() => setView('jobs')}>
-                            <h3 style={{ marginBottom: '1rem' }}>Job Board</h3>
-                            <p style={{ color: 'var(--text-muted)' }}>Explore open positions and apply directly.</p>
-                        </div>
-                        <div className="glass-card" style={{ padding: '2rem', cursor: 'pointer' }} onClick={() => setView('pipeline')}>
-                            <h3 style={{ marginBottom: '1rem' }}>Lead Pipeline</h3>
-                            <p style={{ color: 'var(--text-muted)' }}>{user.role === 'ROLE_HR' ? 'Visualize and manage your leads through different stages.' : 'Restricted to HR.'}</p>
-                        </div>
-                        <div className="glass-card" style={{ padding: '2rem' }}>
-                            <h3 style={{ marginBottom: '1rem' }}>ML Insights</h3>
-                            <p style={{ color: 'var(--text-muted)' }}>AI-driven recommendations for best-fit candidates.</p>
-                        </div>
-                    </div>
-                </>
-            );
+            default: return renderDashboard(); // Fallback
         }
     };
 
     return (
-        <div className="container">
-            {user && !isHeaderHidden && (
-                <nav style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    marginBottom: '2rem',
-                    padding: '1rem 2rem',
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(10px)',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 1000,
-                    borderBottom: '1px solid rgba(0,0,0,0.05)',
-                    borderRadius: '0 0 16px 16px'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <img src={logo} alt="RecruitSmart" style={{ height: '50px' }} />
-                        <span style={{ fontSize: '1.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #6366f1, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>RecruitSmart</span>
+        <div className="mobile-app-container">
+            {/* Mobile Header */}
+            {user && !isHeaderHidden && user.role !== 'ROLE_STUDENT' && (
+                <div className="mobile-header">
+                    <button 
+                        onClick={() => setIsSidebarOpen(true)} 
+                        style={{ 
+                            background: '#FEE2E2', 
+                            color: '#EF4444', 
+                            border: 'none', 
+                            width: '40px', 
+                            height: '40px', 
+                            borderRadius: '8px', 
+                            fontSize: '1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        ≡
+                    </button>
+                    <div style={{ color: '#64748B', fontSize: '0.9rem', fontWeight: 500 }}>
+                        Pages / {
+                            view === 'dashboard' ? 'Home' : 
+                            view === 'profile' ? 'Profile' : 
+                            view === 'jobs' ? 'Jobs' : 
+                            view.charAt(0).toUpperCase() + view.slice(1)
+                        }
                     </div>
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <button onClick={() => setView('dashboard')} style={{ background: 'none', border: 'none', color: view === 'dashboard' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Dashboard</button>
-                        <button onClick={() => setView('jobs')} style={{ background: 'none', border: 'none', color: view === 'jobs' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Jobs</button>
-                        {user.role === 'ROLE_STUDENT' && (
-                            <button onClick={() => setView('applications')} style={{ background: 'none', border: 'none', color: view === 'applications' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>My Applications</button>
-                        )}
-                        <button onClick={() => setView('leads')} style={{ background: 'none', border: 'none', color: view === 'leads' ? 'var(--text-main)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: '600' }}>Leads</button>
-
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginLeft: '1rem', padding: '4px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px' }}>
-                            {getGreeting()}, {displayName}
-                        </span>
-                        <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem' }}>Logout</button>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <button style={{ background: 'none', border: 'none', fontSize: '1.2rem', position: 'relative' }}>
+                            🔔
+                            <span style={{ 
+                                position: 'absolute', 
+                                top: 0, 
+                                right: -4, 
+                                background: '#EF4444', 
+                                color: 'white', 
+                                borderRadius: '50%', 
+                                width: '16px', 
+                                height: '16px', 
+                                fontSize: '10px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                fontWeight: 'bold'
+                            }}>3</span>
+                        </button>
+                        <div style={{ 
+                            background: '#EF4444', 
+                            color: 'white', 
+                            borderRadius: '50%', 
+                            width: '32px', 
+                            height: '32px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            fontWeight: 'bold',
+                            boxShadow: '0 2px 4px rgba(239, 68, 68, 0.4)'
+                        }}>
+                            {getInitials()}
+                        </div>
                     </div>
-                </nav>
+                </div>
             )}
 
-            <main>
+            {/* Sidebar Drawer */}
+            {isSidebarOpen && user.role !== 'ROLE_STUDENT' && (
+                <>
+                    {/* Backdrop */}
+                    <div 
+                        onClick={() => setIsSidebarOpen(false)} 
+                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1999 }}
+                    />
+                    {/* Drawer Content */}
+                    <div style={{
+                        position: 'fixed',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: '280px',
+                        backgroundColor: '#fff',
+                        boxShadow: '4px 0 15px rgba(0,0,0,0.1)',
+                        zIndex: 2000,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        animation: 'slideIn 0.3s ease-out forwards'
+                    }}>
+                        <div style={{ padding: '2rem 1.5rem', background: 'rgba(239, 68, 68, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                 <span style={{ fontSize: '1.5rem' }}>✨</span>
+                                 <h2 style={{ color: '#EF4444', margin: 0, fontSize: '1.4rem' }}>RecruitSmart</h2>
+                             </div>
+                             <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: '#64748B', cursor: 'pointer' }}>×</button>
+                        </div>
+                        <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto' }}>
+                            <button onClick={() => { setView('dashboard'); setIsSidebarOpen(false); }} className={`sidebar-link ${view === 'dashboard' ? 'active' : ''}`}>
+                                🏠 Home
+                            </button>
+                            {user.role === 'ROLE_STUDENT' && (
+                                <button onClick={() => { setView('profile'); setIsSidebarOpen(false); }} className={`sidebar-link ${view === 'profile' ? 'active' : ''}`}>
+                                    👤 My Profile
+                                </button>
+                            )}
+                            <button onClick={() => { setView('jobs'); setIsSidebarOpen(false); }} className={`sidebar-link ${view === 'jobs' ? 'active' : ''}`}>
+                                💼 Jobs
+                            </button>
+                            {!['ROLE_STUDENT'].includes(user.role) && (
+                                <button onClick={() => { setView('leads'); setIsSidebarOpen(false); }} className={`sidebar-link ${view === 'leads' ? 'active' : ''}`}>
+                                    📊 Leads
+                                </button>
+                            )}
+                            <button className="sidebar-link">
+                                📚 Training
+                            </button>
+                            <button className="sidebar-link">
+                                📁 Documents
+                            </button>
+                        </div>
+                        <div style={{ padding: '1rem' }}>
+                            <button onClick={handleLogout} style={{ width: '100%', padding: '1rem', background: '#F8FAF0', color: '#EF4444', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            <style>
+                {`
+                @keyframes slideIn {
+                    from { transform: translateX(-100%); }
+                    to { transform: translateX(0); }
+                }
+                .sidebar-link {
+                    text-align: left;
+                    padding: 1rem 1.2rem;
+                    background: none;
+                    color: #475569;
+                    border: none;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .sidebar-link.active {
+                    background: #FEE2E2;
+                    color: #EF4444;
+                }
+                `}
+            </style>
+
+            <main style={{ padding: '1rem' }}>
                 {renderView()}
             </main>
             <ChatBot
@@ -193,3 +280,4 @@ function App() {
 }
 
 export default App
+

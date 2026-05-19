@@ -25,6 +25,9 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private com.recruitsmart.service.NotificationService notificationService;
+
     @PostMapping("/register")
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     public Map<String, Object> register(@jakarta.validation.Valid @RequestBody User user) {
@@ -117,6 +120,13 @@ public class AuthController {
         // Update Last Login
         user.setLastLogin(java.time.LocalDateTime.now());
         userRepository.save(user);
+        
+        // Trigger Login Notification
+        try {
+            notificationService.createNotification(user, "Successful login on " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss")), "LOGIN");
+        } catch (Exception e) {
+            System.err.println("Failed to trigger login notification: " + e.getMessage());
+        }
         
         String token = jwtUtil.generateToken(user.getEmail());
         return org.springframework.http.ResponseEntity.ok(Map.of("token", token, "user", user));

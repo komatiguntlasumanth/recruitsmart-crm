@@ -147,10 +147,23 @@ public Double calculateLeadScore(Lead lead) {
 ---
 
 ### 10. EXECUTION SCREENSHOTS (Page 32)
-*Note: Descriptions of key screens.*
-- **Landing Page**: Minimalist hero section with student portal access.
-- **CRM Dashboard**: Metrics on Total Leads, Successful Placements, and Match Rates.
-- **Kanban Board**: Drag-and-drop interface for moving leads through "Discovery" to "Closure."
+
+#### 10.1 WEB INTERFACE SCREENSHOTS
+The web interface is designed with a focus on usability and a premium visual aesthetic. It utilizes a responsive card-based layout with a distinct color schema to ensure high contrast and readability. 
+- **Authentication Gateway:** The login and registration portal features a split-screen design, highlighting key platform benefits on the left and a clean, secure credential input form on the right.
+- **Admin/Manager CRM Dashboard:** A comprehensive view featuring high-level metrics, such as lead conversions and successful placements, alongside a dynamic Kanban board for tracking candidates through varying stages of the recruitment pipeline.
+- **Student Portal:** A dedicated interface where students can track their application statuses, view AI-recommended job listings, and monitor their profile completion progress.
+
+#### 10.2 ANDROID MOBILE INTERFACE SCREENSHOTS
+The Android mobile application is built using Capacitor to translate the web experience into a native mobile environment.
+- **Mobile-First Layout:** The interface transitions from a desktop navbar to a fluid, gesture-friendly side drawer and a compact mobile header.
+- **Responsive Dashboard:** Complex grids, such as the Profile Editor and Job Board, automatically seamlessly stack into single-column layouts to prevent horizontal scrolling and ensure a perfect fit on mobile screens. 
+- **Native Experience:** Includes touch-optimized buttons and full-screen modal overlays, providing students with on-the-go access to their career tracking, identical in functionality to the desktop web version but tailored for handheld devices.
+
+#### 10.3 DEPLOYMENT STATUS (Render/Railway)
+The application architecture is successfully deployed and accessible over the public internet, ensuring high availability and secure data transmission.
+- **Frontend Hosting (Render):** The Vite-compiled React web application is continuously deployed via Render, served securely over HTTPS (e.g., `recruitsmart-crm-2l0j.onrender.com`). The deployment pipeline ensures immediate updates upon codebase changes.
+- **Backend Infrastructure (Railway):** The Spring Boot backend REST API and the unified MySQL database are hosted on Railway, providing scalable computing resources. The environment handles automated routing, CORS configuration, and persistent data storage for cross-platform synchronization between the Web and Android clients.
 
 ---
 

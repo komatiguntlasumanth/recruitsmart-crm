@@ -99,7 +99,7 @@ const ManagerDashboard = ({ user, onLogout, onModalToggle }) => {
         setLoading(true);
         try {
             // Using the same endpoint as JobBoard.jsx
-            const res = await authFetch(`${API_BASE_URL}/api/student/profile/${userId}`);
+            const res = await authFetch(`${API_BASE_URL}/api/student/profile/user/${userId}`);
             if (res.ok) {
                 const data = await res.json();
                 setCandidateProfile(data);
@@ -447,8 +447,8 @@ const ManagerDashboard = ({ user, onLogout, onModalToggle }) => {
                                     <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className="input-field" />
                                 </div>
                                 <div>
-                                    <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>End Date</label>
-                                    <input type="date" name="applicationEndDate" value={formData.applicationEndDate} onChange={handleInputChange} className="input-field" />
+                                    <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '4px' }}>End Date & Time</label>
+                                    <input type="datetime-local" name="applicationEndDate" value={formData.applicationEndDate} onChange={handleInputChange} className="input-field" />
                                 </div>
                             </div>
                             <input name="applicationLink" placeholder="Application URL" value={formData.applicationLink} onChange={handleInputChange} className="input-field" />

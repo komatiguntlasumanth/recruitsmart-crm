@@ -16,7 +16,13 @@ const getNormalizedApiUrl = () => {
         return 'https://recruitsmart-crm-2l0j.onrender.com';
     }
 
-    // Priority 3: Localhost development (Only when running 'npm run dev' on PC)
+    // Priority 3: Localhost development
+    if (window.location.hostname === '10.0.2.2') {
+        // We are on Android Emulator accessing the host computer
+        return 'http://10.0.2.2:8080';
+    }
+    
+    // Normal PC development
     return 'http://localhost:8080';
 };
 

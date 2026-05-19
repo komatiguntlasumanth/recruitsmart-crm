@@ -3,8 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import API_BASE_URL, { authFetch } from '../../config/api';
 import './ChatBot.css';
-import botIcon from '../../assets/bot-icon.png';
-
+import botIcon from '../../assets/ai_bot_logo.png';
 const ChatBot = ({ context = "You are the RecruitSmart AI Assistant.", onToggleHeader }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
@@ -19,6 +18,58 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant.", onToggleH
         { label: "Check Status", query: "What is the status of my applications?" },
         { label: "Profile Tips", query: "How can I improve my student profile?" }
     ];
+
+    const calculateProfileCompletion = (profileData) => {
+        let totalFields = 0;
+        let filledFields = 0;
+
+        const basicFields = ['designation', 'mobileNumber', 'currentLocation', 'dob',
+            'alternateEmail', 'githubLink', 'linkedinLink', 'portfolioUrl',
+            'profileSummary', 'permanentAddress', 'profilePictureUrl', 'level',
+            'alternateMobile', 'workStatus'];
+
+        basicFields.forEach(field => {
+            totalFields++;
+            if (profileData[field] && profileData[field].toString().trim().length > 0) filledFields++;
+        });
+
+        const arrayFields = ['education', 'experiences', 'skills', 'projects',
+            'achievements', 'certificates', 'internships'];
+
+        arrayFields.forEach(field => {
+            totalFields++;
+            if (profileData[field] && profileData[field].length > 0) filledFields++;
+        });
+
+        return Math.round((filledFields / totalFields) * 100);
+    };
+
+    const handleQuickAction = async (action) => {
+        if (action.label === "Find Jobs") {
+            try {
+                const userString = localStorage.getItem('user');
+                const loggedInUser = userString ? JSON.parse(userString) : null;
+                
+                if (loggedInUser && loggedInUser.role === 'ROLE_STUDENT') {
+                    const res = await authFetch(`${API_BASE_URL}/api/student/profile`);
+                    if (res.ok) {
+                        const profileData = await res.json();
+                        const completion = calculateProfileCompletion(profileData);
+                        if (completion < 50) {
+                            alert("Finish your profile (at least 50%) to proceed with job recommendations.");
+                            return;
+                        } else {
+                            handleSend("Please recommend jobs for me based on my profile.");
+                            return;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching profile for completion check:", err);
+            }
+        }
+        handleSend(action.query);
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -75,9 +126,9 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant.", onToggleH
                 const lines = chunk.split('\n');
                 for (let line of lines) {
                     if (line.startsWith('data:')) {
-                        line = line.substring(5).trim();
+                        line = line.substring(5);
                     }
-                    if (line) {
+                    if (line.length > 0) {
                         accumulatedResponse += line;
                         setMessages(prev => {
                             const newMsgs = [...prev];
@@ -90,10 +141,12 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant.", onToggleH
 
         } catch (error) {
             console.error("Chat Error:", error);
-            setMessages(prev => [...prev, {
-                text: `Sorry, I encountered an error: ${error.message}`,
-                sender: 'ai'
-            }]);
+            if (accumulatedResponse.length === 0) {
+                setMessages(prev => [...prev, {
+                    text: `Sorry, I encountered an error: ${error.message}`,
+                    sender: 'ai'
+                }]);
+            }
         } finally {
             setLoading(false);
         }
@@ -144,7 +197,7 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant.", onToggleH
                         {quickActions.map((action, i) => (
                             <button
                                 key={i}
-                                onClick={() => handleSend(action.query)}
+                                onClick={() => handleQuickAction(action)}
                                 disabled={loading}
                             >
                                 {action.label}

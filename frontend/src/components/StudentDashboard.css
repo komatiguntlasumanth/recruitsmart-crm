@@ -663,6 +663,23 @@
     gap: 0.5rem;
 }
 
+.sd-grid-2, .sd-grid-3, .sd-grid-4, .sd-grid-5 {
+    display: grid;
+    gap: 1rem;
+}
+
+.sd-grid-2 { grid-template-columns: 1fr 1fr; }
+.sd-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.sd-grid-4 { grid-template-columns: 1.5fr 1fr 1fr 40px; gap: 0.5rem; align-items: end; }
+.sd-grid-5 { grid-template-columns: 1.5fr 1fr 1fr 1fr 40px; gap: 0.5rem; align-items: end; }
+
+@media (max-width: 768px) {
+    .sd-grid-2, .sd-grid-3, .sd-grid-4, .sd-grid-5 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
 .form-group label {
     font-size: 0.85rem;
     font-weight: 600;
