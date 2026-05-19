@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL from '../config/api';
-import logo from '../assets/brand-icon.png';
 
 const API_BASE = `${API_BASE_URL}/api/auth`;
 
@@ -182,7 +181,7 @@ const AuthPage = ({ onLogin }) => {
                     display: window.innerWidth < 768 ? 'none' : 'flex'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                        <img src={logo} alt="RecruitSmart" style={{ height: '60px', background: 'white', borderRadius: '50%', padding: '5px' }} />
+                        <img src="/rs-logo.png" alt="RecruitSmart" style={{ height: '60px', background: 'white', borderRadius: '50%', padding: '5px' }} />
                         <h1 style={{ fontSize: '2.5rem', margin: 0 }}>RecruitSmart</h1>
                     </div>
                     <p style={{ fontSize: '1.1rem', lineHeight: '1.6', opacity: '0.9' }}>

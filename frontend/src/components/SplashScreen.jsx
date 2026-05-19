@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from '../assets/brand-icon.png';
 
 const SplashScreen = () => {
     return (
@@ -44,7 +43,7 @@ const SplashScreen = () => {
                     boxShadow: '0 20px 40px rgba(239, 68, 68, 0.2)'
                 }}>
                     <img 
-                        src={logo} 
+                        src="/rs-logo.png" 
                         alt="RecruitSmart Logo" 
                         style={{ height: '80px', width: 'auto' }} 
                     />
