@@ -7,8 +7,16 @@ import StudentDashboard from './components/StudentDashboard'
 import AdminDashboard from './components/AdminDashboard'
 import ManagerDashboard from './components/ManagerDashboard'
 import ChatBot from './components/common/ChatBot'
+import SplashScreen from './components/SplashScreen'
 
 function App() {
+    const [showSplash, setShowSplash] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setShowSplash(false), 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
     const [user, setUser] = useState(() => {
         try {
             const savedUser = localStorage.getItem('user');
@@ -61,6 +69,10 @@ function App() {
             }, 100);
         }
     };
+
+    if (showSplash) {
+        return <SplashScreen />;
+    }
 
     if (!user) {
         return (

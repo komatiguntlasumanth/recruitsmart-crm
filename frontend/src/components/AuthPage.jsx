@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import API_BASE_URL from '../config/api';
-import logo from '../assets/logo.png';
+import logo from '../assets/brand-icon.png';
 
 const API_BASE = `${API_BASE_URL}/api/auth`;
 
@@ -14,6 +14,21 @@ const AuthPage = ({ onLogin }) => {
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [loadingText, setLoadingText] = useState('Authenticating');
+
+    useEffect(() => {
+        let interval;
+        if (loading) {
+            let dots = 0;
+            interval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                setLoadingText('Authenticating' + '.'.repeat(dots));
+            }, 500);
+        } else {
+            setLoadingText('Authenticating');
+        }
+        return () => clearInterval(interval);
+    }, [loading]);
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
@@ -322,7 +337,26 @@ const AuthPage = ({ onLogin }) => {
                             }}
                             disabled={loading}
                         >
-                            {loading ? 'Processing...' : (
+                            {loading ? (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                    <div style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        border: '3px solid rgba(255,255,255,0.3)',
+                                        borderTopColor: 'white',
+                                        borderRadius: '50%',
+                                        animation: 'spin 1s linear infinite'
+                                    }} />
+                                    <span>{loadingText}</span>
+                                    <style>
+                                        {`
+                                        @keyframes spin {
+                                            to { transform: rotate(360deg); }
+                                        }
+                                        `}
+                                    </style>
+                                </div>
+                            ) : (
                                 <>
                                     {mode === 'login' ? 'Sign In' : 'Create Account'}
                                 </>
