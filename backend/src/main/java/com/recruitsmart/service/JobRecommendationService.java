@@ -23,26 +23,59 @@ public class JobRecommendationService {
         // Get student profile
         StudentProfile profile = studentProfileRepository.findByUserId(userId).orElse(null);
         
-        if (profile == null || profile.getDesignation() == null || profile.getDesignation().isEmpty()) {
-            // No profile or designation set - return all open jobs
-            return jobRepository.findByStatus("OPEN");
+        List<Job> allJobs = jobRepository.findByStatus("OPEN");
+        if (allJobs == null || allJobs.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+
+        if (profile == null) {
+            return allJobs.stream().limit(5).collect(Collectors.toList());
         }
         
         String studentLevel = profile.getLevel();
         String studentDesignation = profile.getDesignation();
         
-        // Filter jobs by matching level (Status) and Designation (Position)
-        List<Job> allJobs = jobRepository.findByStatus("OPEN");
-        return allJobs.stream()
+        // 1. Try strict level and designation matching
+        List<Job> recommended = allJobs.stream()
             .filter(job -> {
                 boolean levelMatch = (studentLevel == null || studentLevel.isEmpty() || 
                                      (job.getLevel() != null && job.getLevel().equalsIgnoreCase(studentLevel)));
                 
-                boolean designationMatch = (studentDesignation == null || studentDesignation.isEmpty() || 
+                boolean designationMatch = (studentDesignation != null && !studentDesignation.isEmpty() && 
                                            (job.getDesignation() != null && job.getDesignation().toLowerCase().contains(studentDesignation.toLowerCase())));
                 
                 return levelMatch && designationMatch;
             })
             .collect(Collectors.toList());
+            
+        // 2. If empty, try designation matching only (relax level)
+        if (recommended.isEmpty() && studentDesignation != null && !studentDesignation.isEmpty()) {
+            recommended = allJobs.stream()
+                .filter(job -> job.getDesignation() != null && job.getDesignation().toLowerCase().contains(studentDesignation.toLowerCase()))
+                .collect(Collectors.toList());
+        }
+        
+        // 3. If still empty, try matching on skills
+        if (recommended.isEmpty() && profile.getSkills() != null && !profile.getSkills().isEmpty()) {
+            List<String> studentSkills = profile.getSkills().stream()
+                .map(s -> s.getName().toLowerCase())
+                .collect(Collectors.toList());
+            recommended = allJobs.stream()
+                .filter(job -> {
+                    String jobText = ((job.getTitle() != null ? job.getTitle() : "") + " " +
+                                     (job.getDescription() != null ? job.getDescription() : "") + " " +
+                                     (job.getEligibilityCriteria() != null ? job.getEligibilityCriteria() : "") + " " +
+                                     (job.getDesignation() != null ? job.getDesignation() : "")).toLowerCase();
+                    return studentSkills.stream().anyMatch(skill -> jobText.contains(skill));
+                })
+                .collect(Collectors.toList());
+        }
+        
+        // 4. Ultimate fallback: return first 5 open jobs
+        if (recommended.isEmpty()) {
+            return allJobs.stream().limit(5).collect(Collectors.toList());
+        }
+        
+        return recommended.stream().limit(5).collect(Collectors.toList());
     }
 }

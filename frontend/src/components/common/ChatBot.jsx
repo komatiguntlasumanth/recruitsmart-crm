@@ -23,18 +23,27 @@ const ChatBot = ({ context = "You are the RecruitSmart AI Assistant.", onToggleH
         let totalFields = 0;
         let filledFields = 0;
 
+        // Basic fields (6 core fields)
         const basicFields = ['designation', 'mobileNumber', 'currentLocation', 'dob',
-            'alternateEmail', 'githubLink', 'linkedinLink', 'portfolioUrl',
-            'profileSummary', 'permanentAddress', 'profilePictureUrl', 'level',
-            'alternateMobile', 'workStatus'];
+            'profileSummary', 'level'];
 
         basicFields.forEach(field => {
             totalFields++;
             if (profileData[field] && profileData[field].toString().trim().length > 0) filledFields++;
         });
 
+        // Optional fields (only count if filled)
+        const optionalFields = ['alternateEmail', 'githubLink', 'linkedinLink', 'portfolioUrl'];
+        optionalFields.forEach(field => {
+            if (profileData[field] && profileData[field].toString().trim().length > 0) {
+                totalFields++;
+                filledFields++;
+            }
+        });
+
+        // Array fields - count if has at least one entry (6 fields)
         const arrayFields = ['education', 'experiences', 'skills', 'projects',
-            'achievements', 'certificates', 'internships'];
+            'achievements', 'certificates'];
 
         arrayFields.forEach(field => {
             totalFields++;
